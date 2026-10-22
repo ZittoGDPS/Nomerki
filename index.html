@@ -6,7 +6,7 @@
     <title>Генератор Номеров</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase -->
+    <!-- Подключаем Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -24,7 +24,11 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.db = db;
+        
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbOnValue = onValue;
+        window.db = db;
     </script>
 
     <style>
@@ -32,11 +36,22 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
-        #register-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
+        /* Экран регистрации */
+        #register-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 99999999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
+        }
         #register-screen h1 { color: #0088cc; font-size: 32px; margin-bottom: 10px; }
         #register-screen p { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; }
-        .btn-register { background: #0088cc; color: white; border: none; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: 0.2s; }
+        .btn-register {
+            background: #0088cc; color: white; border: none; padding: 15px 40px;
+            border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: 0.2s;
+        }
         .btn-register:active { transform: scale(0.95); }
+        
         #game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; }
 
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
@@ -81,6 +96,7 @@
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
+        /* Стили профиля */
         #profile-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
@@ -121,12 +137,14 @@
 </head>
 <body>
 
+    <!-- ЭКРАН РЕГИСТРАЦИИ -->
     <div id="register-screen">
         <h1>Номерки 🚀</h1>
-        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть.</p>
+        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть и синхронизировать прогресс.</p>
         <button class="btn-register" id="btn-start">Войти через Telegram</button>
     </div>
 
+    <!-- САМА ИГРА -->
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
@@ -252,14 +270,26 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
+        // --- ИСПРАВЛЕНИЕ БАГА С АККАУНТАМИ ---
         let myName = "Игрок";
-        let myId = "guest_" + Math.floor(Math.random() * 10000);
+        let myId;
+
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            // Если Telegram, берем настоящий ID
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
+        } else {
+            // Если Браузер, ищем сохраненный ID (чтобы не создавать новые)
+            let savedBrowserId = localStorage.getItem('blum_browser_id');
+            if (!savedBrowserId) {
+                savedBrowserId = "browser_" + Math.floor(Math.random() * 1000000);
+                localStorage.setItem('blum_browser_id', savedBrowserId);
+            }
+            myId = savedBrowserId;
+            myName = "Гость (Браузер)";
         }
 
-        // Проверяем, открыт ли профиль другого игрока через ссылку
+        // Проверяем, открыт ли профиль другого игрока
         const urlParams = new URLSearchParams(window.location.search);
         const viewPlayerId = urlParams.get('player');
 
@@ -424,7 +454,6 @@
         }
 
         function renderProfile() {
-            // Если смотрим чужой профиль, показываем кнопку "Назад в игру"
             if (viewPlayerId) {
                 getEl('profile-title').innerText = "👤 Профиль игрока";
                 getEl('btn-close-profile').innerText = "В игру";
@@ -459,7 +488,7 @@
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
         }
 
-        // РЕГИСТРАЦИЯ
+        // Кнопка Войти (Регистрация)
         document.getElementById('btn-start').addEventListener('click', () => {
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
@@ -472,13 +501,18 @@
                         state.balance = data.balance || 0;
                         state.level = data.level || 1;
                         state.points = data.points || 0;
+                        state.inventory = data.inventory || [];
+                        state.bestNumber = data.bestNumber || null;
+                        state.totalGenerated = data.totalGenerated || 0;
+                        state.totalSold = data.totalSold || 0;
+                        state.maxBalance = data.maxBalance || 0;
                         updateUI();
                     }
                 });
             }
         });
 
-        // ОБРАБОТЧИКИ КЛИКОВ
+        // Обработчики кликов
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
@@ -501,7 +535,6 @@
                 state.currentGen = { phone, price: evalData.price, category: evalData.category };
                 let earnedXP = Math.floor(rarity.xp * state.boostMultiplier);
 
-                // Обновляем статистику генерации
                 state.totalGenerated++;
                 if (!state.bestNumber || evalData.price > state.bestNumber.price) {
                     state.bestNumber = state.currentGen;
@@ -531,7 +564,7 @@
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
                 }
                 state.balance += state.currentGen.price;
-                state.totalSold++; // Статистика
+                state.totalSold++;
                 updateUI();
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('custom-gen-btn').style.display = 'block';
@@ -550,7 +583,7 @@
                     if (!confirm(`Продать за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
                 }
                 state.balance += item.price;
-                state.totalSold++; // Статистика
+                state.totalSold++;
                 state.inventory.splice(idx, 1);
                 updateUI();
                 renderInventory();
@@ -563,7 +596,7 @@
                     if (!confirm(`Продать ВСЕ на ${total.toLocaleString('ru-RU')} ₽?`)) return;
                 }
                 state.balance += total;
-                state.totalSold += state.inventory.length; // Статистика
+                state.totalSold += state.inventory.length;
                 state.inventory = [];
                 updateUI();
                 renderInventory();
@@ -593,7 +626,7 @@
         if (state.isDarkTheme) document.body.classList.add('dark-theme');
         updateUI();
 
-        // Если открыт профиль другого игрока
+        // Логика для просмотра чужого профиля
         if (viewPlayerId) {
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
@@ -614,11 +647,9 @@
                         
                         getEl('user-name-display').innerText = data.name || "Игрок";
                         
-                        // Прячем кнопки игры, так как мы смотрим чужой профиль
                         getEl('custom-gen-btn').style.display = 'none';
                         getEl('btn-open-bag').style.display = 'none'; 
                         
-                        // Открываем профиль
                         getEl('profile-screen').style.display = 'flex';
                         renderProfile();
                     }
