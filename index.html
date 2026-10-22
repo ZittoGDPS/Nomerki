@@ -6,7 +6,7 @@
     <title>Генератор Номеров</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Подключаем Firebase -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -24,11 +24,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        window.fbRef = ref;
-        window.fbSet = set;
-        window.fbOnValue = onValue;
-        window.db = db;
+        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.db = db;
     </script>
 
     <style>
@@ -96,7 +92,6 @@
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
-        /* Стили профиля */
         #profile-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
@@ -140,7 +135,7 @@
     <!-- ЭКРАН РЕГИСТРАЦИИ -->
     <div id="register-screen">
         <h1>Номерки 🚀</h1>
-        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть и синхронизировать прогресс.</p>
+        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть.</p>
         <button class="btn-register" id="btn-start">Войти через Telegram</button>
     </div>
 
@@ -270,26 +265,25 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        // --- ИСПРАВЛЕНИЕ БАГА С АККАУНТАМИ ---
+        // --- 1. ОПРЕДЕЛЕНИЕ ПОЛЬЗОВАТЕЛЯ ---
         let myName = "Игрок";
         let myId;
+        let isBrowser = false;
 
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            // Если Telegram, берем настоящий ID
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
         } else {
-            // Если Браузер, ищем сохраненный ID (чтобы не создавать новые)
+            isBrowser = true;
             let savedBrowserId = localStorage.getItem('blum_browser_id');
             if (!savedBrowserId) {
                 savedBrowserId = "browser_" + Math.floor(Math.random() * 1000000);
                 localStorage.setItem('blum_browser_id', savedBrowserId);
             }
             myId = savedBrowserId;
-            myName = "Гость (Браузер)";
+            myName = "Гость";
         }
 
-        // Проверяем, открыт ли профиль другого игрока
         const urlParams = new URLSearchParams(window.location.search);
         const viewPlayerId = urlParams.get('player');
 
@@ -488,8 +482,42 @@
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
         }
 
-        // Кнопка Войти (Регистрация)
+        // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
+        // Проверяем, нажимал ли пользователь кнопку раньше
+        let isRegistered = localStorage.getItem('blum_registered') === 'true';
+
+        if (isRegistered) {
+            document.getElementById('register-screen').style.display = 'none';
+            document.getElementById('game-wrapper').style.display = 'flex';
+            document.getElementById('user-name-display').innerText = myName;
+            
+            if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
+                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        state.balance = data.balance || 0;
+                        state.level = data.level || 1;
+                        state.points = data.points || 0;
+                        state.inventory = data.inventory || [];
+                        state.bestNumber = data.bestNumber || null;
+                        state.totalGenerated = data.totalGenerated || 0;
+                        state.totalSold = data.totalSold || 0;
+                        state.maxBalance = data.maxBalance || 0;
+                        updateUI();
+                    }
+                });
+            }
+        }
+
         document.getElementById('btn-start').addEventListener('click', () => {
+            // Если зашли через браузер, перекидываем в бота
+            if (isBrowser) {
+                window.location.href = "https://t.me/ВАШ_БОТ"; // ЗАМЕНИТЕ НА ВАШЕГО БОТА
+                return;
+            }
+
+            // Если в ТГ, просто скрываем экран
+            localStorage.setItem('blum_registered', 'true'); // Запоминаем, что вошли
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
             document.getElementById('user-name-display').innerText = myName;
@@ -512,7 +540,7 @@
             }
         });
 
-        // Обработчики кликов
+        // Обработчики кликов (без изменений)
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
@@ -626,7 +654,7 @@
         if (state.isDarkTheme) document.body.classList.add('dark-theme');
         updateUI();
 
-        // Логика для просмотра чужого профиля
+        // Просмотр чужого профиля
         if (viewPlayerId) {
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
