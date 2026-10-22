@@ -300,6 +300,7 @@
                     <input type="email" id="sync-email-input" class="warn-input" placeholder="your@mail.com" style="margin:0;">
                     <button id="btn-sync-email" style="background:#0088cc; color:white; border:none; padding:0 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Войти</button>
                 </div>
+                <button id="btn-reset-progress" style="background:#dc3545; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top: 15px; width:100%;">Сбросить прогресс (Опасно!)</button>
             </div>
 
             <div class="setting-item">
@@ -538,6 +539,7 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
+            document.getElementById('user-name-display').innerText = myName;
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -816,7 +818,6 @@
                 return;
             }
 
-            // Заменяем ID на Email
             myId = "email_" + email;
             myName = email.split('@')[0];
             
@@ -825,12 +826,10 @@
 
             showToast("🔄 Синхронизация...");
 
-            // Загружаем данные с новым ID
             if (window.db && window.fbOnValue && window.fbRef) {
                 window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
-                        // Если аккаунт найден — загружаем
                         state.balance = data.balance || 0;
                         state.level = data.level || 1;
                         state.points = data.points || 0;
@@ -845,7 +844,6 @@
                         updateUI();
                         showToast("✅ Прогресс успешно загружен!");
                     } else {
-                        // Если аккаунт не найден — создаем новый
                         state.balance = 0;
                         state.level = 1;
                         state.points = 0;
@@ -858,18 +856,35 @@
                         document.getElementById('user-name-display').innerText = myName;
                         getEl('settings-screen').style.display = 'none';
                         updateUI();
-                        saveData(); // Сохраняем пустой аккаунт
+                        saveData();
                         showToast("✨ Создан новый аккаунт!");
                     }
                 });
             }
         });
 
+        // Сброс прогресса
+        document.getElementById('btn-reset-progress').addEventListener('click', () => {
+            if (confirm("Вы уверены? Весь прогресс будет удален!")) {
+                localStorage.clear();
+                if (window.db && window.fbSet && window.fbRef && myId) {
+                    window.fbSet(window.fbRef(window.db, 'players/' + myId), null);
+                }
+                location.reload();
+            }
+        });
+
         // Инициализация
         document.getElementById('user-name-display').innerText = myName;
 
+        // 5 СЕКУНД НА ЗАГРУЗКУ
+        let loadTimeout = setTimeout(() => {
+            showToast("⚠️ Сервер не отвечает. Загружены локальные данные.");
+        }, 5000);
+
         if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
             window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                clearTimeout(loadTimeout); // Если данные пришли, отменяем таймер
                 const data = snapshot.val();
                 if (data) {
                     state.balance = data.balance || 0;
@@ -881,8 +896,14 @@
                     state.totalSold = data.totalSold || 0;
                     state.maxBalance = data.maxBalance || 0;
                     updateUI();
+                } else {
+                    updateUI();
                 }
             });
+        } else {
+            // Если Firebase не загрузился, просто показываем локальные данные
+            clearTimeout(loadTimeout);
+            updateUI();
         }
 
         // Обработчики кликов
@@ -1015,9 +1036,7 @@
 
         // Просмотр чужого профиля
         if (viewPlayerId) {
-            document.getElementById('register-screen').style.display = 'none';
-            document.getElementById('game-wrapper').style.display = 'flex';
-            getEl('user-name-display').innerText = "Профиль игрока";
+            document.getElementById('user-name-display').innerText = "Профиль игрока";
             
             if (window.db && window.fbOnValue && window.fbRef) {
                 window.fbOnValue(window.fbRef(window.db, 'players/' + viewPlayerId), (snapshot) => {
