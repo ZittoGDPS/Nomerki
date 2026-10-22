@@ -354,15 +354,12 @@
         const urlUserId = urlParams.get('user_id');
 
         if (urlUserId) {
-            // Если в ссылке есть ?user_id=123
             myId = urlUserId;
             myName = "Игрок (Браузер)";
         } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            // Если зашли через Telegram
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
         } else {
-            // Если просто открыли в браузере без параметра
             isBrowser = true;
             let savedBrowserId = localStorage.getItem('blum_browser_id');
             if (!savedBrowserId) {
@@ -551,7 +548,7 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
-            getEl('stat-user-id').innerText = myId; // Показываем ID игрока в профиле
+            getEl('stat-user-id').innerText = myId;
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -849,7 +846,7 @@
         }
 
         document.getElementById('btn-start').addEventListener('click', () => {
-            // Мы УБРАЛИ проверку isBrowser, чтобы ты мог зайти с любого устройства!
+            // Теперь вход РАБОТАЕТ ВСЕГДА. Никаких проверок на браузер.
             localStorage.setItem('blum_registered', 'true');
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
