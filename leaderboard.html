@@ -92,8 +92,10 @@
     </script>
 
     <style>
+        /* Переменные темы (чтобы фон менялся) */
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
+        
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
         #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
@@ -127,6 +129,7 @@
     </div>
 
     <script>
+        // Применяем тему сразу при загрузке
         if (localStorage.getItem('blum_theme') === 'dark') {
             document.body.classList.add('dark-theme');
         }
