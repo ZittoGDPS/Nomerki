@@ -23,58 +23,62 @@
         <button class="btn-close" onclick="window.location.href='index.html'" style="background: #0088cc;">Назад</button>
     </div>
     
-    <div id="leaderboard-list"></div>
+    <div id="leaderboard-list"><div style="text-align:center; padding: 20px;">Загрузка...</div></div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
+            authDomain: "nomerki-gam3.firebaseapp.com",
+            databaseURL: "https://nomerki-gam3-default-rtdb.firebaseio.com",
+            projectId: "nomerki-gam3",
+            storageBucket: "nomerki-gam3.firebasestorage.app",
+            messagingSenderId: "582885790988",
+            appId: "1:582885790988:web:ef8965c63a38da68d82529",
+            measurementId: "G-8EGEPGFF4H"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const tg = window.Telegram ? window.Telegram.WebApp : null;
-        if (tg) { tg.ready(); tg.expand(); }
-
-        // Получаем данные текущего игрока
-        let myName = "Игрок";
-        let myBalance = 0;
-        
+        let myId = "guest";
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            myName = tg.initDataUnsafe.user.first_name || "Игрок";
-            
-            // Синхронизируем баланс из облака
-            if (tg.CloudStorage) {
-                tg.CloudStorage.getItem("player_state", (err, data) => {
-                    if (data && !err) {
-                        try {
-                            let parsed = JSON.parse(data);
-                            myBalance = parsed.balance || 0;
-                        } catch(e) {}
-                    }
-                    render(myName, myBalance);
-                });
-            } else {
-                render(myName, myBalance);
-            }
-        } else {
-            // Если в браузере
-            myName = "Вы (Браузер)";
-            myBalance = parseInt(localStorage.getItem('blum_balance')) || 0;
-            render(myName, myBalance);
+            myId = tg.initDataUnsafe.user.id.toString();
         }
 
-        function render(name, balance) {
-            // Сюда в будущем можно подключить Firebase для реальных людей
-            // Пока что создаем имитацию, но с ВАШИМ реальным именем и балансом
-            let players = [
-                { name: "Александр", balance: 950000, avatar: "А" },
-                { name: "Мария", balance: 720000, avatar: "М" },
-                { name: "Дмитрий", balance: 450000, avatar: "Д" },
-                { name: "Елена", balance: 310000, avatar: "Е" },
-                { name: "Сергей", balance: 150000, avatar: "С" },
-                { name: "Анна", balance: 80000, avatar: "А" },
-                { name: name, balance: balance, avatar: name.charAt(0).toUpperCase(), isYou: true }
-            ];
+        // Слушаем базу данных в реальном времени
+        const playersRef = ref(db, 'players');
+        onValue(playersRef, (snapshot) => {
+            const data = snapshot.val();
+            let players = [];
+            
+            if (data) {
+                for (let id in data) {
+                    let p = data[id];
+                    players.push({
+                        id: id,
+                        name: p.name || "Игрок",
+                        balance: p.balance || 0,
+                        avatar: (p.name || "И").charAt(0).toUpperCase(),
+                        isYou: id === myId
+                    });
+                }
+            }
 
+            // Сортировка по балансу
             players.sort((a, b) => b.balance - a.balance);
 
             let container = document.getElementById('leaderboard-list');
             container.innerHTML = '';
             
+            if (players.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 20px;">Пока нет игроков</div>';
+                return;
+            }
+
             players.forEach((p, i) => {
                 let youClass = p.isYou ? 'you' : '';
                 let div = document.createElement('div');
@@ -89,7 +93,7 @@
             });
 
             if (localStorage.getItem('blum_theme') === 'dark') document.body.classList.add('dark-theme');
-        }
+        });
     </script>
 </body>
 </html>
