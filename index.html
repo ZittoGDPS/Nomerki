@@ -66,7 +66,7 @@
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
-        #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
@@ -75,11 +75,43 @@
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
 
-        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; }
-        #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
+        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; gap: 10px; align-items: center; }
+        
+        /* Новый селектор оператора */
+        #operator-selector { 
+            background: #1e1e1e; color: white; border: 1px solid #444; 
+            padding: 12px; border-radius: 10px; font-size: 14px; 
+            cursor: pointer; outline: none; width: 120px;
+        }
+        
+        #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; flex: 1; background: #0088cc; box-sizing: border-box; }
+        
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
+
+        /* Анимации */
+        @keyframes shakeScreen {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake-effect { animation: shakeScreen 0.5s; animation-iteration-count: 1; }
+
+        @keyframes flashGold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        .flash-effect { animation: flashGold 1s; }
 
         .rarity-common { color: var(--text-main) !important; }
         .rarity-bronze { color: #cd7f32 !important; text-shadow: 0 0 5px rgba(205, 127, 50, 0.3); }
@@ -163,6 +195,15 @@
         </div>
         
         <div id="bottom-action-area">
+            <!-- Селектор оператора -->
+            <select id="operator-selector">
+                <option value="+7">Биглайн</option>
+                <option value="+7">МСТ</option>
+                <option value="+7">Могофон</option>
+                <option value="+7">Тел 2</option>
+                <option value="+7">Тиф Карта</option>
+            </select>
+
             <button id="custom-gen-btn">Сгенерировать номер</button>
             <div id="action-btns-wrapper">
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
@@ -265,7 +306,7 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        // 1. Определение пользователя (Баг с браузером исправлен)
+        // 1. Определение пользователя
         let myName = "Игрок";
         let myId;
         let isBrowser = false;
@@ -482,7 +523,7 @@
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
         }
 
-        // --- 2. ЛОГИКА РЕГИСТРАЦИИ (БЕЗ СЕРВЕРОВ) ---
+        // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
         let isRegistered = localStorage.getItem('blum_registered') === 'true';
 
         if (isRegistered) {
@@ -509,13 +550,11 @@
         }
 
         document.getElementById('btn-start').addEventListener('click', () => {
-            // Если зашли через браузер, перекидываем в бота
             if (isBrowser) {
                 window.location.href = "https://t.me/Nomerki_generator_bot"; 
                 return;
             }
 
-            // Если в ТГ, скрываем экран и показываем сообщение
             localStorage.setItem('blum_registered', 'true');
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
@@ -523,7 +562,6 @@
             
             showToast("✅ Вы успешно зарегистрированы!");
 
-            // Синхронизация с Firebase
             if (window.db && window.fbOnValue && window.fbRef) {
                 window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
                     const data = snapshot.val();
@@ -559,7 +597,10 @@
 
             if (target.id === 'custom-gen-btn') {
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-                let phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
+                let operatorPrefix = document.getElementById('operator-selector').value; 
+                
+                let phone = `${operatorPrefix}-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
+                
                 let evalData = calculatePrice(fullNum);
                 let rarity = getRarity(evalData.category);
                 state.currentGen = { phone, price: evalData.price, category: evalData.category };
@@ -570,23 +611,49 @@
                     state.bestNumber = state.currentGen;
                 }
 
+                // Анимация генерации
                 let resDiv = getEl('custom-gen-result');
-                resDiv.innerHTML = `
-                    <div class="info-icon" id="btn-show-info">i</div>
-                    <div class="phone-number ${rarity.cls}">${phone}</div>
-                    <div class="price-tag">${evalData.price.toLocaleString('ru-RU')} ₽</div>
-                    <div class="category-text">${evalData.category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
-                `;
+                let btnGen = getEl('custom-gen-btn');
+                btnGen.disabled = true;
+                btnGen.innerText = "Генерация...";
                 resDiv.classList.add('force-show');
-                getEl('custom-gen-btn').style.display = 'none';
-                getEl('action-btns-wrapper').style.display = 'flex';
+                resDiv.innerHTML = `
+                    <div class="phone-number rarity-common" style="opacity: 0.5;">+7-XXX-XXX-XX-XX</div>
+                    <div class="price-tag" style="opacity: 0.5;">Генерация...</div>
+                    <div class="category-text" style="opacity: 0.5;">Пожалуйста, подождите</div>
+                `;
 
-                state.points += earnedXP;
-                updateUI();
+                setTimeout(() => {
+                    btnGen.disabled = false;
+                    btnGen.innerText = "Сгенерировать номер";
+                    
+                    resDiv.innerHTML = `
+                        <div class="info-icon" id="btn-show-info">i</div>
+                        <div class="phone-number ${rarity.cls}">${phone}</div>
+                        <div class="price-tag">${evalData.price.toLocaleString('ru-RU')} ₽</div>
+                        <div class="category-text">${evalData.category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
+                    `;
 
-                if (evalData.price >= 100000) {
-                    showToast(`🔥 Дорогой номер!<br>${phone}<br>${evalData.price.toLocaleString('ru-RU')} ₽`);
-                }
+                    // Анимация для дорогих номеров (от 500 000)
+                    if (evalData.price >= 500000) {
+                        resDiv.classList.add('shake-effect');
+                        resDiv.classList.add('flash-effect');
+                        setTimeout(() => {
+                            resDiv.classList.remove('shake-effect');
+                            resDiv.classList.remove('flash-effect');
+                        }, 1000);
+                    }
+
+                    getEl('custom-gen-btn').style.display = 'none';
+                    getEl('action-btns-wrapper').style.display = 'flex';
+
+                    state.points += earnedXP;
+                    updateUI();
+
+                    if (evalData.price >= 100000) {
+                        showToast(`🔥 Дорогой номер!<br>${phone}<br>${evalData.price.toLocaleString('ru-RU')} ₽`);
+                    }
+                }, 800); // Задержка 0.8 секунды для эффекта
             }
 
             if (target.id === 'btn-sell-now') {
