@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,7 @@
     <style>
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
+        
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
@@ -18,23 +19,35 @@
         .top-btns { display: flex; gap: 8px; }
         .icon-btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 16px; }
 
-        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 90px; }
+        /* Контейнер для карточки */
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
         
-        /* Карточка больше не скрывается насовсем, она просто меняет содержимое */
+        /* Карточка с номером */
         #custom-gen-result { display: none; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .force-show { display: block !important; }
-        
         .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         
-        /* Кнопки прибиты к низу */
-        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; }
+        /* Жестко фиксируем зону с кнопками внизу */
+        #bottom-action-area { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            background: var(--bg-color); 
+            z-index: 100; 
+        }
+        
         #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
+        
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
+        /* Цвета редкости */
         .rarity-common { color: var(--text-main) !important; }
         .rarity-bronze { color: #cd7f32 !important; text-shadow: 0 0 5px rgba(205, 127, 50, 0.3); }
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
@@ -89,6 +102,7 @@
         <div id="custom-gen-result"></div>
     </div>
     
+    <!-- Зона кнопок внизу -->
     <div id="bottom-action-area">
         <button id="custom-gen-btn">Сгенерировать номер</button>
         <div id="action-btns-wrapper">
@@ -238,7 +252,7 @@
             saveData();
         }
 
-        // ИЗМЕНЕНО: Теперь карточка не стирается, а просто меняются кнопки
+        // Теперь просто переключаем кнопки, карточку не трогаем
         function resetToGenerate() {
             btnGen.style.display = 'block';
             actionBtnsWrapper.style.display = 'none';
@@ -343,4 +357,4 @@
         applyTheme(); updateUI();
     </script>
 </body>
-</html>
+</html
