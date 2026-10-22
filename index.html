@@ -32,6 +32,7 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
+        /* Экран регистрации */
         #register-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 99999999;
@@ -64,12 +65,12 @@
         #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 120px; }
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 160px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
+        .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; letter-spacing: 2px;}
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
@@ -77,7 +78,8 @@
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         
         .gen-buttons-row { display: flex; gap: 10px; width: 100%; }
-        .gen-btn { color: white; padding: 12px 5px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; flex: 1; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .gen-btn { color: white; padding: 12px 5px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; flex: 1; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .gen-btn:active { transform: scale(0.95); }
         .gen-btn span { font-size: 10px; font-weight: normal; opacity: 0.8; }
         
         #btn-gen-1 { background: #28a745; }
@@ -88,7 +90,12 @@
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        #operator-indicator { text-align: center; font-size: 12px; color: var(--text-sub); margin-top: 5px; font-weight: bold; }
+        #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+
+        /* Новые кнопки навигации */
+        .nav-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 5px; }
+        .nav-btn { background: #1e1e1e; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
+        .nav-btn:active { background: #333; }
 
         @keyframes shakeScreen {
             0% { transform: translate(1px, 1px) rotate(0deg); }
@@ -117,7 +124,7 @@
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
         .rarity-gold { color: #ffd700 !important; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
         .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); font-weight: 900; }
-        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(0, 0, 127, 0.5); }
+        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); }
 
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
@@ -192,7 +199,7 @@
         
         <div id="main-screen">
             <div id="custom-gen-result"><div class="info-icon" id="btn-show-info">i</div></div>
-            <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span> (Бонус опыта)</div>
+            <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
         
         <div id="bottom-action-area">
@@ -208,6 +215,14 @@
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
                 <button class="btn-keep" id="btn-keep">Оставить</button>
             </div>
+
+            <!-- Новые кнопки -->
+            <div class="nav-buttons-row">
+                <button class="nav-btn" id="btn-market">1. Рынок</button>
+                <button class="nav-btn" id="btn-shop">2. Магазин</button>
+                <button class="nav-btn" id="btn-jewelry">3. Ювелирный</button>
+            </div>
+
         </div>
     </div>
 
@@ -352,8 +367,6 @@
             totalGenerated: parseInt(localStorage.getItem('blum_total_generated')) || 0,
             totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
             maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
-            
-            // НОВЫЕ ПЕРЕМЕННЫЕ
             freeSpins: parseInt(localStorage.getItem('blum_free_spins')) || 10,
             currentOperator: localStorage.getItem('blum_operator') || null
         };
@@ -397,11 +410,8 @@
             return { cls: "rarity-common", xp: 5 };
         }
 
-        // Новая логика расчета цены с учетом шансов
         function calculatePrice(fullNum, type) {
             let price = 150, category = "Обычный";
-            
-            // Шансы на выпадение супер-номеров
             let rand = Math.random() * 100;
             
             if (type === 1) {
@@ -415,7 +425,6 @@
                 else if (rand < 5) { price = 1000000; category = "ЗОЛОТОЙ"; }
             }
 
-            // Если не выпал супер-номер, считаем обычную красоту
             if (category === "Обычный") {
                 let isBeautiful = false;
                 let last4 = fullNum.slice(-4);
@@ -504,11 +513,10 @@
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
             }
 
-            // Обновляем кнопку 1К (показываем бесплатные прокруты)
             let btn1 = getEl('btn-gen-1');
             if (state.freeSpins > 0) {
                 btn1.innerHTML = `1К<span>Бесплатно (${state.freeSpins})</span>`;
-                btn1.style.background = '#17a2b8'; // Другой цвет для бесплатных
+                btn1.style.background = '#17a2b8';
             } else {
                 btn1.innerHTML = `1К<span>1 000 ₽</span>`;
                 btn1.style.background = '#28a745';
@@ -578,6 +586,78 @@
             getEl('stat-sold').innerText = state.totalSold;
             getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        // ФУНКЦИЯ ДЛЯ АНИМАЦИИ ГЕНЕРАЦИИ
+        function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP) {
+            let resDiv = getEl('custom-gen-result');
+            let btnRow = getEl('gen-buttons-row');
+            btnRow.style.display = 'none';
+            resDiv.classList.add('force-show');
+            
+            resDiv.innerHTML = `
+                <div class="info-icon" id="btn-show-info" style="opacity:0;">i</div>
+                <div class="phone-number rarity-common" id="anim-phone">+7-XXX-XXX-XX-XX</div>
+                <div class="price-tag" id="anim-price" style="opacity: 0.5;">Генерация...</div>
+                <div class="category-text" id="anim-category" style="opacity: 0.5;">Поиск номера...</div>
+            `;
+
+            let animPhone = getEl('anim-phone');
+            let animPrice = getEl('anim-price');
+            let animCategory = getEl('anim-category');
+            
+            // Разбиваем целевой номер на символы
+            let targetChars = targetPhone.split('');
+            let currentStr = "+7-XXX-XXX-XX-XX".split('');
+            let iterations = 0;
+            
+            let interval = setInterval(() => {
+                // Меняем цифры слева направо
+                for (let i = 0; i < targetChars.length; i++) {
+                    if (targetChars[i] === '-' || targetChars[i] === '+') {
+                        currentStr[i] = targetChars[i];
+                    } else {
+                        // Если дошли до этой цифры и прошло достаточно времени - оставляем её
+                        if (i < iterations) {
+                            currentStr[i] = targetChars[i];
+                        } else {
+                            // Иначе рандомим
+                            currentStr[i] = Math.floor(Math.random() * 10).toString();
+                        }
+                    }
+                }
+                
+                animPhone.innerText = currentStr.join('');
+                iterations += 1; // Каждые 50мс "фиксируем" одну новую цифру
+                
+                if (iterations > targetChars.length) {
+                    clearInterval(interval);
+                    // Анимация завершена
+                    animPhone.innerText = targetPhone;
+                    animPhone.className = `phone-number ${rarityClass}`;
+                    animPrice.innerText = price.toLocaleString('ru-RU') + ' ₽';
+                    animPrice.style.opacity = '1';
+                    animCategory.innerHTML = `${category} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
+                    animCategory.style.opacity = '1';
+                    
+                    getEl('btn-show-info').style.opacity = '1';
+                    getEl('btn-show-info').onclick = () => { getEl('info-modal').style.display = 'flex'; };
+
+                    if (price >= 500000) {
+                        resDiv.classList.add('shake-effect');
+                        resDiv.classList.add('flash-effect');
+                        setTimeout(() => {
+                            resDiv.classList.remove('shake-effect');
+                            resDiv.classList.remove('flash-effect');
+                        }, 1000);
+                        showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
+                    }
+
+                    getEl('action-btns-wrapper').style.display = 'flex';
+                    state.points += earnedXP;
+                    updateUI();
+                }
+            }, 50); // Скорость прокрутки (50мс)
         }
 
         // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
@@ -657,7 +737,6 @@
                 let type = target.id === 'btn-gen-1' ? 1 : target.id === 'btn-gen-5' ? 5 : 20;
                 let cost = type * 1000;
                 
-                // Логика оплаты и бесплатных прокрутов
                 if (type === 1 && state.freeSpins > 0) {
                     state.freeSpins--;
                 } else {
@@ -668,7 +747,6 @@
                     state.balance -= cost;
                 }
 
-                // Генерируем случайного оператора и получаем множитель опыта
                 let opXpMultiplier = getRandomOperator();
 
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
@@ -678,8 +756,6 @@
                 let rarity = getRarity(evalData.category);
                 
                 state.currentGen = { phone, price: evalData.price, category: evalData.category };
-                
-                // Считаем опыт с учетом оператора и буста
                 let earnedXP = Math.floor(rarity.xp * opXpMultiplier * state.boostMultiplier);
 
                 state.totalGenerated++;
@@ -687,43 +763,7 @@
                     state.bestNumber = state.currentGen;
                 }
 
-                // Анимация
-                let resDiv = getEl('custom-gen-result');
-                let btnRow = getEl('gen-buttons-row');
-                btnRow.style.display = 'none'; // Прячем кнопки
-                resDiv.classList.add('force-show');
-                resDiv.innerHTML = `
-                    <div class="phone-number rarity-common" style="opacity: 0.5;">+7-XXX-XXX-XX-XX</div>
-                    <div class="price-tag" style="opacity: 0.5;">Генерация...</div>
-                    <div class="category-text" style="opacity: 0.5;">Оператор: ${state.currentOperator}</div>
-                `;
-
-                setTimeout(() => {
-                    resDiv.innerHTML = `
-                        <div class="info-icon" id="btn-show-info">i</div>
-                        <div class="phone-number ${rarity.cls}">${phone}</div>
-                        <div class="price-tag">${evalData.price.toLocaleString('ru-RU')} ₽</div>
-                        <div class="category-text">${evalData.category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
-                    `;
-
-                    if (evalData.price >= 500000) {
-                        resDiv.classList.add('shake-effect');
-                        resDiv.classList.add('flash-effect');
-                        setTimeout(() => {
-                            resDiv.classList.remove('shake-effect');
-                            resDiv.classList.remove('flash-effect');
-                        }, 1000);
-                    }
-
-                    getEl('action-btns-wrapper').style.display = 'flex';
-
-                    state.points += earnedXP;
-                    updateUI();
-
-                    if (evalData.price >= 500000) {
-                        showToast(`🔥 МЕГА-НОМЕР!<br>${phone}<br>${evalData.price.toLocaleString('ru-RU')} ₽`);
-                    }
-                }, 800);
+                startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
             }
 
             if (target.id === 'btn-sell-now') {
@@ -777,6 +817,11 @@
             
             if (target.id === 'btn-show-info') { getEl('info-modal').style.display = 'flex'; }
             if (target.id === 'btn-close-info') { getEl('info-modal').style.display = 'none'; }
+
+            // Заглушки для новых кнопок
+            if (target.id === 'btn-market') { showToast("🛒 Рынок скоро откроется!"); }
+            if (target.id === 'btn-shop') { showToast("🏪 Магазин в разработке!"); }
+            if (target.id === 'btn-jewelry') { showToast("💎 Ювелирный пока закрыт!"); }
         });
 
         document.addEventListener('change', function(e) {
