@@ -2,37 +2,375 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой Mini App</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Подключаем API Telegram -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Генератор Номеров</title>
+    <!-- Подключаем Telegram WebApp -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Стили для игры */
+        :root {
+            --bg-color: #f0f0f0;
+            --card-bg: #ffffff;
+            --text-main: #1e1e1e;
+            --text-sub: #666;
+        }
+        body.dark-theme {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #aaaaaa;
+        }
+        
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            font-family: sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.4s, color 0.4s;
+        }
+
+        /* Шапка */
+        #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
+        #profile-box { display: flex; flex-direction: column; }
+        #lvl-text { font-size: 14px; color: #00ff00; font-weight: bold; }
+        #pts-text { font-size: 11px; color: #aaa; }
+        #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; margin-top: 2px; }
+        .top-btns { display: flex; gap: 8px; }
+        .icon-btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 16px; }
+
+        /* Главный экран */
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; }
+        #custom-gen-result { display: none; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .force-show { display: block !important; }
+        .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
+        .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
+        .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
+        
+        #bottom-action-area { width: 100%; margin-top: 10px; }
+        #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
+        #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
+        .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
+        .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
+
+        /* Экраны */
+        .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
+        .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
+        .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
+        
+        /* Рюкзак */
+        #inv-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
+        #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
+        #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
+        #inv-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
+        .inv-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
+        .btn-sell-item { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* Настройки */
+        #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; background: var(--card-bg); }
+        .setting-text { font-size: 16px; font-weight: bold; }
+        
+        .warn-input-group { display: flex; align-items: center; gap: 10px; margin-top: 10px; width: 100%; }
+        .warn-input { flex: 1; padding: 12px; border-radius: 8px; font-size: 16px; box-sizing: border-box; width: 100%; border: 1px solid #ccc; background: #f9f9f9; color: black; }
+        .warn-label { font-size: 14px; color: #888; }
+        
+        /* Переключатель */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #28a745; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Уведомления */
+        #toast-notification {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1e1e1e;
+            padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 99999999;
+            text-align: center; width: 85%; box-sizing: border-box;
+            animation: slideDown 0.4s forwards;
+        }
+        @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 id="greeting">Привет!</h1>
-        <p>Это мое первое мини-приложение.</p>
-        <button id="mainBtn">Нажми меня</button>
-        <p id="result"></p>
+
+    <!-- ШАПКА -->
+    <div id="top-bar">
+        <div id="profile-box">
+            <div id="lvl-text">Уровень: 1</div>
+            <div id="pts-text">Поинты: 0 / 100</div>
+            <div id="balance-display">0 ₽</div>
+        </div>
+        <div class="top-btns">
+            <button class="icon-btn" id="btn-open-bag">🎒 <span id="bag-count">0</span></button>
+            <button class="icon-btn" id="btn-open-settings">⚙️</button>
+        </div>
     </div>
+    
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen">
+        <div id="custom-gen-result"></div>
+        <div id="bottom-action-area">
+            <button id="custom-gen-btn">Сгенерировать номер</button>
+            <div id="action-btns-wrapper">
+                <button class="btn-sell" id="btn-sell-now">Продать</button>
+                <button class="btn-keep" id="btn-keep">Оставить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- РЮКЗАК -->
+    <div id="inventory-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">🎒 Мой Рюкзак</span>
+            <button class="btn-close" id="btn-close-bag">Закрыть</button>
+        </div>
+        <div id="inv-balance-box">
+            <div style="font-size:14px; margin-bottom:5px;">Ваш баланс</div>
+            <div id="inv-balance-amount" style="font-size:28px; font-weight:bold; color:#28a745;">0 ₽</div>
+        </div>
+        <button id="btn-sell-all">Продать все номера</button>
+        <div id="inv-list"></div>
+    </div>
+
+    <!-- НАСТРОЙКИ -->
+    <div id="settings-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">⚙️ Настройки</span>
+            <button class="btn-close" id="btn-close-settings">Закрыть</button>
+        </div>
+        <div id="settings-content">
+            <div class="setting-item">
+                <span class="setting-text">Тёмная тема</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-theme">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; align-items: center;">
+                    <span class="setting-text">Предупреждение при продаже</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-warning">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <span style="font-size: 12px; margin-bottom: 10px; color: var(--text-sub);">Если стоимость номера равна или выше этой суммы, при продаже появится окно.</span>
+                
+                <div class="warn-input-group">
+                    <span class="warn-label">Сумма от:</span>
+                    <input type="number" id="input-warn-threshold" class="warn-input" placeholder="100000">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СКРИПТ ИГРЫ -->
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
 
-        // Получаем данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('greeting').innerText = `Привет, ${user.first_name}!`;
+        // 1. ЗАГРУЗКА ДАННЫХ
+        let balance = parseInt(localStorage.getItem('blum_balance')) || 0;
+        let inventory = JSON.parse(localStorage.getItem('blum_inventory')) || [];
+        let isDarkTheme = localStorage.getItem('blum_theme') === 'dark';
+        let points = parseInt(localStorage.getItem('blum_points')) || 0;
+        let level = parseInt(localStorage.getItem('blum_level')) || 1;
+        let useSellWarning = localStorage.getItem('blum_use_warning') === 'true';
+        let warnThreshold = parseInt(localStorage.getItem('blum_warn_threshold')) || 100000;
+
+        function saveData() {
+            localStorage.setItem('blum_balance', balance);
+            localStorage.setItem('blum_inventory', JSON.stringify(inventory));
+            localStorage.setItem('blum_theme', isDarkTheme ? 'dark' : 'light');
+            localStorage.setItem('blum_points', points);
+            localStorage.setItem('blum_level', level);
+            localStorage.setItem('blum_use_warning', useSellWarning);
+            localStorage.setItem('blum_warn_threshold', warnThreshold);
         }
 
-        // Обработка кнопки
-        document.getElementById('mainBtn').addEventListener('click', () => {
-            document.getElementById('result').innerText = 'Кнопка нажата! Данные отправлены в бота.';
-            // Отправляем данные обратно в бота
-            tg.sendData(JSON.stringify({ action: "button_clicked", time: Date.now() }));
-        });
+        // ЭЛЕМЕНТЫ
+        const btnGen = document.getElementById('custom-gen-btn');
+        const resultDiv = document.getElementById('custom-gen-result');
+        const balanceDisplay = document.getElementById('balance-display');
+        const lvlText = document.getElementById('lvl-text');
+        const ptsText = document.getElementById('pts-text');
+        const bagCount = document.getElementById('bag-count');
+        const invScreen = document.getElementById('inventory-screen');
+        const invList = document.getElementById('inv-list');
+        const invBalanceAmount = document.getElementById('inv-balance-amount');
+        const btnSellAll = document.getElementById('btn-sell-all');
+        const settingsScreen = document.getElementById('settings-screen');
+        const actionBtnsWrapper = document.getElementById('action-btns-wrapper');
+        const btnSellNow = document.getElementById('btn-sell-now');
+        const btnKeep = document.getElementById('btn-keep');
+        const toggleTheme = document.getElementById('toggle-theme');
+        const toggleWarning = document.getElementById('toggle-warning');
+        const inputWarnThreshold = document.getElementById('input-warn-threshold');
+
+        // 4. ЛОГИКА
+        function getPointsForNextLevel(lvl) { return lvl * 100; }
+
+        function calculatePrice(fullNum) {
+            let price = 150, category = "Обычный";
+            let isBeautiful = false;
+            if (/^(\d)\1{9}$/.test(fullNum)) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; isBeautiful = true; }
+            else {
+                let last4 = fullNum.slice(-4);
+                if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; isBeautiful = true; }
+                else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; isBeautiful = true; }
+                else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; isBeautiful = true; }
+                else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; isBeautiful = true; }
+                else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; isBeautiful = true; }
+                else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; }
+            }
+            if (!isBeautiful) {
+                let luckyChance = level * 0.5;
+                if (Math.random() * 100 < luckyChance) { price = Math.floor(Math.random() * 50000) + 10000; category = "УДАЧНЫЙ (Бонус уровня)"; }
+            }
+            if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
+            return { price: price, category: category };
+        }
+
+        function showToast(text) {
+            let existingToast = document.getElementById('toast-notification');
+            if (existingToast) existingToast.remove();
+            let toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.innerHTML = text;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+        }
+
+        function updateUI() {
+            let formattedBalance = balance.toLocaleString('ru-RU');
+            balanceDisplay.innerText = formattedBalance + ' ₽';
+            invBalanceAmount.innerText = formattedBalance + ' ₽';
+            bagCount.innerText = inventory.length;
+            
+            lvlText.innerText = `Уровень: ${level}`;
+            let ptsNeeded = getPointsForNextLevel(level);
+            
+            if (points >= ptsNeeded && level < 100) {
+                points -= ptsNeeded; level++;
+                showToast(`🎉 Новый уровень: ${level}!`);
+                updateUI(); return;
+            }
+            ptsText.innerText = level >= 100 ? `Максимальный уровень!` : `Поинты: ${points} / ${ptsNeeded}`;
+            
+            btnSellAll.disabled = inventory.length === 0;
+            btnSellAll.innerText = inventory.length === 0 ? "Рюкзак пуст" : "Продать все номера (" + inventory.length + ")";
+            saveData();
+        }
+
+        function resetToGenerate() {
+            resultDiv.classList.remove('force-show');
+            btnGen.style.display = 'block';
+            actionBtnsWrapper.style.display = 'none';
+        }
+
+        btnGen.onclick = function() {
+            let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+            let finalPhone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
+            let evaluation = calculatePrice(fullNum);
+            
+            let currentGenerated = { phone: finalPhone, price: evaluation.price, category: evaluation.category };
+
+            resultDiv.innerHTML = `
+                <div class="phone-number" style="color:var(--text-main)">${finalPhone}</div>
+                <div class="price-tag">${evaluation.price.toLocaleString('ru-RU')} ₽</div>
+                <div class="category-text">${evaluation.category}</div>
+            `;
+            
+            resultDiv.classList.add('force-show');
+            btnGen.style.display = 'none';
+            actionBtnsWrapper.style.display = 'flex';
+
+            points += 10;
+            updateUI();
+
+            if (currentGenerated.price >= 100000) {
+                showToast(`🔥 Вам выпал дорогой номер!\n${currentGenerated.phone}\nСтоимость: ${currentGenerated.price.toLocaleString('ru-RU')} ₽`);
+            }
+
+            btnSellNow.onclick = function() {
+                if (useSellWarning && currentGenerated.price >= warnThreshold) {
+                    if (!confirm(`Вы уверены, что хотите продать номер за ${currentGenerated.price.toLocaleString('ru-RU')} ₽?`)) return;
+                }
+                balance += currentGenerated.price; updateUI(); resetToGenerate();
+            };
+
+            btnKeep.onclick = function() {
+                inventory.push(currentGenerated); updateUI(); resetToGenerate();
+            };
+        };
+
+        function renderInventory() {
+            invList.innerHTML = '';
+            if (inventory.length === 0) {
+                invList.innerHTML = '<div style="text-align:center; margin-top:20px;">Рюкзак пуст.</div>';
+                return;
+            }
+            [...inventory].reverse().forEach((item, index) => {
+                let realIndex = inventory.length - 1 - index;
+                let div = document.createElement('div');
+                div.className = 'inv-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold; font-family:monospace;">${item.phone}</div>
+                        <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
+                    </div>
+                    <button class="btn-sell-item" data-index="${realIndex}">Продать</button>
+                `;
+                invList.appendChild(div);
+            });
+            document.querySelectorAll('.btn-sell-item').forEach(btn => {
+                btn.onclick = function() {
+                    let idx = parseInt(this.getAttribute('data-index'));
+                    let item = inventory[idx];
+                    if (useSellWarning && item.price >= warnThreshold) {
+                        if (!confirm(`Продать номер за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
+                    }
+                    balance += item.price; inventory.splice(idx, 1); updateUI(); renderInventory();
+                };
+            });
+        }
+
+        // НАВИГАЦИЯ
+        document.getElementById('btn-open-bag').onclick = function() { invScreen.style.display = 'flex'; updateUI(); renderInventory(); };
+        document.getElementById('btn-close-bag').onclick = function() { invScreen.style.display = 'none'; };
+        document.getElementById('btn-open-settings').onclick = function() { settingsScreen.style.display = 'flex'; toggleTheme.checked = isDarkTheme; toggleWarning.checked = useSellWarning; inputWarnThreshold.value = warnThreshold; };
+        document.getElementById('btn-close-settings').onclick = function() { settingsScreen.style.display = 'none'; };
+
+        btnSellAll.onclick = function() {
+            if (inventory.length === 0) return;
+            let totalSum = inventory.reduce((sum, item) => sum + item.price, 0);
+            if (useSellWarning && totalSum >= warnThreshold) {
+                if (!confirm(`Продать ВСЕ номера на сумму ${totalSum.toLocaleString('ru-RU')} ₽?`)) return;
+            }
+            balance += totalSum; inventory = []; updateUI(); renderInventory();
+            showToast(`✅ Вы получили ${totalSum.toLocaleString('ru-RU')} ₽`);
+        };
+
+        // НАСТРОЙКИ
+        toggleTheme.onchange = function() { isDarkTheme = this.checked; applyTheme(); saveData(); };
+        toggleWarning.onchange = function() { useSellWarning = this.checked; saveData(); };
+        inputWarnThreshold.onchange = function() {
+            let val = parseInt(this.value) || 100000; if (val < 0) val = 0;
+            warnThreshold = val; this.value = val; saveData();
+        };
+
+        function applyTheme() {
+            if (isDarkTheme) document.body.classList.add('dark-theme');
+            else document.body.classList.remove('dark-theme');
+        }
+
+        applyTheme(); updateUI();
     </script>
 </body>
 </html>
