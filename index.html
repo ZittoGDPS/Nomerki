@@ -8,45 +8,37 @@
     <style>
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
-        
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; width: 50%; }
         #lvl-text { font-size: 14px; color: #00ff00; font-weight: bold; }
         #pts-text { font-size: 11px; color: #aaa; margin-bottom: 4px; }
-        
         #xp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
         #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
         #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
-
         .top-btns { display: flex; gap: 5px; align-items: center; }
         .icon-btn { border: none; padding: 8px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-        
+
         #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-        /* Главный экран */
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .force-show { display: block !important; }
-        
         .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
         .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
-        
-        /* Кнопки */
+
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; }
         #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Цвета редкости */
         .rarity-common { color: var(--text-main) !important; }
         .rarity-bronze { color: #cd7f32 !important; text-shadow: 0 0 5px rgba(205, 127, 50, 0.3); }
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
@@ -54,12 +46,10 @@
         .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); font-weight: 900; }
         .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); }
 
-        /* Экраны */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
-        
-        /* Рюкзак */
+
         #inv-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
@@ -67,14 +57,13 @@
         .inv-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
         .btn-sell-item { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* Настройки */
         #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; background: var(--card-bg); }
         .setting-text { font-size: 16px; font-weight: bold; }
         .warn-input-group { display: flex; align-items: center; gap: 10px; margin-top: 10px; width: 100%; }
         .warn-input { flex: 1; padding: 12px; border-radius: 8px; font-size: 16px; box-sizing: border-box; width: 100%; border: 1px solid #ccc; background: #f9f9f9; color: black; }
         .warn-label { font-size: 14px; color: #888; }
-        
+
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -82,25 +71,12 @@
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Лидерборд */
-        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
-        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
-        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
-        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
-        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
-        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
-        .leader-name { flex: 1; font-weight: bold; margin-left: 10px; }
-        .leader-balance { font-weight: bold; color: #28a745; }
-
-        /* Модальное окно информации */
         #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999999; display: none; justify-content: center; align-items: center; }
         #info-content { background: var(--card-bg); padding: 20px; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; color: var(--text-main); }
         #info-content h3 { margin-top: 0; text-align: center; color: #0088cc; }
         #info-content ul { padding-left: 20px; font-size: 14px; line-height: 1.6; }
         #info-content li { margin-bottom: 5px; }
-        
-        /* Уведомления */
+
         #toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1e1e1e; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 99999999; text-align: center; width: 85%; box-sizing: border-box; animation: slideDown 0.4s forwards; }
         @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
     </style>
@@ -116,7 +92,8 @@
         </div>
         <div class="top-btns">
             <div id="boost-indicator">⚡ x1.5 (10с)</div>
-            <button class="icon-btn" id="btn-open-top">🏆</button>
+            <!-- Кнопка перехода в лидерборд -->
+            <button class="icon-btn" id="btn-go-top">🏆</button>
             <button class="icon-btn" id="btn-open-bag">🎒<span id="bag-count">0</span></button>
             <button class="icon-btn" id="btn-open-settings">⚙️</button>
         </div>
@@ -134,14 +111,6 @@
             <button class="btn-sell" id="btn-sell-now">Продать</button>
             <button class="btn-keep" id="btn-keep">Оставить</button>
         </div>
-    </div>
-    
-    <div id="leaderboard-screen" class="full-screen">
-        <div class="screen-header">
-            <span style="font-weight:bold; font-size:18px;">🏆 Лидеры по балансу</span>
-            <button class="btn-close" id="btn-close-top">Закрыть</button>
-        </div>
-        <div id="leaderboard-list"></div>
     </div>
 
     <div id="inventory-screen" class="full-screen">
@@ -191,7 +160,6 @@
         <div id="info-content">
             <h3>Шансы и Награды</h3>
             <p style="font-size: 14px; text-align: center; color: var(--text-sub);">Каждый уровень повышает шанс выпадения редкого номера.</p>
-            
             <h4 style="color: #0088cc; margin-bottom: 5px;">Опыт за номера:</h4>
             <ul>
                 <li><b>Обычный:</b> 5 XP</li>
@@ -203,25 +171,21 @@
                 <li><b>Золотой:</b> 150 XP</li>
                 <li><b>Бриллиантовый:</b> 1000 XP</li>
             </ul>
-
-            <h4 style="color: #ff007f; margin-bottom: 5px;">Шансы на Бусты (при повышении уровня):</h4>
+            <h4 style="color: #ff007f; margin-bottom: 5px;">Шансы на Бусты:</h4>
             <ul>
-                <li><b>x1.5 (Базовый):</b> 50%</li>
-                <li><b>x2 (Ускорение):</b> 25%</li>
-                <li><b>x3 (Мега):</b> 15% <i>(только с 20 уровня)</i></li>
-                <li><b>x5 (Легендарный):</b> 10% <i>(только с 50 уровня)</i></li>
+                <li><b>x1.5:</b> 50%</li>
+                <li><b>x2:</b> 25%</li>
+                <li><b>x3:</b> 15% <i>(с 20 ур.)</i></li>
+                <li><b>x5:</b> 10% <i>(с 50 ур.)</i></li>
             </ul>
-            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">Буст действует 30 секунд.</p>
             <button class="btn-sell" style="width: 100%; margin-top: 15px;" id="btn-close-info">Понятно</button>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        // Состояние игры
         let state = {
             balance: parseInt(localStorage.getItem('blum_balance')) || 0,
             inventory: JSON.parse(localStorage.getItem('blum_inventory')) || [],
@@ -235,19 +199,6 @@
             currentGen: null
         };
 
-        // Боты для лидерборда
-        let bots = JSON.parse(localStorage.getItem('blum_bots')) || [
-            { name: "Номерной_Магнат", balance: 4520000 },
-            { name: "Иван_Номера", balance: 3120500 },
-            { name: "Сотовый_Король", balance: 1840000 },
-            { name: "Аферист", balance: 950000 },
-            { name: "СимКарта", balance: 620000 },
-            { name: "Оператор", balance: 250000 },
-            { name: "Новичок", balance: 15000 }
-        ];
-        localStorage.setItem('blum_bots', JSON.stringify(bots));
-
-        // Сохранение
         function saveData() {
             localStorage.setItem('blum_balance', state.balance);
             localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
@@ -259,7 +210,6 @@
             localStorage.setItem('blum_boost_end', state.boostEndTime);
         }
 
-        // Вспомогательные функции
         const getEl = (id) => document.getElementById(id);
 
         function getRarity(category) {
@@ -303,7 +253,6 @@
             setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
         }
 
-        // Логика буста
         function checkBoost() {
             let now = Date.now();
             let el = getEl('boost-indicator');
@@ -330,7 +279,6 @@
             checkBoost();
         }
 
-        // Обновление интерфейса
         function updateUI() {
             getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
@@ -358,7 +306,6 @@
             saveData();
         }
 
-        // Отрисовка рюкзака
         function renderInventory() {
             let list = getEl('inv-list');
             list.innerHTML = '';
@@ -382,12 +329,15 @@
             });
         }
 
-        // ДЕЛЕГИРОВАНИЕ СОБЫТИЙ (исправляет баг с кнопками)
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
 
-            // 1. Генерация номера
+            if (target.id === 'btn-go-top') {
+                // Переход на страницу лидерборда
+                window.location.href = 'leaderboard.html';
+            }
+
             if (target.id === 'custom-gen-btn') {
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
                 let phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
@@ -415,7 +365,6 @@
                 }
             }
 
-            // 2. Продать / Оставить
             if (target.id === 'btn-sell-now') {
                 if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
@@ -432,7 +381,6 @@
                 getEl('custom-gen-btn').style.display = 'block';
             }
 
-            // 3. Продажа из рюкзака
             if (target.classList.contains('btn-sell-item')) {
                 let idx = parseInt(target.getAttribute('data-index'));
                 let item = state.inventory[idx];
@@ -445,7 +393,6 @@
                 renderInventory();
             }
 
-            // 4. Продать всё
             if (target.id === 'btn-sell-all') {
                 if (state.inventory.length === 0) return;
                 let total = state.inventory.reduce((sum, item) => sum + item.price, 0);
@@ -459,7 +406,6 @@
                 showToast(`✅ Вы получили ${total.toLocaleString('ru-RU')} ₽`);
             }
 
-            // 5. Открытие окон
             if (target.id === 'btn-open-bag') { getEl('inventory-screen').style.display = 'flex'; updateUI(); renderInventory(); }
             if (target.id === 'btn-close-bag') { getEl('inventory-screen').style.display = 'none'; }
             if (target.id === 'btn-open-settings') { getEl('settings-screen').style.display = 'flex'; getEl('toggle-theme').checked = state.isDarkTheme; getEl('toggle-warning').checked = state.useSellWarning; getEl('input-warn-threshold').value = state.warnThreshold; }
@@ -467,27 +413,8 @@
             
             if (target.id === 'btn-show-info') { getEl('info-modal').style.display = 'flex'; }
             if (target.id === 'btn-close-info') { getEl('info-modal').style.display = 'none'; }
-
-            // 6. Лидерборд
-            if (target.id === 'btn-open-top') {
-                getEl('leaderboard-screen').style.display = 'flex';
-                let list = [...bots, { name: "Вы", balance: state.balance, isYou: true }];
-                list.sort((a, b) => b.balance - a.balance);
-                let container = getEl('leaderboard-list');
-                container.innerHTML = '';
-                list.forEach((p, i) => {
-                    let rClass = i===0?'top1':i===1?'top2':i===2?'top3':'';
-                    let yClass = p.isYou?'you':'';
-                    let div = document.createElement('div');
-                    div.className = `leader-item ${yClass}`;
-                    div.innerHTML = `<div class="leader-rank ${rClass}">#${i+1}</div><div class="leader-name">${p.name}</div><div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>`;
-                    container.appendChild(div);
-                });
-            }
-            if (target.id === 'btn-close-top') { getEl('leaderboard-screen').style.display = 'none'; }
         });
 
-        // Обработчики настроек
         document.addEventListener('change', function(e) {
             if (e.target.id === 'toggle-theme') {
                 state.isDarkTheme = e.target.checked;
@@ -499,10 +426,8 @@
             if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
         });
 
-        // Инициализация
         if (state.isDarkTheme) document.body.classList.add('dark-theme');
         updateUI();
-        
     </script>
 </body>
 </html>
