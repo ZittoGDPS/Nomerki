@@ -32,7 +32,6 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Экран регистрации */
         #register-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 99999999;
@@ -65,7 +64,7 @@
         #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 120px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
@@ -75,22 +74,22 @@
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
 
-        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; gap: 10px; align-items: center; }
+        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Новый селектор оператора */
-        #operator-selector { 
-            background: #1e1e1e; color: white; border: 1px solid #444; 
-            padding: 12px; border-radius: 10px; font-size: 14px; 
-            cursor: pointer; outline: none; width: 120px;
-        }
+        .gen-buttons-row { display: flex; gap: 10px; width: 100%; }
+        .gen-btn { color: white; padding: 12px 5px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; flex: 1; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .gen-btn span { font-size: 10px; font-weight: normal; opacity: 0.8; }
         
-        #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; flex: 1; background: #0088cc; box-sizing: border-box; }
-        
+        #btn-gen-1 { background: #28a745; }
+        #btn-gen-5 { background: #fd7e14; }
+        #btn-gen-20 { background: #dc3545; }
+
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Анимации */
+        #operator-indicator { text-align: center; font-size: 12px; color: var(--text-sub); margin-top: 5px; font-weight: bold; }
+
         @keyframes shakeScreen {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -118,7 +117,7 @@
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
         .rarity-gold { color: #ffd700 !important; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
         .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); font-weight: 900; }
-        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); }
+        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(0, 0, 127, 0.5); }
 
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
@@ -155,6 +154,7 @@
         #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999999; display: none; justify-content: center; align-items: center; }
         #info-content { background: var(--card-bg); padding: 20px; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; color: var(--text-main); }
         #info-content h3 { margin-top: 0; text-align: center; color: #0088cc; }
+        #info-content h4 { color: #0088cc; margin-bottom: 5px; margin-top: 15px; }
         #info-content ul { padding-left: 20px; font-size: 14px; line-height: 1.6; }
         #info-content li { margin-bottom: 5px; }
 
@@ -192,19 +192,18 @@
         
         <div id="main-screen">
             <div id="custom-gen-result"><div class="info-icon" id="btn-show-info">i</div></div>
+            <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span> (Бонус опыта)</div>
         </div>
         
         <div id="bottom-action-area">
-            <!-- Селектор оператора -->
-            <select id="operator-selector">
-                <option value="+7">Биглайн</option>
-                <option value="+7">МСТ</option>
-                <option value="+7">Могофон</option>
-                <option value="+7">Тел 2</option>
-                <option value="+7">Тиф Карта</option>
-            </select>
+            
+            <!-- Кнопки генерации -->
+            <div class="gen-buttons-row" id="gen-buttons-row">
+                <button class="gen-btn" id="btn-gen-1">1К<span>1 000 ₽</span></button>
+                <button class="gen-btn" id="btn-gen-5">5К<span>5 000 ₽</span></button>
+                <button class="gen-btn" id="btn-gen-20">20К<span>20 000 ₽</span></button>
+            </div>
 
-            <button id="custom-gen-btn">Сгенерировать номер</button>
             <div id="action-btns-wrapper">
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
                 <button class="btn-keep" id="btn-keep">Оставить</button>
@@ -279,25 +278,36 @@
 
     <div id="info-modal">
         <div id="info-content">
-            <h3>Шансы и Награды</h3>
-            <h4 style="color: #0088cc; margin-bottom: 5px;">Опыт за номера:</h4>
+            <h3>Информация и Шансы</h3>
+            
+            <h4>Операторы (Бонус к опыту):</h4>
+            <ul>
+                <li><b>Биглайн:</b> x2 к опыту</li>
+                <li><b>МСТ:</b> x1.5 к опыту</li>
+                <li><b>Могофон:</b> x1.2 к опыту</li>
+                <li><b>Тел 2:</b> x1 к опыту</li>
+                <li><b>Тиф Карта:</b> x3 к опыту (Редкий)</li>
+            </ul>
+
+            <h4>Шансы на выпадение цен:</h4>
+            <ul>
+                <li><b>Кнопка 1К:</b> 100к (5%), 1ккк (0.00001%)</li>
+                <li><b>Кнопка 5К:</b> 100к (10%), 1ккк (0.0001%)</li>
+                <li><b>Кнопка 20К:</b> 1ккк (5%), 1ккккк (0.1%)</li>
+                <li><i>Остальные номера обычные (150 - 50 000 ₽)</i></li>
+            </ul>
+
+            <h4>Опыт за номера:</h4>
             <ul>
                 <li><b>Обычный:</b> 5 XP</li>
                 <li><b>Красивое окончание:</b> 10 XP</li>
                 <li><b>Бронзовый:</b> 25 XP</li>
-                <li><b>Удачный (Бонус ур.):</b> 30 XP</li>
                 <li><b>Серебряный:</b> 50 XP</li>
                 <li><b>Зеркальный / Последовательный:</b> 75 XP</li>
                 <li><b>Золотой:</b> 150 XP</li>
                 <li><b>Бриллиантовый:</b> 1000 XP</li>
             </ul>
-            <h4 style="color: #ff007f; margin-bottom: 5px;">Шансы на Бусты:</h4>
-            <ul>
-                <li><b>x1.5:</b> 50%</li>
-                <li><b>x2:</b> 25%</li>
-                <li><b>x3:</b> 15% <i>(с 20 ур.)</i></li>
-                <li><b>x5:</b> 10% <i>(с 50 ур.)</i></li>
-            </ul>
+
             <button class="btn-sell" style="width: 100%; margin-top: 15px;" id="btn-close-info">Понятно</button>
         </div>
     </div>
@@ -306,7 +316,6 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        // 1. Определение пользователя
         let myName = "Игрок";
         let myId;
         let isBrowser = false;
@@ -342,7 +351,11 @@
             bestNumber: JSON.parse(localStorage.getItem('blum_best_number')) || null,
             totalGenerated: parseInt(localStorage.getItem('blum_total_generated')) || 0,
             totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
-            maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0
+            maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
+            
+            // НОВЫЕ ПЕРЕМЕННЫЕ
+            freeSpins: parseInt(localStorage.getItem('blum_free_spins')) || 10,
+            currentOperator: localStorage.getItem('blum_operator') || null
         };
 
         function saveData() {
@@ -358,6 +371,8 @@
             localStorage.setItem('blum_total_generated', state.totalGenerated);
             localStorage.setItem('blum_total_sold', state.totalSold);
             localStorage.setItem('blum_max_balance', state.maxBalance);
+            localStorage.setItem('blum_free_spins', state.freeSpins);
+            localStorage.setItem('blum_operator', state.currentOperator);
 
             if (window.db && window.fbSet && window.fbRef) {
                 window.fbSet(window.fbRef(window.db, 'players/' + myId), {
@@ -382,10 +397,27 @@
             return { cls: "rarity-common", xp: 5 };
         }
 
-        function calculatePrice(fullNum) {
-            let price = 150, category = "Обычный", isBeautiful = false;
-            if (/^(\d)\1{9}$/.test(fullNum)) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; isBeautiful = true; }
-            else {
+        // Новая логика расчета цены с учетом шансов
+        function calculatePrice(fullNum, type) {
+            let price = 150, category = "Обычный";
+            
+            // Шансы на выпадение супер-номеров
+            let rand = Math.random() * 100;
+            
+            if (type === 1) {
+                if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
+                else if (rand < 5) { price = 100000; category = "СЕРЕБРЯНЫЙ"; }
+            } else if (type === 5) {
+                if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
+                else if (rand < 10) { price = 100000; category = "СЕРЕБРЯНЫЙ"; }
+            } else if (type === 20) {
+                if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
+                else if (rand < 5) { price = 1000000; category = "ЗОЛОТОЙ"; }
+            }
+
+            // Если не выпал супер-номер, считаем обычную красоту
+            if (category === "Обычный") {
+                let isBeautiful = false;
                 let last4 = fullNum.slice(-4);
                 if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; isBeautiful = true; }
                 else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; isBeautiful = true; }
@@ -393,13 +425,26 @@
                 else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; isBeautiful = true; }
                 else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; isBeautiful = true; }
                 else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; }
+                
+                if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
             }
-            if (!isBeautiful) {
-                let luckyChance = state.level * 0.5;
-                if (Math.random() * 100 < luckyChance) { price = Math.floor(Math.random() * 50000) + 10000; category = "УДАЧНЫЙ (Бонус уровня)"; }
-            }
-            if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
+
             return { price, category };
+        }
+
+        function getRandomOperator() {
+            const operators = ["Биглайн", "МСТ", "Могофон", "Тел 2", "Тиф Карта"];
+            let op = operators[Math.floor(Math.random() * operators.length)];
+            state.currentOperator = op;
+            getEl('current-operator').innerText = op;
+            
+            let xpMultiplier = 1;
+            if (op === "Биглайн") xpMultiplier = 2;
+            else if (op === "МСТ") xpMultiplier = 1.5;
+            else if (op === "Могофон") xpMultiplier = 1.2;
+            else if (op === "Тиф Карта") xpMultiplier = 3;
+            
+            return xpMultiplier;
         }
 
         function showToast(text) {
@@ -458,6 +503,18 @@
                 getEl('pts-text').innerText = `Поинты: ${state.points} / ${ptsNeeded}`;
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
             }
+
+            // Обновляем кнопку 1К (показываем бесплатные прокруты)
+            let btn1 = getEl('btn-gen-1');
+            if (state.freeSpins > 0) {
+                btn1.innerHTML = `1К<span>Бесплатно (${state.freeSpins})</span>`;
+                btn1.style.background = '#17a2b8'; // Другой цвет для бесплатных
+            } else {
+                btn1.innerHTML = `1К<span>1 000 ₽</span>`;
+                btn1.style.background = '#28a745';
+            }
+
+            getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -595,38 +652,53 @@
                 getEl('profile-screen').style.display = 'none';
             }
 
-            if (target.id === 'custom-gen-btn') {
+            // ГЕНЕРАЦИЯ НОМЕРОВ
+            if (target.id === 'btn-gen-1' || target.id === 'btn-gen-5' || target.id === 'btn-gen-20') {
+                let type = target.id === 'btn-gen-1' ? 1 : target.id === 'btn-gen-5' ? 5 : 20;
+                let cost = type * 1000;
+                
+                // Логика оплаты и бесплатных прокрутов
+                if (type === 1 && state.freeSpins > 0) {
+                    state.freeSpins--;
+                } else {
+                    if (state.balance < cost) {
+                        showToast("❌ Недостаточно средств!");
+                        return;
+                    }
+                    state.balance -= cost;
+                }
+
+                // Генерируем случайного оператора и получаем множитель опыта
+                let opXpMultiplier = getRandomOperator();
+
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-                let operatorPrefix = document.getElementById('operator-selector').value; 
+                let phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
                 
-                let phone = `${operatorPrefix}-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
-                
-                let evalData = calculatePrice(fullNum);
+                let evalData = calculatePrice(fullNum, type);
                 let rarity = getRarity(evalData.category);
+                
                 state.currentGen = { phone, price: evalData.price, category: evalData.category };
-                let earnedXP = Math.floor(rarity.xp * state.boostMultiplier);
+                
+                // Считаем опыт с учетом оператора и буста
+                let earnedXP = Math.floor(rarity.xp * opXpMultiplier * state.boostMultiplier);
 
                 state.totalGenerated++;
                 if (!state.bestNumber || evalData.price > state.bestNumber.price) {
                     state.bestNumber = state.currentGen;
                 }
 
-                // Анимация генерации
+                // Анимация
                 let resDiv = getEl('custom-gen-result');
-                let btnGen = getEl('custom-gen-btn');
-                btnGen.disabled = true;
-                btnGen.innerText = "Генерация...";
+                let btnRow = getEl('gen-buttons-row');
+                btnRow.style.display = 'none'; // Прячем кнопки
                 resDiv.classList.add('force-show');
                 resDiv.innerHTML = `
                     <div class="phone-number rarity-common" style="opacity: 0.5;">+7-XXX-XXX-XX-XX</div>
                     <div class="price-tag" style="opacity: 0.5;">Генерация...</div>
-                    <div class="category-text" style="opacity: 0.5;">Пожалуйста, подождите</div>
+                    <div class="category-text" style="opacity: 0.5;">Оператор: ${state.currentOperator}</div>
                 `;
 
                 setTimeout(() => {
-                    btnGen.disabled = false;
-                    btnGen.innerText = "Сгенерировать номер";
-                    
                     resDiv.innerHTML = `
                         <div class="info-icon" id="btn-show-info">i</div>
                         <div class="phone-number ${rarity.cls}">${phone}</div>
@@ -634,7 +706,6 @@
                         <div class="category-text">${evalData.category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
                     `;
 
-                    // Анимация для дорогих номеров (от 500 000)
                     if (evalData.price >= 500000) {
                         resDiv.classList.add('shake-effect');
                         resDiv.classList.add('flash-effect');
@@ -644,16 +715,15 @@
                         }, 1000);
                     }
 
-                    getEl('custom-gen-btn').style.display = 'none';
                     getEl('action-btns-wrapper').style.display = 'flex';
 
                     state.points += earnedXP;
                     updateUI();
 
-                    if (evalData.price >= 100000) {
-                        showToast(`🔥 Дорогой номер!<br>${phone}<br>${evalData.price.toLocaleString('ru-RU')} ₽`);
+                    if (evalData.price >= 500000) {
+                        showToast(`🔥 МЕГА-НОМЕР!<br>${phone}<br>${evalData.price.toLocaleString('ru-RU')} ₽`);
                     }
-                }, 800); // Задержка 0.8 секунды для эффекта
+                }, 800);
             }
 
             if (target.id === 'btn-sell-now') {
@@ -664,13 +734,13 @@
                 state.totalSold++;
                 updateUI();
                 getEl('action-btns-wrapper').style.display = 'none';
-                getEl('custom-gen-btn').style.display = 'block';
+                getEl('gen-buttons-row').style.display = 'flex';
             }
             if (target.id === 'btn-keep') {
                 state.inventory.push(state.currentGen);
                 updateUI();
                 getEl('action-btns-wrapper').style.display = 'none';
-                getEl('custom-gen-btn').style.display = 'block';
+                getEl('gen-buttons-row').style.display = 'flex';
             }
 
             if (target.classList.contains('btn-sell-item')) {
@@ -744,8 +814,8 @@
                         
                         getEl('user-name-display').innerText = data.name || "Игрок";
                         
-                        getEl('custom-gen-btn').style.display = 'none';
                         getEl('btn-open-bag').style.display = 'none'; 
+                        getEl('gen-buttons-row').style.display = 'none'; 
                         
                         getEl('profile-screen').style.display = 'flex';
                         renderProfile();
