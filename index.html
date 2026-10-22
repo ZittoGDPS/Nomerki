@@ -92,20 +92,25 @@
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
-        /* Стили для КАЗИНО */
+        /* Стили для КАЗИНО (Апгрейдер) */
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
         .casino-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #333; }
-        .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         
-        .casino-display { font-size: 64px; font-weight: bold; color: #ffcc00; margin: 20px 0; font-family: monospace; text-shadow: 0 0 20px rgba(255, 204, 0, 0.5); }
+        .casino-inventory-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .casino-inv-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; cursor: pointer; }
+        .casino-inv-item.selected { border-color: #ffcc00; background: #333; }
+        .casino-inv-item .num { font-family: monospace; font-size: 16px; font-weight: bold; }
+        .casino-inv-item .prc { color: #28a745; font-weight: bold; }
         
-        .casino-controls { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px; }
-        .casino-input { padding: 15px; border-radius: 10px; border: 2px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
+        .casino-controls { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; }
+        .casino-input-group { display: flex; align-items: center; gap: 10px; }
+        .casino-input { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
         
-        .casino-btns { display: flex; gap: 10px; }
-        .btn-red { background: #dc3545; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; flex: 1; cursor: pointer; }
-        .btn-black { background: #333; color: white; border: 2px solid #555; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; flex: 1; cursor: pointer; }
-        .btn-spin { background: #28a745; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; }
+        .chance-display { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; color: #ffcc00; }
+        
+        .btn-spin { background: #dc3545; color: white; border: none; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: background 0.2s; }
+        .btn-spin:active { background: #a71d2a; }
         
         .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; height: 30px; }
 
@@ -183,7 +188,6 @@
             </div>
             <div class="top-btns">
                 <div id="boost-indicator">⚡ x1.5 (10с)</div>
-                <!-- Кнопка Казино -->
                 <button class="icon-btn" id="btn-casino" style="background: #ff007f;">🎰</button>
                 <button class="icon-btn" id="btn-open-profile">👤</button>
                 <button class="icon-btn" id="btn-go-top">🏆</button>
@@ -213,26 +217,29 @@
         </div>
     </div>
 
-    <!-- ЭКРАН КАЗИНО -->
+    <!-- ЭКРАН КАЗИНО (АПГРЕЙДЕР) -->
     <div id="casino-screen">
         <div class="casino-header">
-            <span style="font-weight:bold; font-size:18px;">🎰 Казино</span>
+            <span style="font-weight:bold; font-size:18px;">🎰 Апгрейдер</span>
             <button class="btn-close" onclick="closeCasino()">Закрыть</button>
         </div>
         <div class="casino-body">
-            <h2>Угадай: Четное или Нечетное?</h2>
-            <div class="casino-display" id="casino-number">?</div>
-            
-            <div class="casino-controls">
-                <input type="number" id="casino-bet" class="casino-input" placeholder="Сумма ставки" min="100">
-                
-                <div class="casino-btns">
-                    <button class="btn-red" onclick="spinCasino('even')">Четное (Красное)</button>
-                    <button class="btn-black" onclick="spinCasino('odd')">Нечетное (Черное)</button>
-                </div>
+            <h3 style="margin-top:0; color:#aaa;">1. Выберите номер из рюкзака</h3>
+            <div class="casino-inventory-list" id="casino-inventory-list">
+                <!-- Сюда будут загружаться номера -->
             </div>
-            
-            <div class="casino-result" id="casino-result-text"></div>
+
+            <div class="casino-controls" id="casino-controls" style="display: none;">
+                <h3 style="margin: 0; color:#aaa; text-align:center;">2. Выберите желаемую сумму</h3>
+                <div class="casino-input-group">
+                    <input type="number" id="casino-target-price" class="casino-input" placeholder="Желаемая цена">
+                </div>
+                
+                <div class="chance-display" id="casino-chance">Шанс: 0%</div>
+
+                <button class="btn-spin" id="btn-do-upgrade" onclick="doUpgrade()">Апгрейд!</button>
+                <div class="casino-result" id="casino-result-text"></div>
+            </div>
         </div>
     </div>
 
@@ -349,6 +356,9 @@
             currentOperator: localStorage.getItem('blum_operator') || null,
             isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false'
         };
+
+        // Переменная для выбранного номера в казино
+        let selectedCasinoItemIndex = null;
 
         function saveData() {
             localStorage.setItem('blum_balance', state.balance);
@@ -659,6 +669,132 @@
             }, 50);
         }
 
+        // --- КАЗИНО ЛОГИКА ---
+        function openCasino() {
+            getEl('casino-screen').style.display = 'flex';
+            selectedCasinoItemIndex = null;
+            getEl('casino-controls').style.display = 'none';
+            getEl('casino-result-text').innerText = "";
+            getEl('casino-target-price').value = "";
+            getEl('casino-chance').innerText = "Шанс: 0%";
+
+            let list = getEl('casino-inventory-list');
+            list.innerHTML = '';
+
+            if (state.inventory.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#aaa;">Рюкзак пуст. Нечего апгрейдить.</div>';
+                return;
+            }
+
+            state.inventory.forEach((item, index) => {
+                let div = document.createElement('div');
+                div.className = 'casino-inv-item';
+                div.onclick = () => {
+                    document.querySelectorAll('.casino-inv-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedCasinoItemIndex = index;
+                    getEl('casino-controls').style.display = 'flex';
+                    getEl('casino-target-price').value = Math.floor(item.price * 2); // По умолчанию х2
+                    calculateChance();
+                };
+                div.innerHTML = `
+                    <div class="num">${item.phone}</div>
+                    <div class="prc">${item.price.toLocaleString('ru-RU')} ₽</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function calculateChance() {
+            if (selectedCasinoItemIndex === null) return;
+            let currentPrice = state.inventory[selectedCasinoItemIndex].price;
+            let targetPrice = parseInt(getEl('casino-target-price').value);
+
+            if (!targetPrice || targetPrice <= currentPrice) {
+                getEl('casino-chance').innerText = "Цена должна быть выше текущей!";
+                getEl('casino-chance').style.color = "#dc3545";
+                return;
+            }
+
+            // Логика шанса: Чем больше множитель, тем меньше шанс
+            // Например: х2 = 50%, х3 = 33%, х4 = 25% и т.д.
+            let multiplier = targetPrice / currentPrice;
+            let chance = Math.floor((1 / multiplier) * 100);
+
+            // Ограничиваем шанс (минимум 1%, максимум 95%)
+            if (chance > 95) chance = 95;
+            if (chance < 1) chance = 1;
+
+            getEl('casino-chance').innerText = `Шанс: ${chance}%`;
+            getEl('casino-chance').style.color = chance > 50 ? "#28a745" : chance > 20 ? "#ffcc00" : "#dc3545";
+            
+            return chance;
+        }
+
+        function doUpgrade() {
+            if (selectedCasinoItemIndex === null) return;
+            
+            let item = state.inventory[selectedCasinoItemIndex];
+            let currentPrice = item.price;
+            let targetPrice = parseInt(getEl('casino-target-price').value);
+            let chance = calculateChance();
+
+            if (!targetPrice || targetPrice <= currentPrice) {
+                showToast("❌ Неверная сумма!");
+                return;
+            }
+
+            let resultText = getEl('casino-result-text');
+            resultText.innerText = "Крутим...";
+            resultText.style.color = "#fff";
+
+            // Блокируем кнопку
+            getEl('btn-do-upgrade').disabled = true;
+
+            setTimeout(() => {
+                let roll = Math.random() * 100;
+                if (roll <= chance) {
+                    // Победа
+                    state.inventory[selectedCasinoItemIndex].price = targetPrice;
+                    
+                    // Обновляем редкость (если цена стала очень большой)
+                    if (targetPrice >= 1000000) state.inventory[selectedCasinoItemIndex].category = "ЗОЛОТОЙ";
+                    else if (targetPrice >= 100000) state.inventory[selectedCasinoItemIndex].category = "СЕРЕБРЯНЫЙ";
+
+                    resultText.innerText = `🎉 УСПЕХ! Номер улучшен до ${targetPrice.toLocaleString('ru-RU')} ₽`;
+                    resultText.style.color = "#00ff00";
+                    showToast(`🎉 Успех! Вы улучшили номер!`);
+                } else {
+                    // Проигрыш
+                    state.inventory.splice(selectedCasinoItemIndex, 1);
+                    resultText.innerText = `😢 ПРОВАЛ... Номер сгорел.`;
+                    resultText.style.color = "#dc3545";
+                    showToast(`😢 Провал. Номер сгорел.`);
+                    getEl('casino-controls').style.display = 'none';
+                    selectedCasinoItemIndex = null;
+                }
+
+                updateUI();
+                renderInventory();
+                getEl('btn-do-upgrade').disabled = false;
+                
+                // Если номер остался, обновляем список в казино
+                if (selectedCasinoItemIndex !== null) {
+                    openCasino(); // Перерисовываем список
+                    // Возвращаем выбор (костыль, но работает)
+                    setTimeout(() => {
+                        let items = document.querySelectorAll('.casino-inv-item');
+                        if(items[selectedCasinoItemIndex]) items[selectedCasinoItemIndex].click();
+                    }, 50);
+                }
+
+            }, 1000);
+        }
+
+        function closeCasino() {
+            getEl('casino-screen').style.display = 'none';
+        }
+
         // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
         let isRegistered = localStorage.getItem('blum_registered') === 'true';
 
@@ -716,74 +852,12 @@
             }
         });
 
-        // --- КАЗИНО ЛОГИКА ---
-        function closeCasino() {
-            getEl('casino-screen').style.display = 'none';
-            getEl('casino-result-text').innerText = "";
-            getEl('casino-number').innerText = "?";
-        }
-
-        function spinCasino(choice) {
-            let betAmount = parseInt(getEl('casino-bet').value);
-            if (!betAmount || betAmount < 100) {
-                showToast("❌ Минимальная ставка 100 ₽!");
-                return;
-            }
-            if (state.balance < betAmount) {
-                showToast("❌ Недостаточно средств!");
-                return;
-            }
-
-            // Списываем ставку
-            state.balance -= betAmount;
-            updateUI();
-
-            let display = getEl('casino-number');
-            let resultText = getEl('casino-result-text');
-            resultText.innerText = "Крутим...";
-            display.style.color = "#fff";
-
-            // Анимация рулетки
-            let spins = 0;
-            let interval = setInterval(() => {
-                display.innerText = Math.floor(Math.random() * 10) + 1;
-                spins++;
-                if (spins > 15) {
-                    clearInterval(interval);
-                    
-                    // Финальное число
-                    let finalNum = Math.floor(Math.random() * 10) + 1;
-                    display.innerText = finalNum;
-                    
-                    let isEven = finalNum % 2 === 0;
-                    
-                    if ((choice === 'even' && isEven) || (choice === 'odd' && !isEven)) {
-                        // Победа
-                        let winAmount = betAmount * 2;
-                        state.balance += winAmount;
-                        display.style.color = "#00ff00";
-                        resultText.innerText = `🎉 ПОБЕДА! Вы выиграли ${winAmount.toLocaleString('ru-RU')} ₽`;
-                        resultText.style.color = "#00ff00";
-                        showToast(`🎉 Вы выиграли ${winAmount.toLocaleString('ru-RU')} ₽!`);
-                    } else {
-                        // Проигрыш
-                        display.style.color = "#dc3545";
-                        resultText.innerText = `😢 Проигрыш. Выпало ${finalNum}`;
-                        resultText.style.color = "#dc3545";
-                    }
-                    
-                    state.maxBalance = Math.max(state.maxBalance, state.balance);
-                    updateUI();
-                }
-            }, 100);
-        }
-
         // Обработчики кликов
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
 
-            if (target.id === 'btn-casino') { getEl('casino-screen').style.display = 'flex'; }
+            if (target.id === 'btn-casino') { openCasino(); }
             if (target.id === 'btn-go-top') { window.location.href = 'leaderboard.html'; }
             
             if (target.id === 'btn-open-profile') {
@@ -794,7 +868,7 @@
                 getEl('profile-screen').style.display = 'none';
             }
 
-            // ГЕНЕРАЦИЯ НОМЕРОВ (Теперь через кнопки магазинов)
+            // ГЕНЕРАЦИЯ НОМЕРОВ
             if (target.id === 'btn-market' || target.id === 'btn-shop' || target.id === 'btn-jewelry') {
                 let type = target.id === 'btn-market' ? 1 : target.id === 'btn-shop' ? 5 : 20;
                 let cost = type * 1000;
@@ -894,6 +968,11 @@
             }
             if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
             if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
+            
+            // Обновление шанса при вводе суммы
+            if (e.target.id === 'casino-target-price') {
+                calculateChance();
+            }
         });
 
         if (state.isDarkTheme) document.body.classList.add('dark-theme');
