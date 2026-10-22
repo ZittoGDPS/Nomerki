@@ -5,13 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Подключаем Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
+            authDomain: "nomerki-gam3.firebaseapp.com",
+            databaseURL: "https://nomerki-gam3-default-rtdb.firebaseio.com",
+            projectId: "nomerki-gam3",
+            storageBucket: "nomerki-gam3.firebasestorage.app",
+            messagingSenderId: "582885790988",
+            appId: "1:582885790988:web:ef8965c63a38da68d82529",
+            measurementId: "G-8EGEPGFF4H"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // Делаем функции доступными для основного скрипта
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbOnValue = onValue;
+        window.db = db;
+    </script>
+
     <style>
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
+        /* Стили для экрана регистрации */
+        #register-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 99999999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
+        }
+        #register-screen h1 { color: #0088cc; font-size: 32px; margin-bottom: 10px; }
+        #register-screen p { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; }
+        .btn-register {
+            background: #0088cc; color: white; border: none; padding: 15px 40px;
+            border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: 0.2s;
+        }
+        .btn-register:active { transform: scale(0.95); }
+        
+        /* Скрываем игру, пока не зарегистрировались */
+        #game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; }
+
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; width: 50%; }
+        #user-name-display { font-size: 12px; color: #ffcc00; font-weight: bold; margin-bottom: 2px; }
         #lvl-text { font-size: 14px; color: #00ff00; font-weight: bold; }
         #pts-text { font-size: 11px; color: #aaa; margin-bottom: 4px; }
         #xp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
@@ -83,36 +130,47 @@
 </head>
 <body>
 
-    <div id="top-bar">
-        <div id="profile-box">
-            <div id="lvl-text">Уровень: 1</div>
-            <div id="pts-text">Поинты: 0 / 100</div>
-            <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
-            <div id="balance-display">0 ₽</div>
-        </div>
-        <div class="top-btns">
-            <div id="boost-indicator">⚡ x1.5 (10с)</div>
-            <!-- Кнопка перехода в лидерборд -->
-            <button class="icon-btn" id="btn-go-top">🏆</button>
-            <button class="icon-btn" id="btn-open-bag">🎒<span id="bag-count">0</span></button>
-            <button class="icon-btn" id="btn-open-settings">⚙️</button>
-        </div>
+    <!-- ЭКРАН РЕГИСТРАЦИИ -->
+    <div id="register-screen">
+        <h1>Номерки 🚀</h1>
+        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть и синхронизировать прогресс с Telegram.</p>
+        <button class="btn-register" id="btn-start">Войти через Telegram</button>
     </div>
-    
-    <div id="main-screen">
-        <div id="custom-gen-result">
-            <div class="info-icon" id="btn-show-info">i</div>
+
+    <!-- САМА ИГРА -->
+    <div id="game-wrapper">
+        <div id="top-bar">
+            <div id="profile-box">
+                <div id="user-name-display">Загрузка...</div>
+                <div id="lvl-text">Уровень: 1</div>
+                <div id="pts-text">Поинты: 0 / 100</div>
+                <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
+                <div id="balance-display">0 ₽</div>
+            </div>
+            <div class="top-btns">
+                <div id="boost-indicator">⚡ x1.5 (10с)</div>
+                <button class="icon-btn" id="btn-go-top">🏆</button>
+                <button class="icon-btn" id="btn-open-bag">🎒<span id="bag-count">0</span></button>
+                <button class="icon-btn" id="btn-open-settings">⚙️</button>
+            </div>
         </div>
-    </div>
-    
-    <div id="bottom-action-area">
-        <button id="custom-gen-btn">Сгенерировать номер</button>
-        <div id="action-btns-wrapper">
-            <button class="btn-sell" id="btn-sell-now">Продать</button>
-            <button class="btn-keep" id="btn-keep">Оставить</button>
+        
+        <div id="main-screen">
+            <div id="custom-gen-result">
+                <div class="info-icon" id="btn-show-info">i</div>
+            </div>
+        </div>
+        
+        <div id="bottom-action-area">
+            <button id="custom-gen-btn">Сгенерировать номер</button>
+            <div id="action-btns-wrapper">
+                <button class="btn-sell" id="btn-sell-now">Продать</button>
+                <button class="btn-keep" id="btn-keep">Оставить</button>
+            </div>
         </div>
     </div>
 
+    <!-- Рюкзак -->
     <div id="inventory-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">🎒 Мой Рюкзак</span>
@@ -126,6 +184,7 @@
         <div id="inv-list"></div>
     </div>
 
+    <!-- Настройки -->
     <div id="settings-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">⚙️ Настройки</span>
@@ -156,10 +215,10 @@
         </div>
     </div>
 
+    <!-- Модальное окно инфо -->
     <div id="info-modal">
         <div id="info-content">
             <h3>Шансы и Награды</h3>
-            <p style="font-size: 14px; text-align: center; color: var(--text-sub);">Каждый уровень повышает шанс выпадения редкого номера.</p>
             <h4 style="color: #0088cc; margin-bottom: 5px;">Опыт за номера:</h4>
             <ul>
                 <li><b>Обычный:</b> 5 XP</li>
@@ -182,9 +241,18 @@
         </div>
     </div>
 
+    <!-- СКРИПТ -->
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
+
+        // Данные пользователя
+        let myName = "Игрок";
+        let myId = "guest_" + Math.floor(Math.random() * 10000);
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            myName = tg.initDataUnsafe.user.first_name || "Игрок";
+            myId = tg.initDataUnsafe.user.id.toString();
+        }
 
         let state = {
             balance: parseInt(localStorage.getItem('blum_balance')) || 0,
@@ -199,6 +267,7 @@
             currentGen: null
         };
 
+        // Функция сохранения (вызывается при каждом изменении)
         function saveData() {
             localStorage.setItem('blum_balance', state.balance);
             localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
@@ -208,6 +277,17 @@
             localStorage.setItem('blum_use_warning', state.useSellWarning);
             localStorage.setItem('blum_warn_threshold', state.warnThreshold);
             localStorage.setItem('blum_boost_end', state.boostEndTime);
+
+            // Синхронизация с Firebase
+            if (window.db && window.fbSet && window.fbRef) {
+                window.fbSet(window.fbRef(window.db, 'players/' + myId), {
+                    name: myName,
+                    balance: state.balance,
+                    level: state.level,
+                    points: state.points,
+                    lastSeen: Date.now()
+                });
+            }
         }
 
         const getEl = (id) => document.getElementById(id);
@@ -329,14 +409,32 @@
             });
         }
 
+        // РЕГИСТРАЦИЯ (Кнопка Войти)
+        document.getElementById('btn-start').addEventListener('click', () => {
+            document.getElementById('register-screen').style.display = 'none';
+            document.getElementById('game-wrapper').style.display = 'flex';
+            document.getElementById('user-name-display').innerText = myName;
+
+            // Синхронизация при входе
+            if (window.db && window.fbOnValue && window.fbRef) {
+                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        state.balance = data.balance || 0;
+                        state.level = data.level || 1;
+                        state.points = data.points || 0;
+                        updateUI();
+                    }
+                });
+            }
+        });
+
+        // ОБРАБОТЧИКИ КЛИКОВ
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
 
-            if (target.id === 'btn-go-top') {
-                // Переход на страницу лидерборда
-                window.location.href = 'leaderboard.html';
-            }
+            if (target.id === 'btn-go-top') { window.location.href = 'leaderboard.html'; }
 
             if (target.id === 'custom-gen-btn') {
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
