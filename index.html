@@ -1,4 +1,4 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -12,42 +12,37 @@ DOCTYPE html>
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
-        #profile-box { display: flex; flex-direction: column; }
+        #profile-box { display: flex; flex-direction: column; width: 50%; }
         #lvl-text { font-size: 14px; color: #00ff00; font-weight: bold; }
-        #pts-text { font-size: 11px; color: #aaa; }
-        #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; margin-top: 2px; }
-        .top-btns { display: flex; gap: 8px; }
-        .icon-btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 16px; }
-
-        /* Контейнер для карточки */
-        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
+        #pts-text { font-size: 11px; color: #aaa; margin-bottom: 4px; }
         
-        /* Карточка с номером */
-        #custom-gen-result { display: none; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #xp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+        #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
+        
+        #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
+
+        .top-btns { display: flex; gap: 5px; align-items: center; }
+        .icon-btn { border: none; padding: 8px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        
+        #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
+        #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .force-show { display: block !important; }
+        
+        .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
         .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; }
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         
-        /* Жестко фиксируем зону с кнопками внизу */
-        #bottom-action-area { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            padding: 15px; 
-            box-sizing: border-box; 
-            background: var(--bg-color); 
-            z-index: 100; 
-        }
-        
+        #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; }
         #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
-        
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Цвета редкости */
         .rarity-common { color: var(--text-main) !important; }
         .rarity-bronze { color: #cd7f32 !important; text-shadow: 0 0 5px rgba(205, 127, 50, 0.3); }
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
@@ -80,6 +75,24 @@ DOCTYPE html>
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
+        /* Стили для Лидерборда */
+        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
+        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
+        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
+        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
+        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
+        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
+        .leader-name { flex: 1; font-weight: bold; margin-left: 10px; }
+        .leader-balance { font-weight: bold; color: #28a745; }
+
+        /* Модальное окно информации */
+        #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999999; display: none; justify-content: center; align-items: center; }
+        #info-content { background: var(--card-bg); padding: 20px; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; color: var(--text-main); }
+        #info-content h3 { margin-top: 0; text-align: center; color: #0088cc; }
+        #info-content ul { padding-left: 20px; font-size: 14px; line-height: 1.6; }
+        #info-content li { margin-bottom: 5px; }
+        
         #toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1e1e1e; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 99999999; text-align: center; width: 85%; box-sizing: border-box; animation: slideDown 0.4s forwards; }
         @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
     </style>
@@ -90,19 +103,23 @@ DOCTYPE html>
         <div id="profile-box">
             <div id="lvl-text">Уровень: 1</div>
             <div id="pts-text">Поинты: 0 / 100</div>
+            <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
             <div id="balance-display">0 ₽</div>
         </div>
         <div class="top-btns">
-            <button class="icon-btn" id="btn-open-bag">🎒 <span id="bag-count">0</span></button>
+            <div id="boost-indicator">⚡ x1.5 (10с)</div>
+            <button class="icon-btn" id="btn-open-top">🏆</button>
+            <button class="icon-btn" id="btn-open-bag">🎒<span id="bag-count">0</span></button>
             <button class="icon-btn" id="btn-open-settings">⚙️</button>
         </div>
     </div>
     
     <div id="main-screen">
-        <div id="custom-gen-result"></div>
+        <div id="custom-gen-result">
+            <div class="info-icon" id="btn-show-info">i</div>
+        </div>
     </div>
     
-    <!-- Зона кнопок внизу -->
     <div id="bottom-action-area">
         <button id="custom-gen-btn">Сгенерировать номер</button>
         <div id="action-btns-wrapper">
@@ -111,6 +128,15 @@ DOCTYPE html>
         </div>
     </div>
     
+    <!-- ЭКРАН ЛИДЕРБОРДА -->
+    <div id="leaderboard-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">🏆 Лидеры по балансу</span>
+            <button class="btn-close" id="btn-close-top">Закрыть</button>
+        </div>
+        <div id="leaderboard-list"></div>
+    </div>
+
     <div id="inventory-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">🎒 Мой Рюкзак</span>
@@ -154,6 +180,36 @@ DOCTYPE html>
         </div>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО ИНФОРМАЦИИ -->
+    <div id="info-modal">
+        <div id="info-content">
+            <h3>Шансы и Награды</h3>
+            <p style="font-size: 14px; text-align: center; color: var(--text-sub);">Каждый уровень повышает шанс выпадения редкого номера.</p>
+            
+            <h4 style="color: #0088cc; margin-bottom: 5px;">Опыт за номера:</h4>
+            <ul>
+                <li><b>Обычный:</b> 5 XP</li>
+                <li><b>Красивое окончание:</b> 10 XP</li>
+                <li><b>Бронзовый:</b> 25 XP</li>
+                <li><b>Удачный (Бонус ур.):</b> 30 XP</li>
+                <li><b>Серебряный:</b> 50 XP</li>
+                <li><b>Зеркальный / Последовательный:</b> 75 XP</li>
+                <li><b>Золотой:</b> 150 XP</li>
+                <li><b>Бриллиантовый:</b> 1000 XP</li>
+            </ul>
+
+            <h4 style="color: #ff007f; margin-bottom: 5px;">Шансы на Бусты (при повышении уровня):</h4>
+            <ul>
+                <li><b>x1.5 (Базовый):</b> 50%</li>
+                <li><b>x2 (Ускорение):</b> 25%</li>
+                <li><b>x3 (Мега):</b> 15% <i>(только с 20 уровня)</i></li>
+                <li><b>x5 (Легендарный):</b> 10% <i>(только с 50 уровня)</i></li>
+            </ul>
+            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">Буст действует 30 секунд.</p>
+            <button class="btn-sell" style="width: 100%; margin-top: 15px;" onclick="document.getElementById('info-modal').style.display='none'">Понятно</button>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
@@ -166,6 +222,25 @@ DOCTYPE html>
         let useSellWarning = localStorage.getItem('blum_use_warning') === 'true';
         let warnThreshold = parseInt(localStorage.getItem('blum_warn_threshold')) || 100000;
 
+        let boostMultiplier = 1;
+        let boostEndTime = parseInt(localStorage.getItem('blum_boost_end')) || 0;
+
+        // База "ботов" для лидерборда
+        let bots = JSON.parse(localStorage.getItem('blum_bots'));
+        if (!bots) {
+            // Генерируем ботов при первом запуске (баланс от 10к до 5кк)
+            bots = [
+                { name: "Номерной_Магнат", balance: 4520000 },
+                { name: "Иван_Номера", balance: 3120500 },
+                { name: "Сотовый_Король", balance: 1840000 },
+                { name: "Аферист", balance: 950000 },
+                { name: "СимКарта", balance: 620000 },
+                { name: "Оператор", balance: 250000 },
+                { name: "Новичок", balance: 15000 }
+            ];
+            localStorage.setItem('blum_bots', JSON.stringify(bots));
+        }
+
         function saveData() {
             localStorage.setItem('blum_balance', balance);
             localStorage.setItem('blum_inventory', JSON.stringify(inventory));
@@ -174,6 +249,7 @@ DOCTYPE html>
             localStorage.setItem('blum_level', level);
             localStorage.setItem('blum_use_warning', useSellWarning);
             localStorage.setItem('blum_warn_threshold', warnThreshold);
+            localStorage.setItem('blum_boost_end', boostEndTime);
         }
 
         const btnGen = document.getElementById('custom-gen-btn');
@@ -181,6 +257,7 @@ DOCTYPE html>
         const balanceDisplay = document.getElementById('balance-display');
         const lvlText = document.getElementById('lvl-text');
         const ptsText = document.getElementById('pts-text');
+        const xpBarFill = document.getElementById('xp-bar-fill');
         const bagCount = document.getElementById('bag-count');
         const invScreen = document.getElementById('inventory-screen');
         const invList = document.getElementById('inv-list');
@@ -193,6 +270,11 @@ DOCTYPE html>
         const toggleTheme = document.getElementById('toggle-theme');
         const toggleWarning = document.getElementById('toggle-warning');
         const inputWarnThreshold = document.getElementById('input-warn-threshold');
+        const boostIndicator = document.getElementById('boost-indicator');
+        
+        // Элементы лидерборда
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const leaderboardList = document.getElementById('leaderboard-list');
 
         function getPointsForNextLevel(lvl) { return lvl * 100; }
         function getRarityClass(category) {
@@ -202,6 +284,16 @@ DOCTYPE html>
             if (category.includes("БРОНЗОВЫЙ")) return "rarity-bronze";
             if (category.includes("УДАЧНЫЙ")) return "rarity-lucky";
             return "rarity-common";
+        }
+        function getXPForRarity(category) {
+            if (category.includes("БРИЛЛИАНТОВЫЙ")) return 1000;
+            if (category.includes("ЗОЛОТОЙ")) return 150;
+            if (category.includes("СЕРЕБРЯНЫЙ")) return 50;
+            if (category.includes("ЗЕРКАЛЬНЫЙ") || category.includes("ПОСЛЕДОВАТЕЛЬНЫЙ")) return 75;
+            if (category.includes("БРОНЗОВЫЙ")) return 25;
+            if (category.includes("УДАЧНЫЙ")) return 30;
+            if (category.includes("КРАСИВОЕ")) return 10;
+            return 5;
         }
 
         function calculatePrice(fullNum) {
@@ -231,7 +323,33 @@ DOCTYPE html>
             let toast = document.createElement('div');
             toast.id = 'toast-notification'; toast.innerHTML = text;
             document.body.appendChild(toast);
-            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
+        }
+
+        function checkBoost() {
+            let now = Date.now();
+            if (now < boostEndTime) {
+                let timeLeft = Math.ceil((boostEndTime - now) / 1000);
+                boostIndicator.style.display = 'block';
+                boostIndicator.innerText = `⚡ x${boostMultiplier} (${timeLeft}с)`;
+            } else {
+                boostIndicator.style.display = 'none';
+                boostMultiplier = 1;
+            }
+        }
+        setInterval(checkBoost, 1000);
+        checkBoost();
+
+        function giveBoost(newLevel) {
+            let roll = Math.random() * 100;
+            if (newLevel > 50 && roll < 10) boostMultiplier = 5; 
+            else if (newLevel > 20 && roll < 25) boostMultiplier = 3;
+            else if (roll < 50) boostMultiplier = 2;
+            else boostMultiplier = 1.5;
+            
+            boostEndTime = Date.now() + 30000; 
+            showToast(`🚀 БУСТ! Множитель x${boostMultiplier} на 30 секунд!`);
+            checkBoost();
         }
 
         function updateUI() {
@@ -241,59 +359,120 @@ DOCTYPE html>
             bagCount.innerText = inventory.length;
             lvlText.innerText = `Уровень: ${level}`;
             let ptsNeeded = getPointsForNextLevel(level);
-            if (points >= ptsNeeded && level < 100) {
+            
+            while (points >= ptsNeeded && level < 100) {
                 points -= ptsNeeded; level++;
-                showToast(`🎉 Новый уровень: ${level}!`);
-                updateUI(); return;
+                giveBoost(level);
+                ptsNeeded = getPointsForNextLevel(level);
             }
-            ptsText.innerText = level >= 100 ? `Максимальный уровень!` : `Поинты: ${points} / ${ptsNeeded}`;
+            
+            if (level >= 100) {
+                ptsText.innerText = `Максимальный уровень!`;
+                xpBarFill.style.width = '100%';
+            } else {
+                ptsText.innerText = `Поинты: ${points} / ${ptsNeeded}`;
+                let percent = (points / ptsNeeded) * 100;
+                xpBarFill.style.width = `${percent}%`;
+            }
+            
             btnSellAll.disabled = inventory.length === 0;
             btnSellAll.innerText = inventory.length === 0 ? "Рюкзак пуст" : "Продать все номера (" + inventory.length + ")";
             saveData();
         }
 
-        // Теперь просто переключаем кнопки, карточку не трогаем
         function resetToGenerate() {
             btnGen.style.display = 'block';
             actionBtnsWrapper.style.display = 'none';
         }
 
-        btnGen.onclick = function() {
-            let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-            let finalPhone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
-            let evaluation = calculatePrice(fullNum);
-            let currentGenerated = { phone: finalPhone, price: evaluation.price, category: evaluation.category };
-            let colorClass = getRarityClass(evaluation.category);
+        // ЛОГИКА ЛИДЕРБОРДА
+        function renderLeaderboard() {
+            // Собираем всех: боты + игрок
+            let allPlayers = [...bots];
+            allPlayers.push({ name: "Вы", balance: balance, isYou: true });
 
-            resultDiv.innerHTML = `
-                <div class="phone-number ${colorClass}">${finalPhone}</div>
-                <div class="price-tag">${evaluation.price.toLocaleString('ru-RU')} ₽</div>
-                <div class="category-text">${evaluation.category}</div>
-            `;
-            resultDiv.classList.add('force-show');
-            
-            btnGen.style.display = 'none';
-            actionBtnsWrapper.style.display = 'flex';
+            // Сортируем по убыванию баланса
+            allPlayers.sort((a, b) => b.balance - a.balance);
 
-            let earnedXP = Math.floor(currentGenerated.price / 1000) + 5;
-            points += earnedXP;
-            updateUI();
+            leaderboardList.innerHTML = '';
+            allPlayers.forEach((player, index) => {
+                let rank = index + 1;
+                let rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+                let youClass = player.isYou ? 'you' : '';
+                
+                let div = document.createElement('div');
+                div.className = `leader-item ${youClass}`;
+                div.innerHTML = `
+                    <div class="leader-rank ${rankClass}">#${rank}</div>
+                    <div class="leader-name">${player.name}</div>
+                    <div class="leader-balance">${player.balance.toLocaleString('ru-RU')} ₽</div>
+                `;
+                leaderboardList.appendChild(div);
+            });
+        }
 
-            if (currentGenerated.price >= 100000) {
-                showToast(`🔥 Дорогой номер!\n${currentGenerated.phone}\n${currentGenerated.price.toLocaleString('ru-RU')} ₽ (+${earnedXP} XP)`);
-            }
-
-            btnSellNow.onclick = function() {
-                if (useSellWarning && currentGenerated.price >= warnThreshold) {
-                    if (!confirm(`Продать за ${currentGenerated.price.toLocaleString('ru-RU')} ₽?`)) return;
-                }
-                balance += currentGenerated.price; updateUI(); resetToGenerate();
-            };
-
-            btnKeep.onclick = function() {
-                inventory.push(currentGenerated); updateUI(); resetToGenerate();
-            };
+        // Навигация
+        document.getElementById('btn-open-top').onclick = function() { 
+            leaderboardScreen.style.display = 'flex'; 
+            renderLeaderboard();
         };
+        document.getElementById('btn-close-top').onclick = function() { leaderboardScreen.style.display = 'none'; };
+
+        document.getElementById('btn-show-info').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('info-modal').style.display = 'flex';
+        });
+
+        btnGen.addEventListener('click', function(e) {
+            e.preventDefault();
+            try {
+                let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+                let finalPhone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
+                let evaluation = calculatePrice(fullNum);
+                let currentGenerated = { phone: finalPhone, price: evaluation.price, category: evaluation.category };
+                let colorClass = getRarityClass(evaluation.category);
+
+                resultDiv.innerHTML = `
+                    <div class="info-icon" id="btn-show-info">i</div>
+                    <div class="phone-number ${colorClass}">${finalPhone}</div>
+                    <div class="price-tag">${evaluation.price.toLocaleString('ru-RU')} ₽</div>
+                    <div class="category-text">${evaluation.category}</div>
+                `;
+                
+                document.getElementById('btn-show-info').addEventListener('click', function(ev) {
+                    ev.stopPropagation();
+                    document.getElementById('info-modal').style.display = 'flex';
+                });
+
+                resultDiv.classList.add('force-show');
+                btnGen.style.display = 'none';
+                actionBtnsWrapper.style.display = 'flex';
+
+                let baseXP = getXPForRarity(evaluation.category);
+                let earnedXP = Math.floor(baseXP * boostMultiplier);
+                points += earnedXP;
+                updateUI();
+
+                if (currentGenerated.price >= 100000) {
+                    showToast(`🔥 Дорогой номер!\n${currentGenerated.phone}\n${currentGenerated.price.toLocaleString('ru-RU')} ₽\n(+${earnedXP} XP)`);
+                } else {
+                    showToast(`Получено +${earnedXP} XP`);
+                }
+
+                btnSellNow.onclick = function() {
+                    if (useSellWarning && currentGenerated.price >= warnThreshold) {
+                        if (!confirm(`Продать за ${currentGenerated.price.toLocaleString('ru-RU')} ₽?`)) return;
+                    }
+                    balance += currentGenerated.price; updateUI(); resetToGenerate();
+                };
+
+                btnKeep.onclick = function() {
+                    inventory.push(currentGenerated); updateUI(); resetToGenerate();
+                };
+            } catch (err) {
+                console.error("Ошибка при генерации:", err);
+            }
+        });
 
         function renderInventory() {
             invList.innerHTML = '';
@@ -357,4 +536,4 @@ DOCTYPE html>
         applyTheme(); updateUI();
     </script>
 </body>
-</html
+</html>
