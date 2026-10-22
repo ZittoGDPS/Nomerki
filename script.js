@@ -1,89 +1,80 @@
-const tg = window.Telegram ? window.Telegram.WebApp : null;
+// --- 1. ИНИЦИАЛИЗАЦИЯ FIREBASE ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
 
-// --- 1. РЕГИСТРАЦИЯ ПО ТГ ---
-function registerUser() {
-    if (tg) {
-        tg.ready();
-        tg.expand();
-        
-        // Получаем данные пользователя из ТГ
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            let user = tg.initDataUnsafe.user;
-            let userName = user.first_name || "Игрок";
-            let userId = user.id;
-            
-            // Отображаем данные
-            document.getElementById('user-info').style.display = 'flex';
-            document.getElementById('user-name').innerText = userName;
-            document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
-            document.getElementById('loading-status').style.display = 'none';
-            
-            // Сохраняем ID в память (для синхронизации)
-            localStorage.setItem('tg_user_id', userId);
-            localStorage.setItem('tg_user_name', userName);
-            
-            return userId;
-        } else {
-            // Если открыто просто в браузере (не через ТГ)
-            document.getElementById('user-info').style.display = 'flex';
-            document.getElementById('user-name').innerText = "Гость (Браузер)";
-            document.getElementById('loading-status').style.display = 'none';
-            return null;
-        }
-    } else {
-        document.getElementById('loading-status').innerText = "Ошибка Telegram API";
-        return null;
+const firebaseConfig = {
+    apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
+    authDomain: "nomerki-gam3.firebaseapp.com",
+    databaseURL: "https://nomerki-gam3-default-rtdb.firebaseio.com",
+    projectId: "nomerki-gam3",
+    storageBucket: "nomerki-gam3.firebasestorage.app",
+    messagingSenderId: "582885790988",
+    appId: "1:582885790988:web:ef8965c63a38da68d82529",
+    measurementId: "G-8EGEPGFF4H"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// --- 2. РЕГИСТРАЦИЯ В TG ---
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+let myName = "Гость";
+let myId = "guest_" + Math.floor(Math.random() * 100000);
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        myName = tg.initDataUnsafe.user.first_name || "Игрок";
+        myId = tg.initDataUnsafe.user.id.toString();
+        document.getElementById('user-name').innerText = myName;
     }
 }
 
-// --- 2. СИНХРОНИЗАЦИЯ ДАННЫХ (Облако ТГ) ---
-let state = { balance: 0, inventory: [], level: 1, points: 0, isDark: false };
-let userId = registerUser();
+// Состояние игры
+let state = {
+    balance: 0, inventory: [], level: 1, points: 0, boostMultiplier: 1,
+    boostEndTime: 0, currentGen: null
+};
 
-function syncFromCloud() {
-    if (!tg || !tg.CloudStorage) return false;
-    
-    tg.CloudStorage.getItem("player_state", (err, data) => {
-        if (data && !err) {
-            try {
-                let parsed = JSON.parse(data);
-                state.balance = parsed.balance || 0;
-                state.inventory = parsed.inventory || [];
-                state.level = parsed.level || 1;
-                state.points = parsed.points || 0;
-                
-                updateUI();
-                console.log("Данные загружены из облака ТГ");
-            } catch (e) { console.log("Ошибка чтения"); }
+// --- 3. СИНХРОНИЗАЦИЯ С FIREBASE ---
+function syncFirebase() {
+    // Сохраняем имя в базу при входе
+    set(ref(db, 'players/' + myId + '/name'), myName);
+
+    // Слушаем изменения баланса (если играем с другого устройства)
+    onValue(ref(db, 'players/' + myId), (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            if (data.balance !== undefined) state.balance = data.balance;
+            if (data.level !== undefined) state.level = data.level;
+            if (data.points !== undefined) state.points = data.points;
+            updateUI();
         }
     });
-    return true;
 }
 
-function saveToCloud() {
-    if (!tg || !tg.CloudStorage) return;
-    
-    let dataToSave = {
+// Обновляем базу данных при каждом изменении в игре
+function saveToFirebase() {
+    set(ref(db, 'players/' + myId), {
+        name: myName,
         balance: state.balance,
-        inventory: state.inventory,
         level: state.level,
-        points: state.points
-    };
-    tg.CloudStorage.setItem("player_state", JSON.stringify(dataToSave));
+        points: state.points,
+        lastSeen: Date.now()
+    });
 }
 
-// --- 3. ЛОГИКА ИГРЫ (упрощенная) ---
+// --- 4. ОСТАЛЬНАЯ ЛОГИКА ИГРЫ ---
 function updateUI() {
     document.getElementById('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
     document.getElementById('lvl-text').innerText = `Уровень: ${state.level}`;
     document.getElementById('pts-text').innerText = `Поинты: ${state.points} / ${state.level * 100}`;
-    
-    // Сохраняем в облако при каждом обновлении
-    saveToCloud();
+    saveToFirebase(); // Сохраняем в облако при каждом обновлении
 }
 
-// Пример кнопки генерации (чтобы проверить работу)
-document.getElementById('custom-gen-btn').onclick = () => {
+// Кнопка генерации
+document.getElementById('custom-gen-btn').addEventListener('click', () => {
     let price = Math.floor(Math.random() * 10000) + 150;
     state.balance += price;
     
@@ -94,22 +85,12 @@ document.getElementById('custom-gen-btn').onclick = () => {
     `;
     document.getElementById('custom-gen-result').classList.add('force-show');
     updateUI();
-};
+});
 
-// Кнопка перехода в лидерборд
-document.getElementById('btn-go-top').onclick = () => {
+// Переход в лидерборд
+document.getElementById('btn-go-top').addEventListener('click', () => {
     window.location.href = 'leaderboard.html';
-};
+});
 
-// Запуск синхронизации при загрузке
-window.onload = () => {
-    // Сначала пробуем облако
-    let cloudLoaded = syncFromCloud();
-    
-    // Если облако недоступно (например, тест в браузере), грузим локально
-    if (!cloudLoaded) {
-        state.balance = parseInt(localStorage.getItem('blum_balance')) || 0;
-        state.level = parseInt(localStorage.getItem('blum_level')) || 1;
-        updateUI();
-    }
-};
+// Запуск
+syncFirebase();
