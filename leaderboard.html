@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Лидеры</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
+        body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
+
+        #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
+        .icon-btn { border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #dc3545; font-size: 14px; }
+
+        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
+        
+        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
+        
+        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
+        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
+        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
+        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
+        
+        .leader-name { flex: 1; font-weight: bold; margin-left: 10px; }
+        .leader-balance { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <span style="font-weight:bold; font-size:18px;">🏆 Лидеры по балансу</span>
+        <button class="icon-btn" onclick="window.location.href='index.html'">Назад в игру</button>
+    </div>
+    
+    <div id="leaderboard-list"></div>
+
+    <script>
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) { tg.ready(); tg.expand(); }
+
+        // 1. Загружаем реальный баланс игрока из памяти игры
+        let myBalance = parseInt(localStorage.getItem('blum_balance')) || 0;
+        let myName = "Вы";
+        
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            myName = tg.initDataUnsafe.user.first_name || "Вы";
+        }
+
+        // 2. Создаем список игроков (симуляция реальных + вы)
+        let allPlayers = [
+            { name: "Номерной_Магнат", balance: 4520000 },
+            { name: "Иван_Номера", balance: 3120500 },
+            { name: "Сотовый_Король", balance: 1840000 },
+            { name: "Аферист", balance: 950000 },
+            { name: "СимКарта", balance: 620000 },
+            { name: "Оператор", balance: 250000 },
+            { name: "Новичок", balance: 15000 },
+            { name: myName, balance: myBalance, isYou: true } // Добавляем вас с реальным балансом
+        ];
+
+        // 3. Сортируем по убыванию баланса
+        allPlayers.sort((a, b) => b.balance - a.balance);
+
+        // 4. Отрисовываем
+        let container = document.getElementById('leaderboard-list');
+        allPlayers.forEach((player, index) => {
+            let rank = index + 1;
+            let rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+            let youClass = player.isYou ? 'you' : '';
+            
+            let div = document.createElement('div');
+            div.className = `leader-item ${youClass}`;
+            div.innerHTML = `
+                <div class="leader-rank ${rankClass}">#${rank}</div>
+                <div class="leader-name">${player.name}</div>
+                <div class="leader-balance">${player.balance.toLocaleString('ru-RU')} ₽</div>
+            `;
+            container.appendChild(div);
+        });
+
+        // Применяем тему
+        let isDarkTheme = localStorage.getItem('blum_theme') === 'dark';
+        if (isDarkTheme) document.body.classList.add('dark-theme');
+    </script>
+</body>
+</html>
