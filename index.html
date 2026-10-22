@@ -32,23 +32,7 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Экран регистрации */
-        #register-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 99999999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px; box-sizing: border-box;
-        }
-        #register-screen h1 { color: #0088cc; font-size: 32px; margin-bottom: 10px; }
-        #register-screen p { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; }
-        .btn-register {
-            background: #0088cc; color: white; border: none; padding: 15px 40px;
-            border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,136,204,0.3); transition: 0.2s;
-        }
-        .btn-register:active { transform: scale(0.95); }
-        
-        #game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; }
+        #game-wrapper { display: flex; flex-direction: column; width: 100%; height: 100%; }
 
         /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
@@ -194,14 +178,7 @@
 </head>
 <body>
 
-    <!-- ЭКРАН РЕГИСТРАЦИИ -->
-    <div id="register-screen">
-        <h1>Номерки 🚀</h1>
-        <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть.</p>
-        <button class="btn-register" id="btn-start">Войти в игру</button>
-    </div>
-
-    <!-- САМА ИГРА -->
+    <!-- САМА ИГРА (СРАЗУ ОТКРЫВАЕТСЯ) -->
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
@@ -251,9 +228,7 @@
         </div>
         <div class="casino-body">
             <h3 style="margin-top:0; color:#aaa;">1. Выберите номер из рюкзака</h3>
-            <div class="casino-inventory-list" id="casino-inventory-list">
-                <!-- Сюда будут загружаться номера -->
-            </div>
+            <div class="casino-inventory-list" id="casino-inventory-list"></div>
 
             <div class="casino-controls" id="casino-controls" style="display: none;">
                 <h3 style="margin: 0; color:#aaa; text-align:center;">2. Выберите желаемую сумму</h3>
@@ -291,9 +266,6 @@
                 <div class="profile-row"><span>Всего продано:</span> <span id="stat-sold">0</span></div>
                 <div class="profile-row"><span>Текущий баланс:</span> <span id="stat-current-balance">0 ₽</span></div>
                 <div class="profile-row"><span>Максимальный баланс:</span> <span id="stat-max-balance">0 ₽</span></div>
-                <div class="profile-row" style="color: #888; font-size: 12px; margin-top: 10px; border-top: 1px solid #444; padding-top: 10px;">
-                    <span>Ваш ID для входа:</span> <span id="stat-user-id" style="user-select: all;">...</span>
-                </div>
             </div>
         </div>
     </div>
@@ -319,6 +291,17 @@
             <button class="btn-close" id="btn-close-settings">Закрыть</button>
         </div>
         <div id="settings-content">
+            
+            <!-- Блок синхронизации по Email -->
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                <span class="setting-text">Синхронизация по Email</span>
+                <span style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">Введите Email, чтобы сохранить или загрузить прогресс.</span>
+                <div style="display:flex; gap:10px; width:100%;">
+                    <input type="email" id="sync-email-input" class="warn-input" placeholder="your@mail.com" style="margin:0;">
+                    <button id="btn-sync-email" style="background:#0088cc; color:white; border:none; padding:0 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Войти</button>
+                </div>
+            </div>
+
             <div class="setting-item">
                 <span class="setting-text">Тёмная тема</span>
                 <label class="switch"><input type="checkbox" id="toggle-theme"><span class="slider"></span></label>
@@ -346,16 +329,16 @@
         if (tg) { tg.ready(); tg.expand(); }
 
         let myName = "Игрок";
-        let myId;
+        let myId = null;
         let isBrowser = false;
 
-        // ЛОГИКА ОПРЕДЕЛЕНИЯ ID (синхронизация ТГ и Браузера)
+        // 1. ПЕРВИЧНАЯ ИНИЦИАЛИЗАЦИЯ ID
         const urlParams = new URLSearchParams(window.location.search);
         const urlUserId = urlParams.get('user_id');
 
         if (urlUserId) {
             myId = urlUserId;
-            myName = "Игрок (Браузер)";
+            myName = "Игрок (Ссылка)";
         } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
@@ -368,6 +351,13 @@
             }
             myId = savedBrowserId;
             myName = "Гость";
+        }
+
+        // Проверяем, входил ли он уже по Email
+        let savedEmailId = localStorage.getItem('blum_email_id');
+        if (savedEmailId) {
+            myId = savedEmailId;
+            myName = "Игрок (Email)";
         }
 
         const viewPlayerId = urlParams.get('player');
@@ -411,7 +401,7 @@
             localStorage.setItem('blum_operator', state.currentOperator);
             localStorage.setItem('blum_animation', state.isAnimationEnabled);
 
-            if (window.db && window.fbSet && window.fbRef) {
+            if (window.db && window.fbSet && window.fbRef && myId) {
                 window.fbSet(window.fbRef(window.db, 'players/' + myId), {
                     name: myName, balance: state.balance, level: state.level, points: state.points,
                     inventory: state.inventory, bestNumber: state.bestNumber,
@@ -548,7 +538,6 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
-            getEl('stat-user-id').innerText = myId;
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -612,7 +601,6 @@
             getEl('stat-sold').innerText = state.totalSold;
             getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
-            getEl('stat-user-id').innerText = myId;
         }
 
         function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP) {
@@ -819,45 +807,30 @@
             getEl('casino-screen').style.display = 'none';
         }
 
-        // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
-        let isRegistered = localStorage.getItem('blum_registered') === 'true';
-
-        if (isRegistered) {
-            document.getElementById('register-screen').style.display = 'none';
-            document.getElementById('game-wrapper').style.display = 'flex';
-            document.getElementById('user-name-display').innerText = myName;
+        // --- ЛОГИКА ВХОДА ПО EMAIL ---
+        document.getElementById('btn-sync-email').addEventListener('click', () => {
+            let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
             
-            if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
-                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        state.balance = data.balance || 0;
-                        state.level = data.level || 1;
-                        state.points = data.points || 0;
-                        state.inventory = data.inventory || [];
-                        state.bestNumber = data.bestNumber || null;
-                        state.totalGenerated = data.totalGenerated || 0;
-                        state.totalSold = data.totalSold || 0;
-                        state.maxBalance = data.maxBalance || 0;
-                        updateUI();
-                    }
-                });
+            if (!email || !email.includes('@')) {
+                showToast("❌ Введите корректный Email!");
+                return;
             }
-        }
 
-        document.getElementById('btn-start').addEventListener('click', () => {
-            // Теперь вход РАБОТАЕТ ВСЕГДА. Никаких проверок на браузер.
-            localStorage.setItem('blum_registered', 'true');
-            document.getElementById('register-screen').style.display = 'none';
-            document.getElementById('game-wrapper').style.display = 'flex';
-            document.getElementById('user-name-display').innerText = myName;
+            // Заменяем ID на Email
+            myId = "email_" + email;
+            myName = email.split('@')[0];
             
-            showToast("✅ Вы успешно зарегистрированы!");
+            localStorage.setItem('blum_email_id', myId);
+            localStorage.setItem('blum_user_name', myName);
 
+            showToast("🔄 Синхронизация...");
+
+            // Загружаем данные с новым ID
             if (window.db && window.fbOnValue && window.fbRef) {
                 window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
+                        // Если аккаунт найден — загружаем
                         state.balance = data.balance || 0;
                         state.level = data.level || 1;
                         state.points = data.points || 0;
@@ -866,11 +839,51 @@
                         state.totalGenerated = data.totalGenerated || 0;
                         state.totalSold = data.totalSold || 0;
                         state.maxBalance = data.maxBalance || 0;
+                        
+                        document.getElementById('user-name-display').innerText = myName;
+                        getEl('settings-screen').style.display = 'none';
                         updateUI();
+                        showToast("✅ Прогресс успешно загружен!");
+                    } else {
+                        // Если аккаунт не найден — создаем новый
+                        state.balance = 0;
+                        state.level = 1;
+                        state.points = 0;
+                        state.inventory = [];
+                        state.bestNumber = null;
+                        state.totalGenerated = 0;
+                        state.totalSold = 0;
+                        state.maxBalance = 0;
+                        
+                        document.getElementById('user-name-display').innerText = myName;
+                        getEl('settings-screen').style.display = 'none';
+                        updateUI();
+                        saveData(); // Сохраняем пустой аккаунт
+                        showToast("✨ Создан новый аккаунт!");
                     }
                 });
             }
         });
+
+        // Инициализация
+        document.getElementById('user-name-display').innerText = myName;
+
+        if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
+            window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    state.balance = data.balance || 0;
+                    state.level = data.level || 1;
+                    state.points = data.points || 0;
+                    state.inventory = data.inventory || [];
+                    state.bestNumber = data.bestNumber || null;
+                    state.totalGenerated = data.totalGenerated || 0;
+                    state.totalSold = data.totalSold || 0;
+                    state.maxBalance = data.maxBalance || 0;
+                    updateUI();
+                }
+            });
+        }
 
         // Обработчики кликов
         document.addEventListener('click', function(e) {
