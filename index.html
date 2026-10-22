@@ -82,6 +82,7 @@
         .gen-btn:active { transform: scale(0.95); }
         .gen-btn span { font-size: 10px; font-weight: normal; opacity: 0.8; }
         
+        /* Новые цвета для кнопок */
         #btn-gen-1 { background: #28a745; }
         #btn-gen-5 { background: #fd7e14; }
         #btn-gen-20 { background: #dc3545; }
@@ -92,7 +93,6 @@
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
-        /* Новые кнопки навигации */
         .nav-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 5px; }
         .nav-btn { background: #1e1e1e; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
         .nav-btn:active { background: #333; }
@@ -218,9 +218,9 @@
 
             <!-- Новые кнопки -->
             <div class="nav-buttons-row">
-                <button class="nav-btn" id="btn-market">1. Рынок</button>
-                <button class="nav-btn" id="btn-shop">2. Магазин</button>
-                <button class="nav-btn" id="btn-jewelry">3. Ювелирный</button>
+                <button class="nav-btn" id="btn-market">1. Рынок (1к)</button>
+                <button class="nav-btn" id="btn-shop">2. Магазин (5к)</button>
+                <button class="nav-btn" id="btn-jewelry">3. Ювелирный (20к)</button>
             </div>
 
         </div>
@@ -276,6 +276,10 @@
             <div class="setting-item">
                 <span class="setting-text">Тёмная тема</span>
                 <label class="switch"><input type="checkbox" id="toggle-theme"><span class="slider"></span></label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-text">Анимация генерации</span>
+                <label class="switch"><input type="checkbox" id="toggle-animation" checked><span class="slider"></span></label>
             </div>
             <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                 <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; align-items: center;">
@@ -368,7 +372,8 @@
             totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
             maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
             freeSpins: parseInt(localStorage.getItem('blum_free_spins')) || 10,
-            currentOperator: localStorage.getItem('blum_operator') || null
+            currentOperator: localStorage.getItem('blum_operator') || null,
+            isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false' // По умолчанию true
         };
 
         function saveData() {
@@ -386,6 +391,7 @@
             localStorage.setItem('blum_max_balance', state.maxBalance);
             localStorage.setItem('blum_free_spins', state.freeSpins);
             localStorage.setItem('blum_operator', state.currentOperator);
+            localStorage.setItem('blum_animation', state.isAnimationEnabled);
 
             if (window.db && window.fbSet && window.fbRef) {
                 window.fbSet(window.fbRef(window.db, 'players/' + myId), {
@@ -523,6 +529,7 @@
             }
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
+            getEl('toggle-animation').checked = state.isAnimationEnabled;
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -595,6 +602,31 @@
             btnRow.style.display = 'none';
             resDiv.classList.add('force-show');
             
+            // Если анимация ВЫКЛЮЧЕНА - показываем сразу
+            if (!state.isAnimationEnabled) {
+                resDiv.innerHTML = `
+                    <div class="info-icon" id="btn-show-info">i</div>
+                    <div class="phone-number ${rarityClass}">${targetPhone}</div>
+                    <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
+                    <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
+                `;
+                getEl('btn-show-info').onclick = () => { getEl('info-modal').style.display = 'flex'; };
+                if (price >= 500000) {
+                    resDiv.classList.add('shake-effect');
+                    resDiv.classList.add('flash-effect');
+                    setTimeout(() => {
+                        resDiv.classList.remove('shake-effect');
+                        resDiv.classList.remove('flash-effect');
+                    }, 1000);
+                    showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
+                }
+                getEl('action-btns-wrapper').style.display = 'flex';
+                state.points += earnedXP;
+                updateUI();
+                return;
+            }
+
+            // Если анимация ВКЛЮЧЕНА
             resDiv.innerHTML = `
                 <div class="info-icon" id="btn-show-info" style="opacity:0;">i</div>
                 <div class="phone-number rarity-common" id="anim-phone">+7-XXX-XXX-XX-XX</div>
@@ -606,33 +638,28 @@
             let animPrice = getEl('anim-price');
             let animCategory = getEl('anim-category');
             
-            // Разбиваем целевой номер на символы
             let targetChars = targetPhone.split('');
             let currentStr = "+7-XXX-XXX-XX-XX".split('');
             let iterations = 0;
             
             let interval = setInterval(() => {
-                // Меняем цифры слева направо
                 for (let i = 0; i < targetChars.length; i++) {
                     if (targetChars[i] === '-' || targetChars[i] === '+') {
                         currentStr[i] = targetChars[i];
                     } else {
-                        // Если дошли до этой цифры и прошло достаточно времени - оставляем её
                         if (i < iterations) {
                             currentStr[i] = targetChars[i];
                         } else {
-                            // Иначе рандомим
                             currentStr[i] = Math.floor(Math.random() * 10).toString();
                         }
                     }
                 }
                 
                 animPhone.innerText = currentStr.join('');
-                iterations += 1; // Каждые 50мс "фиксируем" одну новую цифру
+                iterations += 1;
                 
                 if (iterations > targetChars.length) {
                     clearInterval(interval);
-                    // Анимация завершена
                     animPhone.innerText = targetPhone;
                     animPhone.className = `phone-number ${rarityClass}`;
                     animPrice.innerText = price.toLocaleString('ru-RU') + ' ₽';
@@ -657,7 +684,7 @@
                     state.points += earnedXP;
                     updateUI();
                 }
-            }, 50); // Скорость прокрутки (50мс)
+            }, 50);
         }
 
         // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
@@ -819,9 +846,18 @@
             if (target.id === 'btn-close-info') { getEl('info-modal').style.display = 'none'; }
 
             // Заглушки для новых кнопок
-            if (target.id === 'btn-market') { showToast("🛒 Рынок скоро откроется!"); }
-            if (target.id === 'btn-shop') { showToast("🏪 Магазин в разработке!"); }
-            if (target.id === 'btn-jewelry') { showToast("💎 Ювелирный пока закрыт!"); }
+            if (target.id === 'btn-market') { 
+                if (state.balance < 1000) { showToast("❌ Рынок стоит 1000 ₽!"); return; }
+                showToast("🛒 Рынок скоро откроется!"); 
+            }
+            if (target.id === 'btn-shop') { 
+                if (state.balance < 5000) { showToast("❌ Магазин стоит 5000 ₽!"); return; }
+                showToast("🏪 Магазин в разработке!"); 
+            }
+            if (target.id === 'btn-jewelry') { 
+                if (state.balance < 20000) { showToast("❌ Ювелирный стоит 20000 ₽!"); return; }
+                showToast("💎 Ювелирный пока закрыт!"); 
+            }
         });
 
         document.addEventListener('change', function(e) {
@@ -829,6 +865,10 @@
                 state.isDarkTheme = e.target.checked;
                 if (state.isDarkTheme) document.body.classList.add('dark-theme');
                 else document.body.classList.remove('dark-theme');
+                saveData();
+            }
+            if (e.target.id === 'toggle-animation') {
+                state.isAnimationEnabled = e.target.checked;
                 saveData();
             }
             if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
