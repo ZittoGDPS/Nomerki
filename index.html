@@ -198,7 +198,7 @@
     <div id="register-screen">
         <h1>Номерки 🚀</h1>
         <p>Добро пожаловать! Нажмите кнопку ниже, чтобы начать играть.</p>
-        <button class="btn-register" id="btn-start">Войти через Telegram</button>
+        <button class="btn-register" id="btn-start">Войти в игру</button>
     </div>
 
     <!-- САМА ИГРА -->
@@ -291,6 +291,9 @@
                 <div class="profile-row"><span>Всего продано:</span> <span id="stat-sold">0</span></div>
                 <div class="profile-row"><span>Текущий баланс:</span> <span id="stat-current-balance">0 ₽</span></div>
                 <div class="profile-row"><span>Максимальный баланс:</span> <span id="stat-max-balance">0 ₽</span></div>
+                <div class="profile-row" style="color: #888; font-size: 12px; margin-top: 10px; border-top: 1px solid #444; padding-top: 10px;">
+                    <span>Ваш ID для входа:</span> <span id="stat-user-id" style="user-select: all;">...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -346,10 +349,20 @@
         let myId;
         let isBrowser = false;
 
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        // ЛОГИКА ОПРЕДЕЛЕНИЯ ID (синхронизация ТГ и Браузера)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlUserId = urlParams.get('user_id');
+
+        if (urlUserId) {
+            // Если в ссылке есть ?user_id=123
+            myId = urlUserId;
+            myName = "Игрок (Браузер)";
+        } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            // Если зашли через Telegram
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
         } else {
+            // Если просто открыли в браузере без параметра
             isBrowser = true;
             let savedBrowserId = localStorage.getItem('blum_browser_id');
             if (!savedBrowserId) {
@@ -360,7 +373,6 @@
             myName = "Гость";
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
         const viewPlayerId = urlParams.get('player');
 
         let state = {
@@ -539,6 +551,7 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
+            getEl('stat-user-id').innerText = myId; // Показываем ID игрока в профиле
 
             let btnAll = getEl('btn-sell-all');
             btnAll.disabled = state.inventory.length === 0;
@@ -602,6 +615,7 @@
             getEl('stat-sold').innerText = state.totalSold;
             getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
+            getEl('stat-user-id').innerText = myId;
         }
 
         function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP) {
@@ -835,11 +849,7 @@
         }
 
         document.getElementById('btn-start').addEventListener('click', () => {
-            if (isBrowser) {
-                window.location.href = "https://t.me/Nomerki_generator_bot"; 
-                return;
-            }
-
+            // Мы УБРАЛИ проверку isBrowser, чтобы ты мог зайти с любого устройства!
             localStorage.setItem('blum_registered', 'true');
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
