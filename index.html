@@ -37,6 +37,9 @@
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         
+        /* Стиль для опыта под редкостью */
+        .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; }
+
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; }
         #custom-gen-btn { color: white; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; width: 100%; background: #0088cc; box-sizing: border-box; }
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
@@ -75,7 +78,7 @@
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Стили для Лидерборда */
+        /* Лидерборд */
         #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
         .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
@@ -86,7 +89,7 @@
         .leader-name { flex: 1; font-weight: bold; margin-left: 10px; }
         .leader-balance { font-weight: bold; color: #28a745; }
 
-        /* Модальное окно информации */
+        /* Модальное окно инфо */
         #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999999; display: none; justify-content: center; align-items: center; }
         #info-content { background: var(--card-bg); padding: 20px; border-radius: 15px; width: 90%; max-height: 80vh; overflow-y: auto; color: var(--text-main); }
         #info-content h3 { margin-top: 0; text-align: center; color: #0088cc; }
@@ -128,7 +131,6 @@
         </div>
     </div>
     
-    <!-- ЭКРАН ЛИДЕРБОРДА -->
     <div id="leaderboard-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">🏆 Лидеры по балансу</span>
@@ -180,7 +182,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ИНФОРМАЦИИ -->
     <div id="info-modal">
         <div id="info-content">
             <h3>Шансы и Награды</h3>
@@ -225,10 +226,8 @@
         let boostMultiplier = 1;
         let boostEndTime = parseInt(localStorage.getItem('blum_boost_end')) || 0;
 
-        // База "ботов" для лидерборда
         let bots = JSON.parse(localStorage.getItem('blum_bots'));
         if (!bots) {
-            // Генерируем ботов при первом запуске (баланс от 10к до 5кк)
             bots = [
                 { name: "Номерной_Магнат", balance: 4520000 },
                 { name: "Иван_Номера", balance: 3120500 },
@@ -272,7 +271,6 @@
         const inputWarnThreshold = document.getElementById('input-warn-threshold');
         const boostIndicator = document.getElementById('boost-indicator');
         
-        // Элементы лидерборда
         const leaderboardScreen = document.getElementById('leaderboard-screen');
         const leaderboardList = document.getElementById('leaderboard-list');
 
@@ -385,13 +383,10 @@
             actionBtnsWrapper.style.display = 'none';
         }
 
-        // ЛОГИКА ЛИДЕРБОРДА
         function renderLeaderboard() {
-            // Собираем всех: боты + игрок
             let allPlayers = [...bots];
             allPlayers.push({ name: "Вы", balance: balance, isYou: true });
 
-            // Сортируем по убыванию баланса
             allPlayers.sort((a, b) => b.balance - a.balance);
 
             leaderboardList.innerHTML = '';
@@ -411,7 +406,6 @@
             });
         }
 
-        // Навигация
         document.getElementById('btn-open-top').onclick = function() { 
             leaderboardScreen.style.display = 'flex'; 
             renderLeaderboard();
@@ -432,11 +426,14 @@
                 let currentGenerated = { phone: finalPhone, price: evaluation.price, category: evaluation.category };
                 let colorClass = getRarityClass(evaluation.category);
 
+                let baseXP = getXPForRarity(evaluation.category);
+                let earnedXP = Math.floor(baseXP * boostMultiplier);
+
                 resultDiv.innerHTML = `
                     <div class="info-icon" id="btn-show-info">i</div>
                     <div class="phone-number ${colorClass}">${finalPhone}</div>
                     <div class="price-tag">${evaluation.price.toLocaleString('ru-RU')} ₽</div>
-                    <div class="category-text">${evaluation.category}</div>
+                    <div class="category-text">${evaluation.category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
                 `;
                 
                 document.getElementById('btn-show-info').addEventListener('click', function(ev) {
@@ -448,15 +445,12 @@
                 btnGen.style.display = 'none';
                 actionBtnsWrapper.style.display = 'flex';
 
-                let baseXP = getXPForRarity(evaluation.category);
-                let earnedXP = Math.floor(baseXP * boostMultiplier);
                 points += earnedXP;
                 updateUI();
 
+                // Уведомление показываем ТОЛЬКО если номер дорогой (от 100к)
                 if (currentGenerated.price >= 100000) {
-                    showToast(`🔥 Дорогой номер!\n${currentGenerated.phone}\n${currentGenerated.price.toLocaleString('ru-RU')} ₽\n(+${earnedXP} XP)`);
-                } else {
-                    showToast(`Получено +${earnedXP} XP`);
+                    showToast(`🔥 Дорогой номер!\n${currentGenerated.phone}\n${currentGenerated.price.toLocaleString('ru-RU')} ₽`);
                 }
 
                 btnSellNow.onclick = function() {
@@ -507,33 +501,4 @@
         }
 
         document.getElementById('btn-open-bag').onclick = function() { invScreen.style.display = 'flex'; updateUI(); renderInventory(); };
-        document.getElementById('btn-close-bag').onclick = function() { invScreen.style.display = 'none'; };
-        document.getElementById('btn-open-settings').onclick = function() { settingsScreen.style.display = 'flex'; toggleTheme.checked = isDarkTheme; toggleWarning.checked = useSellWarning; inputWarnThreshold.value = warnThreshold; };
-        document.getElementById('btn-close-settings').onclick = function() { settingsScreen.style.display = 'none'; };
-
-        btnSellAll.onclick = function() {
-            if (inventory.length === 0) return;
-            let totalSum = inventory.reduce((sum, item) => sum + item.price, 0);
-            if (useSellWarning && totalSum >= warnThreshold) {
-                if (!confirm(`Продать ВСЕ на ${totalSum.toLocaleString('ru-RU')} ₽?`)) return;
-            }
-            balance += totalSum; inventory = []; updateUI(); renderInventory();
-            showToast(`✅ +${totalSum.toLocaleString('ru-RU')} ₽`);
-        };
-
-        toggleTheme.onchange = function() { isDarkTheme = this.checked; applyTheme(); saveData(); };
-        toggleWarning.onchange = function() { useSellWarning = this.checked; saveData(); };
-        inputWarnThreshold.onchange = function() {
-            let val = parseInt(this.value) || 100000; if (val < 0) val = 0;
-            warnThreshold = val; this.value = val; saveData();
-        };
-
-        function applyTheme() {
-            if (isDarkTheme) document.body.classList.add('dark-theme');
-            else document.body.classList.remove('dark-theme');
-        }
-
-        applyTheme(); updateUI();
-    </script>
-</body>
-</html>
+        document.getElementById
