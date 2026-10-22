@@ -482,8 +482,7 @@
             getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
         }
 
-        // --- 2. ЛОГИКА РЕГИСТРАЦИИ ---
-        // Проверяем, нажимал ли пользователь кнопку раньше
+        // --- 2. ЛОГИКА РЕГИСТРАЦИИ (С ОТПРАВКОЙ БОТУ) ---
         let isRegistered = localStorage.getItem('blum_registered') === 'true';
 
         if (isRegistered) {
@@ -512,35 +511,23 @@
         document.getElementById('btn-start').addEventListener('click', () => {
             // Если зашли через браузер, перекидываем в бота
             if (isBrowser) {
-                window.location.href = "https://t.me/ВАШ_БОТ"; // ЗАМЕНИТЕ НА ВАШЕГО БОТА
+                window.location.href = "https://t.me/Nomerki_generator_bot"; 
                 return;
             }
 
-            // Если в ТГ, просто скрываем экран
-            localStorage.setItem('blum_registered', 'true'); // Запоминаем, что вошли
+            // Если в ТГ, скрываем экран и запоминаем
+            localStorage.setItem('blum_registered', 'true');
             document.getElementById('register-screen').style.display = 'none';
             document.getElementById('game-wrapper').style.display = 'flex';
             document.getElementById('user-name-display').innerText = myName;
 
-            if (window.db && window.fbOnValue && window.fbRef) {
-                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        state.balance = data.balance || 0;
-                        state.level = data.level || 1;
-                        state.points = data.points || 0;
-                        state.inventory = data.inventory || [];
-                        state.bestNumber = data.bestNumber || null;
-                        state.totalGenerated = data.totalGenerated || 0;
-                        state.totalSold = data.totalSold || 0;
-                        state.maxBalance = data.maxBalance || 0;
-                        updateUI();
-                    }
-                });
+            // ОТПРАВЛЯЕМ ДАННЫЕ БОТУ (Игра закроется)
+            if (tg) {
+                tg.sendData(JSON.stringify({ action: "register", name: myName, id: myId }));
             }
         });
 
-        // Обработчики кликов (без изменений)
+        // Обработчики кликов
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon');
             if (!target) return;
