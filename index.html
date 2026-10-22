@@ -65,7 +65,7 @@
         #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 160px; }
+        #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
@@ -77,25 +77,26 @@
 
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         
-        .gen-buttons-row { display: flex; gap: 10px; width: 100%; }
-        .gen-btn { color: white; padding: 12px 5px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; flex: 1; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
-        .gen-btn:active { transform: scale(0.95); }
-        .gen-btn span { font-size: 10px; font-weight: normal; opacity: 0.8; }
-        
-        /* Новые цвета для кнопок */
-        #btn-gen-1 { background: #28a745; }
-        #btn-gen-5 { background: #fd7e14; }
-        #btn-gen-20 { background: #dc3545; }
+        /* Кнопки магазинов (теперь они же и кнопки генерации) */
+        .shop-buttons-row { display: flex; gap: 10px; width: 100%; }
+        .shop-btn { 
+            color: white; border: none; padding: 15px 5px; border-radius: 10px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: transform 0.1s;
+        }
+        .shop-btn:active { transform: scale(0.95); }
+        .shop-btn span { font-size: 11px; font-weight: normal; opacity: 0.9; margin-top: 4px;}
+
+        #btn-market { background: #28a745; } /* Зеленый */
+        #btn-shop { background: #fd7e14; }   /* Оранжевый */
+        #btn-jewelry { background: #dc3545; } /* Красный */
 
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-
-        .nav-buttons-row { display: flex; gap: 10px; width: 100%; margin-top: 5px; }
-        .nav-btn { background: #1e1e1e; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
-        .nav-btn:active { background: #333; }
 
         @keyframes shakeScreen {
             0% { transform: translate(1px, 1px) rotate(0deg); }
@@ -124,7 +125,7 @@
         .rarity-silver { color: #b0b0b0 !important; text-shadow: 0 0 5px rgba(176, 176, 176, 0.5); }
         .rarity-gold { color: #ffd700 !important; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
         .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); font-weight: 900; }
-        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); }
+        .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(0, 0, 127, 0.5); }
 
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
@@ -204,23 +205,16 @@
         
         <div id="bottom-action-area">
             
-            <!-- Кнопки генерации -->
-            <div class="gen-buttons-row" id="gen-buttons-row">
-                <button class="gen-btn" id="btn-gen-1">1К<span>1 000 ₽</span></button>
-                <button class="gen-btn" id="btn-gen-5">5К<span>5 000 ₽</span></button>
-                <button class="gen-btn" id="btn-gen-20">20К<span>20 000 ₽</span></button>
+            <!-- Кнопки магазинов (заменяют генерацию) -->
+            <div class="shop-buttons-row" id="gen-buttons-row">
+                <button class="shop-btn" id="btn-market">Рынок<span>1 000 ₽</span></button>
+                <button class="shop-btn" id="btn-shop">Магазин<span>5 000 ₽</span></button>
+                <button class="shop-btn" id="btn-jewelry">Ювелирный<span>20 000 ₽</span></button>
             </div>
 
             <div id="action-btns-wrapper">
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
                 <button class="btn-keep" id="btn-keep">Оставить</button>
-            </div>
-
-            <!-- Новые кнопки -->
-            <div class="nav-buttons-row">
-                <button class="nav-btn" id="btn-market">1. Рынок (1к)</button>
-                <button class="nav-btn" id="btn-shop">2. Магазин (5к)</button>
-                <button class="nav-btn" id="btn-jewelry">3. Ювелирный (20к)</button>
             </div>
 
         </div>
@@ -310,9 +304,9 @@
 
             <h4>Шансы на выпадение цен:</h4>
             <ul>
-                <li><b>Кнопка 1К:</b> 100к (5%), 1ккк (0.00001%)</li>
-                <li><b>Кнопка 5К:</b> 100к (10%), 1ккк (0.0001%)</li>
-                <li><b>Кнопка 20К:</b> 1ккк (5%), 1ккккк (0.1%)</li>
+                <li><b>Рынок (1К):</b> 100к (5%), 1ккк (0.00001%)</li>
+                <li><b>Магазин (5К):</b> 100к (10%), 1ккк (0.0001%)</li>
+                <li><b>Ювелирный (20К):</b> 1ккк (5%), 1ккккк (0.1%)</li>
                 <li><i>Остальные номера обычные (150 - 50 000 ₽)</i></li>
             </ul>
 
@@ -373,7 +367,7 @@
             maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
             freeSpins: parseInt(localStorage.getItem('blum_free_spins')) || 10,
             currentOperator: localStorage.getItem('blum_operator') || null,
-            isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false' // По умолчанию true
+            isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false'
         };
 
         function saveData() {
@@ -519,13 +513,13 @@
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
             }
 
-            let btn1 = getEl('btn-gen-1');
+            let btnMarket = getEl('btn-market');
             if (state.freeSpins > 0) {
-                btn1.innerHTML = `1К<span>Бесплатно (${state.freeSpins})</span>`;
-                btn1.style.background = '#17a2b8';
+                btnMarket.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
+                btnMarket.style.background = '#17a2b8';
             } else {
-                btn1.innerHTML = `1К<span>1 000 ₽</span>`;
-                btn1.style.background = '#28a745';
+                btnMarket.innerHTML = `Рынок<span>1 000 ₽</span>`;
+                btnMarket.style.background = '#28a745';
             }
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
@@ -602,7 +596,6 @@
             btnRow.style.display = 'none';
             resDiv.classList.add('force-show');
             
-            // Если анимация ВЫКЛЮЧЕНА - показываем сразу
             if (!state.isAnimationEnabled) {
                 resDiv.innerHTML = `
                     <div class="info-icon" id="btn-show-info">i</div>
@@ -626,7 +619,6 @@
                 return;
             }
 
-            // Если анимация ВКЛЮЧЕНА
             resDiv.innerHTML = `
                 <div class="info-icon" id="btn-show-info" style="opacity:0;">i</div>
                 <div class="phone-number rarity-common" id="anim-phone">+7-XXX-XXX-XX-XX</div>
@@ -759,9 +751,9 @@
                 getEl('profile-screen').style.display = 'none';
             }
 
-            // ГЕНЕРАЦИЯ НОМЕРОВ
-            if (target.id === 'btn-gen-1' || target.id === 'btn-gen-5' || target.id === 'btn-gen-20') {
-                let type = target.id === 'btn-gen-1' ? 1 : target.id === 'btn-gen-5' ? 5 : 20;
+            // ГЕНЕРАЦИЯ НОМЕРОВ (Теперь через кнопки магазинов)
+            if (target.id === 'btn-market' || target.id === 'btn-shop' || target.id === 'btn-jewelry') {
+                let type = target.id === 'btn-market' ? 1 : target.id === 'btn-shop' ? 5 : 20;
                 let cost = type * 1000;
                 
                 if (type === 1 && state.freeSpins > 0) {
@@ -844,20 +836,6 @@
             
             if (target.id === 'btn-show-info') { getEl('info-modal').style.display = 'flex'; }
             if (target.id === 'btn-close-info') { getEl('info-modal').style.display = 'none'; }
-
-            // Заглушки для новых кнопок
-            if (target.id === 'btn-market') { 
-                if (state.balance < 1000) { showToast("❌ Рынок стоит 1000 ₽!"); return; }
-                showToast("🛒 Рынок скоро откроется!"); 
-            }
-            if (target.id === 'btn-shop') { 
-                if (state.balance < 5000) { showToast("❌ Магазин стоит 5000 ₽!"); return; }
-                showToast("🏪 Магазин в разработке!"); 
-            }
-            if (target.id === 'btn-jewelry') { 
-                if (state.balance < 20000) { showToast("❌ Ювелирный стоит 20000 ₽!"); return; }
-                showToast("💎 Ювелирный пока закрыт!"); 
-            }
         });
 
         document.addEventListener('change', function(e) {
