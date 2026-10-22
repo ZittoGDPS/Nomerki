@@ -5,26 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Лидеры</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
-        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
-        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
-        .leader-avatar { width: 32px; height: 32px; border-radius: 50%; background: #0088cc; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; margin-right: 10px; }
-        .leader-name { flex: 1; font-weight: bold; }
-        .leader-balance { font-weight: bold; color: #28a745; }
-    </style>
-</head>
-<body>
-
-    <div id="top-bar">
-        <span style="font-weight:bold; font-size:18px;">🏆 Топ игроков</span>
-        <button class="btn-close" onclick="window.location.href='index.html'" style="background: #0088cc;">Назад</button>
-    </div>
     
-    <div id="leaderboard-list"><div style="text-align:center; padding: 20px;">Загрузка...</div></div>
-
+    <!-- Подключаем Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -43,10 +25,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Получаем ID текущего игрока из Telegram
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         let myId = "guest";
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            myId = tg.initDataUnsafe.user.id.toString();
+        if (tg) {
+            tg.ready(); 
+            tg.expand();
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                myId = tg.initDataUnsafe.user.id.toString();
+            }
+        }
+
+        // Функция для отрисовки таблицы
+        function renderLeaderboard(players) {
+            const container = document.getElementById('leaderboard-list');
+            container.innerHTML = '';
+
+            if (players.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 20px; color: #aaa;">Пока нет игроков. Сгенерируйте номер в игре!</div>';
+                return;
+            }
+
+            players.forEach((p, i) => {
+                let rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                let youClass = p.isYou ? 'you' : '';
+                
+                let div = document.createElement('div');
+                div.className = `leader-item ${youClass}`;
+                div.innerHTML = `
+                    <div class="leader-rank ${rankClass}">#${i+1}</div>
+                    <div class="leader-avatar">${p.avatar}</div>
+                    <div class="leader-name">${p.name} ${p.isYou ? '(Вы)' : ''}</div>
+                    <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
+                `;
+                container.appendChild(div);
+            });
         }
 
         // Слушаем базу данных в реальном времени
@@ -54,7 +67,7 @@
         onValue(playersRef, (snapshot) => {
             const data = snapshot.val();
             let players = [];
-            
+
             if (data) {
                 for (let id in data) {
                     let p = data[id];
@@ -68,32 +81,51 @@
                 }
             }
 
-            // Сортировка по балансу
+            // Сортируем по убыванию баланса
             players.sort((a, b) => b.balance - a.balance);
-
-            let container = document.getElementById('leaderboard-list');
-            container.innerHTML = '';
-            
-            if (players.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 20px;">Пока нет игроков</div>';
-                return;
-            }
-
-            players.forEach((p, i) => {
-                let youClass = p.isYou ? 'you' : '';
-                let div = document.createElement('div');
-                div.className = `leader-item ${youClass}`;
-                div.innerHTML = `
-                    <div class="leader-rank">#${i+1}</div>
-                    <div class="leader-avatar">${p.avatar}</div>
-                    <div class="leader-name">${p.name} ${p.isYou ? '(Вы)' : ''}</div>
-                    <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
-                `;
-                container.appendChild(div);
-            });
-
-            if (localStorage.getItem('blum_theme') === 'dark') document.body.classList.add('dark-theme');
+            renderLeaderboard(players);
         });
+    </script>
+
+    <style>
+        :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
+        body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
+
+        #top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
+        .btn-close { background: #0088cc; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+
+        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
+        
+        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .leader-item.you { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.1); }
+        
+        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
+        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
+        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
+        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
+        
+        .leader-avatar { width: 32px; height: 32px; border-radius: 50%; background: #0088cc; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; margin-right: 10px; }
+        .leader-name { flex: 1; font-weight: bold; }
+        .leader-balance { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <span style="font-weight:bold; font-size:18px;">🏆 Топ игроков</span>
+        <button class="btn-close" onclick="window.location.href='index.html'">В игру</button>
+    </div>
+    
+    <div id="leaderboard-list">
+        <div style="text-align:center; padding: 20px; color: #aaa;">Загрузка данных...</div>
+    </div>
+
+    <script>
+        // Применяем тему
+        if (localStorage.getItem('blum_theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
     </script>
 </body>
 </html>
