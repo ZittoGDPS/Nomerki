@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simkarta</title>
+    <title>Nomerki</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
@@ -20,43 +20,45 @@
     </script>
     <style>
         :root { 
-            --bg: #0f0f11; --card: #ffffff; --text: #ffffff; --text-sub: #888; 
-            --blue: #3b82f6; --green: #22c55e; --yellow: #eab308; --red: #ef4444; --dark-card: #1e1e24;
+            --bg: #121212; --card: #ffffff; --text: #ffffff; --text-sub: #888; 
+            --blue: #3b82f6; --green: #22c55e; --yellow: #eab308; --red: #ef4444; --dark-card: #1e1e1e;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
         /* Верхняя панель */
         #top-bar { padding: 15px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
-        #profile-box { display: flex; flex-direction: column; gap: 2px; }
-        #user-name-display { font-size: 12px; color: var(--text-sub); }
-        #balance-display { font-size: 26px; font-weight: bold; }
-        #xp-bar-container { width: 120px; height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+        #profile-box { display: flex; flex-direction: column; gap: 2px; max-width: 60%; }
+        #user-name-display { font-size: 13px; color: var(--text-sub); }
+        #balance-display { font-size: 28px; font-weight: 800; line-height: 1.1; word-break: break-word; }
+        #xp-bar-container { width: 100px; height: 4px; background: #333; border-radius: 2px; margin-top: 6px; overflow: hidden; }
         #xp-bar-fill { height: 100%; background: #8b5cf6; width: 0%; transition: 0.3s; }
         
         .stats-box { display: flex; gap: 6px; align-items: center; }
-        .pill { background: var(--dark-card); padding: 6px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        #lvl-text { color: #fff; } #pts-text { color: #4ade80; } #spins-display { color: #f87171; }
-        #btn-menu { background: #2a2a35; border: none; color: white; padding: 6px 12px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+        .pill { background: var(--dark-card); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        #lvl-text { color: #fff; flex-direction: column; line-height: 1; font-size: 10px; padding: 4px 10px; } 
+        #lvl-text span { font-size: 13px; margin-top: 2px; }
+        #pts-text { color: #4ade80; } #spins-display { color: #f87171; }
+        #btn-menu { background: var(--dark-card); border: none; color: white; padding: 8px 12px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Область скролла */
+        #scroll-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
 
         /* Основной экран (Сим-карта) */
-        #main-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 20px; position: relative; }
+        #main-screen { width: 100%; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 20px; position: relative; }
         
-        #operator-indicator { font-size: 13px; color: var(--text-sub); margin-bottom: 15px; text-align: center; display: none; /* Скрыто, так как оператор теперь на карте */ }
-
-        #sim-card-wrapper { width: 100%; max-width: 350px; position: relative; }
-        #sim-card { background: var(--card); border-radius: 24px; padding: 25px 20px; color: #000; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: flex; flex-direction: column; min-height: 220px; transition: transform 0.3s; position: relative; }
+        #sim-card { background: var(--card); border-radius: 28px; padding: 25px; color: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; width: 100%; max-width: 350px; min-height: 230px; transition: transform 0.3s; position: relative; }
         
         .sim-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .sim-op { display: flex; flex-direction: column; gap: 2px; }
-        .sim-op-name { font-size: 22px; font-weight: 900; color: #000; }
-        .sim-op-country { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; }
+        .sim-op { display: flex; flex-direction: column; gap: 4px; }
+        .sim-op-name { font-size: 22px; font-weight: 800; color: #000; letter-spacing: -0.5px; }
+        .sim-op-country { font-size: 12px; color: #666; display: flex; align-items: center; gap: 4px; }
         
-        /* Градиентная ячейка */
-        #sim-gradient-box { width: 50px; height: 50px; border-radius: 12px; border: 2px dashed #ccc; transition: 0.5s; position: relative; overflow: hidden; }
+        /* Ячейка с градиентом */
+        #sim-gradient-box { width: 65px; height: 65px; border-radius: 18px; transition: 0.5s; background: #f3f4f6; }
         
-        .sim-number { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-top: auto; margin-bottom: 5px; text-align: left; font-family: monospace; }
-        .sim-cat { font-size: 12px; color: #888; font-weight: bold; text-align: right; text-transform: uppercase; }
+        .sim-number { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-top: auto; margin-bottom: 5px; text-align: left; font-family: monospace; }
+        .sim-cat { font-size: 12px; color: #888; font-weight: 700; text-align: right; text-transform: uppercase; }
         
         #price-tag { font-size: 20px; font-weight: bold; color: var(--green); text-align: left; margin-bottom: 5px; display: none; }
         #price-tag.show { display: block; }
@@ -64,23 +66,38 @@
         #reasons-box { display: none; font-size: 12px; color: #555; line-height: 1.4; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         #reasons-box.show { display: block; }
 
-        .info-icon { position: absolute; top: 20px; right: 80px; width: 24px; height: 24px; background: #e5e7eb; color: #374151; border-radius: 50%; display: none; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; font-size: 14px; z-index: 10; }
-        .info-icon.show { display: flex; }
+        /* Кнопки действий (Продать / Оставить) */
+        #action-btns-wrapper { display: none; gap: 10px; width: 100%; max-width: 350px; margin-top: 15px; }
+        .btn-sell { color: white; border: none; padding: 16px; border-radius: 16px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: var(--green); }
+        .btn-keep { background: var(--yellow); color: #000; border: none; padding: 16px; border-radius: 16px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Нижние кнопки (Оригинальный дизайн) */
-        #bottom-action-area { padding: 15px 20px 25px 20px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        /* Нижние кнопки (Оригинал) */
+        #bottom-action-area { padding: 10px 15px 20px 15px; display: flex; justify-content: center; flex-shrink: 0; width: 100%; }
+        .shop-buttons-row { display: flex; gap: 10px; width: 100%; max-width: 400px; }
         
-        .shop-buttons-row { display: flex; gap: 8px; width: 100%; }
-        .shop-btn { color: white; border: none; padding: 15px 5px; border-radius: 14px; font-size: 15px; font-weight: bold; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .shop-btn { color: white; border: none; padding: 14px 5px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .shop-btn:active { transform: scale(0.95); }
-        .shop-btn span { font-size: 11px; font-weight: normal; opacity: 0.9; margin-top: 4px; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px;}
-        #btn-market-gen { background: #28a745; }
-        #btn-shop-gen { background: #fd7e14; }
-        #btn-jewelry-gen { background: #dc3545; }
+        .shop-btn span { font-size: 11px; font-weight: 600; background: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 10px; margin-top: 6px; }
+        
+        #btn-market-gen { background: #22c55e; }
+        #btn-shop-gen { background: #f59e0b; }
+        #btn-jewelry-gen { background: #ef4444; }
 
-        #action-btns-wrapper { display: none; gap: 10px; width: 100%; margin-top: 5px; }
-        .btn-sell { color: white; border: none; padding: 16px; border-radius: 14px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: var(--green); }
-        .btn-keep { background: var(--yellow); color: #000; border: none; padding: 16px; border-radius: 14px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
+        /* Новая секция статистики */
+        #info-section { width: 100%; max-width: 400px; padding: 0 15px; display: flex; flex-direction: column; gap: 12px; }
+        .stat-card { background: var(--dark-card); border-radius: 16px; padding: 16px; }
+        .stat-title { font-size: 13px; color: var(--text-sub); margin-bottom: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;}
+        .stat-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-val { font-weight: 700; color: #fff; }
+        .stat-val.green { color: var(--green); }
+        .stat-val.yellow { color: var(--yellow); }
+        
+        .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 5px rgba(0,255,255,0.5); }
+        .rarity-gold { color: #ffd700 !important; }
+        .rarity-silver { color: #e0e0e0 !important; }
+        .rarity-bronze { color: #cd7f32 !important; }
+        .rarity-common { color: #ccc !important; }
 
         /* Меню */
         #side-menu { position: fixed; top: 0; right: -260px; width: 260px; height: 100%; background: var(--dark-card); z-index: 1000; transition: right 0.3s; display: flex; flex-direction: column; padding-top: 60px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
@@ -105,7 +122,7 @@
         .btn-sm.red { background: var(--red); }
         .btn-sm.green { background: var(--green); }
 
-        /* Казино (Апгрейдер) */
+        /* Казино */
         .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; background: #1a1a1a; }
         .casino-inv-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .casino-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; border: 2px solid transparent; cursor: pointer; }
@@ -133,15 +150,9 @@
         input:checked + .slider { background-color: var(--green); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Утилиты и анимации */
+        /* Тост */
         .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--dark-card); border: 1px solid #333; color: white; padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 5000; text-align: center; width: 90%; max-width: 400px; transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { top: 20px; }
-        
-        @keyframes burn { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); filter: sepia(1) hue-rotate(-50deg); } 100% { transform: scale(0); opacity: 0; } }
-        .burning { animation: burn 0.6s forwards; }
-        
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .shake { animation: shake 0.4s; }
     </style>
 </head>
 <body>
@@ -152,53 +163,79 @@
             <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
         </div>
         <div class="stats-box">
-            <div class="pill" id="lvl-text">Ур. 1</div>
+            <div class="pill" id="lvl-text">Ур.<br><span>1</span></div>
             <div class="pill" id="pts-text">🍀 0ч</div>
             <div class="pill" id="spins-display">🔥 0</div>
-            <button id="btn-menu">☰</button>
+            <button id="btn-menu">≡</button>
         </div>
     </div>
 
-    <div id="main-screen">
-        <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
-        <div id="sim-card-wrapper">
+    <!-- Область с прокруткой -->
+    <div id="scroll-area">
+        <div id="main-screen">
             <div id="sim-card">
                 <div class="sim-header">
                     <div class="sim-op">
-                        <div class="sim-op-name" id="ui-op-name">Оператор</div>
+                        <div class="sim-op-name" id="ui-op-name">Могофон</div>
                         <div class="sim-op-country">🇷🇺 Россия</div>
                     </div>
                     <div id="sim-gradient-box"></div>
                 </div>
-                <div class="info-icon" id="btn-show-info">i</div>
                 <div class="sim-number" id="ui-phone">+7 000 000-00-00</div>
                 <div id="price-tag">0 ₽</div>
                 <div class="sim-cat" id="ui-cat">Обычный</div>
                 <div id="reasons-box"></div>
             </div>
+            
+            <div id="action-btns-wrapper">
+                <button class="btn-sell" id="btn-sell-now">Продать</button>
+                <button class="btn-keep" id="btn-keep">Оставить</button>
+            </div>
         </div>
-    </div>
 
-    <div id="bottom-action-area">
-        <div class="shop-buttons-row" id="gen-buttons-row">
-            <button class="shop-btn" id="btn-market-gen">Рынок<span>1 000 ₽</span></button>
-            <button class="shop-btn" id="btn-shop-gen">Магазин<span>5 000 ₽</span></button>
-            <button class="shop-btn" id="btn-jewelry-gen">Ювелирный<span>20 000 ₽</span></button>
+        <div id="bottom-action-area">
+            <div class="shop-buttons-row" id="gen-buttons-row">
+                <button class="shop-btn" id="btn-market-gen">Рынок<span>1 000 ₽</span></button>
+                <button class="shop-btn" id="btn-shop-gen">Магазин<span>5 000 ₽</span></button>
+                <button class="shop-btn" id="btn-jewelry-gen">Ювелирный<span>20 000 ₽</span></button>
+            </div>
         </div>
-        <div id="action-btns-wrapper">
-            <button class="btn-sell" id="btn-sell-now">Продать</button>
-            <button class="btn-keep" id="btn-keep">Оставить</button>
+
+        <!-- Секция статистики и шансов -->
+        <div id="info-section">
+            <div class="stat-card">
+                <div class="stat-title">💰 Баланс</div>
+                <div class="stat-row"><span>Текущий:</span> <span class="stat-val" id="stat-balance">0 ₽</span></div>
+                <div class="stat-row"><span>Максимальный:</span> <span class="stat-val" id="stat-max-balance">0 ₽</span></div>
+                <div class="stat-row"><span>В рюкзаке:</span> <span class="stat-val" id="stat-inv-val">0 ₽</span></div>
+                <div class="stat-row"><span>Общий капитал:</span> <span class="stat-val green" id="stat-total-worth">0 ₽</span></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-title">📊 Статистика</div>
+                <div class="stat-row"><span>Всего сгенерировано:</span> <span class="stat-val" id="stat-generated">0</span></div>
+                <div class="stat-row"><span>Всего продано:</span> <span class="stat-val" id="stat-sold">0</span></div>
+                <div class="stat-row"><span>Номеров в рюкзаке:</span> <span class="stat-val" id="stat-inv-count">0</span></div>
+                <div class="stat-row"><span>Лучший номер:</span> <span class="stat-val" id="stat-best">—</span></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-title">🎲 Шансы выпадения</div>
+                <div class="stat-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>&lt; 0.001%</span></div>
+                <div class="stat-row"><span class="rarity-gold">Золотой:</span> <span>~1%</span></div>
+                <div class="stat-row"><span class="rarity-silver">Серебряный:</span> <span>~5%</span></div>
+                <div class="stat-row"><span class="rarity-bronze">Бронзовый:</span> <span>~15%</span></div>
+                <div class="stat-row"><span class="rarity-common">Красивое окончание:</span> <span>~30%</span></div>
+                <div class="stat-row"><span class="rarity-common">Обычный:</span> <span>~50%</span></div>
+            </div>
         </div>
     </div>
 
     <div id="side-menu">
+        <div class="menu-item" id="menu-inv"><span>🎒</span> Мой Рюкзак</div>
         <div class="menu-item" id="menu-simwall"><span>📱</span> СИМ-СТЕНА</div>
-        <div class="menu-item" id="menu-global-market"><span>🌍</span> Глобальный Рынок</div>
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
-        <div class="menu-item" id="menu-profile"><span>👤</span> Статистика</div>
-        <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
-        <div class="menu-item" id="menu-friends"><span>👥</span> Друзья</div>
     </div>
 
     <!-- Экраны -->
@@ -213,7 +250,6 @@
     <div id="settings-screen" class="full-screen">
         <div class="header"><h2>⚙️ Настройки</h2><button class="btn-close" data-close="settings-screen">Закрыть</button></div>
         <div class="scroll-area">
-            <div class="setting-item"><span>Тёмная тема</span><label class="switch"><input type="checkbox" id="toggle-theme" checked disabled><span class="slider"></span></label></div>
             <div class="setting-item"><span>Звуки</span><label class="switch"><input type="checkbox" id="toggle-sound"><span class="slider"></span></label></div>
             <div class="setting-item" style="flex-direction:column; align-items:flex-start;">
                 <span>Синхронизация (Email)</span>
@@ -224,7 +260,6 @@
         </div>
     </div>
 
-    <!-- Апгрейдер (Оригинальный дизайн) -->
     <div id="casino-screen" class="full-screen">
         <div class="header"><h2>🎰 Апгрейдер</h2><button class="btn-close" data-close="casino-screen">Закрыть</button></div>
         <div class="casino-body">
@@ -250,12 +285,10 @@
             const tg = window.Telegram?.WebApp;
             if (tg) { tg.ready(); tg.expand(); }
             
-            // Утилиты
             const $ = id => document.getElementById(id);
             const fmt = n => Number(n||0).toLocaleString('ru-RU');
             const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fb : v; } catch { return fb; } };
 
-            // Звуки
             const SOUND = (() => {
                 let ctx, enabled = localStorage.getItem('blum_sound') !== 'false';
                 const init = () => { if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); if(ctx.state==='suspended')ctx.resume(); return ctx; };
@@ -284,7 +317,6 @@
                 };
             })();
 
-            // Данные
             let myId = tg?.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('blum_email_id') || 'browser_'+Math.floor(Math.random()*999999));
             let myName = tg?.initDataUnsafe?.user?.first_name || 'Игрок';
             myId = myId.replace(/[.#$\[\]\/]/g,'_');
@@ -296,34 +328,33 @@
                 level: parseInt(localStorage.getItem('blum_level')) || 1,
                 currentGen: readJSON('blum_current_gen', null),
                 bestNumber: readJSON('blum_best_number', null),
+                totalGenerated: parseInt(localStorage.getItem('blum_total_generated')) || 0,
                 totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
                 maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 100000,
                 freeSpins: parseInt(localStorage.getItem('blum_free_spins') ?? 10),
                 boostEnd: parseInt(localStorage.getItem('blum_boost_end')) || 0,
                 boostMult: parseFloat(localStorage.getItem('blum_boost_mult')) || 1,
                 simwall: readJSON('blum_simwall', {slotsUnlocked:1, items:Array(10).fill(null), lastTick: Date.now()}),
-                currentOperator: localStorage.getItem('blum_operator') || null
+                currentOperator: localStorage.getItem('blum_operator') || 'Могофон'
             };
             if(!localStorage.getItem('blum_starter')) { localStorage.setItem('blum_starter','1'); localStorage.setItem('blum_balance', 100000); }
 
             let cloudReady = false;
             let genAnimating = false;
 
-            // Сохранение
             const save = () => {
-                const keys = ['balance','points','level','totalSold','maxBalance','freeSpins','boostEnd','boostMult','operator'];
+                const keys = ['balance','points','level','totalGenerated','totalSold','maxBalance','freeSpins','boostEnd','boostMult','operator'];
                 keys.forEach(k => localStorage.setItem('blum_'+k, state[k]));
                 ['inventory','currentGen','bestNumber','simwall'].forEach(k => localStorage.setItem('blum_'+k, JSON.stringify(state[k])));
                 if (cloudReady && window.db) {
                     window.fbSet(window.fbRef(window.db, 'players/'+myId), JSON.parse(JSON.stringify({
                         name: myName, balance: state.balance, level: state.level, points: state.points,
-                        inventory: state.inventory, bestNumber: state.bestNumber, totalSold: state.totalSold,
+                        inventory: state.inventory, bestNumber: state.bestNumber, totalGenerated: state.totalGenerated, totalSold: state.totalSold,
                         maxBalance: state.maxBalance, freeSpins: state.freeSpins, simwall: state.simwall, lastSeen: Date.now()
                     }))).catch(console.log);
                 }
             };
 
-            // Обновление UI
             const updateUI = () => {
                 let needed = state.level * 100;
                 while(state.points >= needed) {
@@ -332,24 +363,34 @@
                 }
                 if (state.balance > state.maxBalance) state.maxBalance = state.balance;
                 
+                // Верхняя панель
                 $('balance-display').innerText = fmt(state.balance) + ' ₽';
-                $('lvl-text').innerText = 'Ур. ' + state.level;
+                $('lvl-text').innerHTML = `Ур.<br><span>${state.level}</span>`;
                 $('pts-text').innerText = '🍀 ' + state.points + 'ч';
                 $('spins-display').innerText = '🔥 ' + state.freeSpins;
                 $('xp-bar-fill').style.width = (state.points / needed * 100) + '%';
                 
-                if(state.currentOperator) {
-                    $('ui-op-name').innerText = state.currentOperator;
-                    $('current-operator').innerText = state.currentOperator;
-                }
+                if(state.currentOperator) $('ui-op-name').innerText = state.currentOperator;
 
                 if (state.freeSpins > 0) {
                     $('btn-market-gen').innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
                     $('btn-market-gen').style.background = '#17a2b8';
                 } else {
                     $('btn-market-gen').innerHTML = `Рынок<span>1 000 ₽</span>`;
-                    $('btn-market-gen').style.background = '#28a745';
+                    $('btn-market-gen').style.background = '#22c55e';
                 }
+
+                // Статистика
+                let invVal = state.inventory.reduce((s,i)=>s+i.price,0);
+                $('stat-balance').innerText = fmt(state.balance) + ' ₽';
+                $('stat-max-balance').innerText = fmt(state.maxBalance) + ' ₽';
+                $('stat-inv-val').innerText = fmt(invVal) + ' ₽';
+                $('stat-total-worth').innerText = fmt(state.balance + invVal) + ' ₽';
+                
+                $('stat-generated').innerText = state.totalGenerated;
+                $('stat-sold').innerText = state.totalSold;
+                $('stat-inv-count').innerText = state.inventory.length;
+                $('stat-best').innerText = state.bestNumber ? state.bestNumber.phone : '—';
                 
                 save();
             };
@@ -360,7 +401,6 @@
                 setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000);
             };
 
-            // Операторы
             function getRandomOperator() {
                 const operators = ["Биглайн", "МСТ", "Могофон", "Тел 2", "Тиф Карта"];
                 let op = operators[Math.floor(Math.random() * operators.length)];
@@ -372,19 +412,16 @@
                 return { op, xpMultiplier };
             }
 
-            // Градиент в углу
             const setCardGradient = (category) => {
                 const box = $('sim-gradient-box');
-                box.style.border = 'none';
                 if (category.includes("БРИЛЛИАНТОВЫЙ")) box.style.background = 'linear-gradient(135deg, #00ffff, #0055ff)';
                 else if (category.includes("ЗОЛОТОЙ")) box.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
                 else if (category.includes("СЕРЕБРЯНЫЙ")) box.style.background = 'linear-gradient(135deg, #e0e0e0, #888888)';
                 else if (category.includes("БРОНЗОВЫЙ")) box.style.background = 'linear-gradient(135deg, #cd7f32, #8b4513)';
                 else if (category.includes("КРАСИВОЕ") || category.includes("ЗЕРКАЛЬНЫЙ")) box.style.background = 'linear-gradient(135deg, #ff007f, #ff00ff)';
-                else { box.style.background = 'transparent'; box.style.border = '2px dashed #ccc'; }
+                else box.style.background = '#f3f4f6';
             };
 
-            // Генерация
             const generate = (type) => {
                 if (state.currentGen) return;
                 const cost = type * 1000;
@@ -410,6 +447,7 @@
                 const earnedXP = Math.floor(50 * xpM * (state.boostEnd > Date.now() ? state.boostMult : 1));
                 
                 state.currentGen = { phone: `+7 ${full.slice(0,3)} ${full.slice(3,6)}-${full.slice(6,8)}-${full.slice(8,10)}`, price, category: cat, xp: earnedXP };
+                state.totalGenerated++;
                 if(!state.bestNumber || price > state.bestNumber.price) state.bestNumber = state.currentGen;
                 
                 $('gen-buttons-row').style.display = 'none';
@@ -421,9 +459,7 @@
                 $('ui-cat').innerText = 'Поиск...';
                 $('price-tag').classList.remove('show');
                 $('reasons-box').classList.remove('show');
-                $('btn-show-info').classList.remove('show');
-                $('sim-gradient-box').style.background = 'transparent';
-                $('sim-gradient-box').style.border = '2px dashed #ccc';
+                $('sim-gradient-box').style.background = '#f3f4f6';
                 
                 const int = setInterval(() => {
                     SOUND.tick();
@@ -438,7 +474,6 @@
                         $('price-tag').classList.add('show');
                         $('reasons-box').innerHTML = 'Цена сформирована паттернами номера.';
                         $('reasons-box').classList.add('show');
-                        $('btn-show-info').classList.add('show');
                         setCardGradient(cat);
                         
                         if (price >= 500000) SOUND.mega();
@@ -452,7 +487,6 @@
                 }, 50);
             };
 
-            // Обработчики кнопок генерации
             $('btn-market-gen').onclick = () => { SOUND.click(); generate(1); };
             $('btn-shop-gen').onclick = () => { SOUND.click(); generate(5); };
             $('btn-jewelry-gen').onclick = () => { SOUND.click(); generate(20); };
@@ -479,18 +513,11 @@
                 $('ui-cat').innerText = 'Обычный';
                 $('price-tag').classList.remove('show');
                 $('reasons-box').classList.remove('show');
-                $('btn-show-info').classList.remove('show');
-                $('sim-gradient-box').style.background = 'transparent';
-                $('sim-gradient-box').style.border = '2px dashed #ccc';
+                $('sim-gradient-box').style.background = '#f3f4f6';
                 $('gen-buttons-row').style.display = 'flex';
                 $('action-btns-wrapper').style.display = 'none';
             };
 
-            $('btn-show-info').onclick = () => {
-                if(state.currentGen) showToast(`<b>${state.currentGen.category}</b><br>Шанс выпадения: ~${state.currentGen.price>1e6?'1%':'15%'}<br>XP: +${state.currentGen.xp}`);
-            };
-
-            // Меню
             $('btn-menu').onclick = () => $('side-menu').classList.add('open');
             document.addEventListener('click', e => {
                 if(!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) $('side-menu').classList.remove('open');
@@ -500,7 +527,6 @@
             $('menu-settings').onclick = () => { $('settings-screen').classList.add('show'); $('toggle-sound').checked = SOUND.isEnabled(); };
             $('menu-simwall').onclick = () => { $('simwall-screen').classList.add('show'); renderWall(); };
             
-            // Казино (Апгрейдер)
             $('menu-casino').onclick = () => { 
                 $('casino-screen').classList.add('show'); 
                 cSel = null;
@@ -560,16 +586,7 @@
                 }, 800);
             };
 
-            // Рюкзак
-            $('btn-menu').addEventListener('dblclick', () => { /* Секретная кнопка, не обращаем внимания */ });
-            
-            // Привязываем открытие рюкзака к кнопке "Симки" (в новой панели её нет, поэтому сделаем отдельно в меню)
-            const invBtn = document.createElement('div');
-            invBtn.className = 'menu-item';
-            invBtn.innerHTML = '<span>🎒</span> Мой Рюкзак';
-            invBtn.onclick = () => { $('side-menu').classList.remove('open'); openInv(); };
-            $('side-menu').prepend(invBtn);
-
+            $('menu-inv').onclick = () => { $('side-menu').classList.remove('open'); openInv(); };
             const openInv = () => {
                 $('inventory-screen').classList.add('show');
                 let html = '';
@@ -606,7 +623,6 @@
                 SOUND.sell(); updateUI(); showToast(`✅ Продано на ${fmt(total)} ₽`);
             };
 
-            // СИМ-стена
             const renderWall = () => {
                 let html = '';
                 for(let i=0; i<state.simwall.slotsUnlocked; i++) {
@@ -637,11 +653,9 @@
                 if(it) { state.inventory.push(it); state.simwall.items[i] = null; renderWall(); updateUI(); }
             };
 
-            // Настройки
             $('toggle-sound').onchange = (e) => SOUND.toggle(e.target.checked);
             $('btn-reset').onclick = () => { if(confirm('Удалить прогресс?')) { localStorage.clear(); location.reload(); } };
 
-            // СИМ-стена доход
             setInterval(() => {
                 let diff = Date.now() - state.simwall.lastTick;
                 if(diff >= 60000) {
@@ -653,13 +667,11 @@
                 }
             }, 1000);
 
-            // Инициализация
             if(state.currentGen) {
                 $('ui-phone').innerText = state.currentGen.phone;
                 $('ui-cat').innerText = state.currentGen.category;
                 $('price-tag').innerText = fmt(state.currentGen.price) + ' ₽';
                 $('price-tag').classList.add('show');
-                $('btn-show-info').classList.add('show');
                 setCardGradient(state.currentGen.category);
                 $('gen-buttons-row').style.display = 'none';
                 $('action-btns-wrapper').style.display = 'flex';
@@ -670,7 +682,6 @@
             document.body.addEventListener('click', () => SOUND.unlock(), {once:true});
             updateUI();
             
-            // Загрузка облака
             if(window.db) {
                 window.fbGet(window.fbRef(window.db, 'players/'+myId)).then(s => {
                     if(s.exists()) {
@@ -679,6 +690,8 @@
                         state.level = d.level || state.level;
                         state.inventory = d.inventory || state.inventory;
                         state.bestNumber = d.bestNumber || state.bestNumber;
+                        state.totalGenerated = d.totalGenerated || state.totalGenerated;
+                        state.totalSold = d.totalSold || state.totalSold;
                         state.simwall = d.simwall || state.simwall;
                         updateUI();
                     }
