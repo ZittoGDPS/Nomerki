@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏆 Лидерборд</title>
+
+    <!-- Telegram -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
+            authDomain: "nomerki-gam3.firebaseapp.com",
+            databaseURL: "https://nomerki-gam3-default-rtdb.firebaseio.com",
+            projectId: "nomerki-gam3",
+            storageBucket: "nomerki-gam3.firebasestorage.app",
+            messagingSenderId: "582885790988",
+            appId: "1:582885790988:web:ef8965c63a38da68d82529",
+            measurementId: "G-8EGEPGFF4H"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.fbRef = ref;
+        window.fbOnValue = onValue;
+        window.db = db;
+    </script>
+
+    <style>
+        :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
+        body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.4s, color 0.4s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Шапка */
+        #header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e1e1e;
+            color: white;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        #header h1 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #btn-refresh {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.15s, background 0.2s;
+        }
+        #btn-refresh:active { transform: scale(0.95); background: #006fa3; }
+        #btn-refresh:disabled { background: #444; cursor: not-allowed; }
+
+        /* Статистика сверху */
+        #stats-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: var(--card-bg);
+            margin: 10px 15px 0 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-box {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0088cc;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 3px;
+        }
+
+        /* Список */
+        #leaderboard-list {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .leader-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.1s;
+        }
+        .leader-item:active { transform: scale(0.98); }
+        .leader-item.is-me {
+            outline: 2px solid #0088cc;
+            background: rgba(0,136,204,0.08) !important;
+            color: var(--text-main) !important;
+        }
+
+        .leader-rank {
+            font-size: 18px;
+            font-weight: bold;
+            width: 40px;
+            color: var(--text-sub);
+            flex-shrink: 0;
+        }
+        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
+        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
+        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
+
+        .leader-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #0088cc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+        .leader-name {
+            flex: 1;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 15px;
+        }
+        .leader-balance {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 15px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .leader-item.is-me .leader-balance { color: #1e7e34; }
+
+        /* ТОП 3 */
+        .leader-item.top1 {
+            background: linear-gradient(135deg, #fff8e1, #ffd700) !important;
+            color: #1a1a1a !important;
+            border: 2px solid #ffb300;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        .leader-item.top1 .leader-avatar { background: #d4af37; }
+        .leader-item.top2 {
+            background: linear-gradient(135deg, #f5f5f5, #c0c0c0) !important;
+            color: #1a1a1a !important;
+            border: 2px solid #9e9e9e;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.6);
+        }
+        .leader-item.top2 .leader-avatar { background: #9e9e9e; }
+        .leader-item.top3 {
+            background: linear-gradient(135deg, #fbe9e7, #cd7f32) !important;
+            color: #1a1a1a !important;
+            border: 2px solid #a0522d;
+            box-shadow: 0 0 10px rgba(205, 127, 50, 0.6);
+        }
+        .leader-item.top3 .leader-avatar { background: #8b4513; }
+
+        /* Состояния */
+        .loading-state, .empty-state, .error-state {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+            color: var(--text-sub);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--card-bg);
+            border-top-color: #0088cc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Моя позиция внизу */
+        #my-position {
+            position: sticky;
+            bottom: 0;
+            padding: 12px 15px;
+            background: linear-gradient(180deg, transparent, var(--bg-color) 20%);
+            z-index: 50;
+        }
+        #my-position-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-radius: 12px;
+            background: #0088cc;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,136,204,0.5);
+        }
+        #my-position-inner .leader-rank { color: white !important; }
+        #my-position-inner .leader-balance { color: #ffcc00 !important; }
+        #my-position-inner .leader-avatar { background: rgba(255,255,255,0.25); }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>🏆 Топ 50 игроков</h1>
+        <button id="btn-refresh">Обновить</button>
+    </div>
+
+    <div id="stats-bar">
+        <div class="stat-box">
+            <div class="stat-value" id="stat-total-players">0</div>
+            <div class="stat-label">Игроков</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-total-balance">0 ₽</div>
+            <div class="stat-label">Общий капитал</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-my-rank">—</div>
+            <div class="stat-label">Моя позиция</div>
+        </div>
+    </div>
+
+    <div id="leaderboard-list">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            Загрузка лидерборда...
+        </div>
+    </div>
+
+    <div id="my-position" style="display:none;"></div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const tg = window.Telegram ? window.Telegram.WebApp : null;
+            if (tg) { tg.ready(); tg.expand(); }
+
+            // Определяем ID игрока
+            let myId = null;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('user_id')) {
+                myId = urlParams.get('user_id');
+            } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                myId = tg.initDataUnsafe.user.id.toString();
+            } else {
+                myId = localStorage.getItem('blum_browser_id') || null;
+            }
+
+            const savedEmailId = localStorage.getItem('blum_email_id');
+            if (savedEmailId) myId = savedEmailId;
+
+            // Тема
+            if (localStorage.getItem('blum_theme') === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            const listEl = document.getElementById('leaderboard-list');
+            const refreshBtn = document.getElementById('btn-refresh');
+            let currentPlayers = [];
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str == null ? '' : String(str);
+                return div.innerHTML;
+            }
+
+            function renderPlayers(players) {
+                if (!players || players.length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">😴 Пока нет игроков в рейтинге</div>';
+                    document.getElementById('my-position').style.display = 'none';
+                    return;
+                }
+
+                const top = players.slice(0, 50);
+
+                listEl.innerHTML = '';
+                top.forEach((p, i) => {
+                    const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                    const isMe = p.id === myId;
+                    const div = document.createElement('div');
+                    div.className = `leader-item ${rankClass} ${isMe ? 'is-me' : ''}`;
+                    div.innerHTML = `
+                        <div class="leader-rank ${rankClass}">#${i + 1}</div>
+                        <div class="leader-avatar">${escapeHtml(p.avatar)}</div>
+                        <div class="leader-name">${escapeHtml(p.name)}${isMe ? ' (Вы)' : ''}</div>
+                        <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
+                    `;
+                    listEl.appendChild(div);
+                });
+
+                // Находим мою позицию
+                const myIndex = players.findIndex(p => p.id === myId);
+                const myPosBox = document.getElementById('my-position');
+                const myRankEl = document.getElementById('stat-my-rank');
+
+                if (myIndex !== -1) {
+                    myRankEl.innerText = `#${myIndex + 1}`;
+                    if (myIndex >= 50) {
+                        const me = players[myIndex];
+                        myPosBox.style.display = 'block';
+                        myPosBox.innerHTML = `
+                            <div id="my-position-inner">
+                                <div class="leader-rank">#${myIndex + 1}</div>
+                                <div class="leader-avatar">${escapeHtml(me.avatar)}</div>
+                                <div class="leader-name">${escapeHtml(me.name)} (Вы)</div>
+                                <div class="leader-balance">${me.balance.toLocaleString('ru-RU')} ₽</div>
+                            </div>
+                        `;
+                    } else {
+                        myPosBox.style.display = 'none';
+                    }
+                } else {
+                    myRankEl.innerText = '—';
+                    myPosBox.style.display = 'none';
+                }
+            }
+
+            function loadLeaderboard() {
+                listEl.innerHTML = '<div class="loading-state"><div class="spinner"></div>Загрузка лидерборда...</div>';
+                refreshBtn.disabled = true;
+                refreshBtn.innerText = 'Загрузка...';
+
+                if (!window.db || !window.fbRef || !window.fbOnValue) {
+                    listEl.innerHTML = '<div class="error-state">❌ Ошибка подключения к базе данных</div>';
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerText = 'Обновить';
+                    return;
+                }
+
+                window.fbOnValue(window.fbRef(window.db, 'players'), (snapshot) => {
+                    const data = snapshot.val();
+                    const players = [];
+
+                    if (data) {
+                        for (const id in data) {
+                            const p = data[id];
+                            const name = (p.name || 'Игрок').toString();
+                            players.push({
+                                id,
+                                name,
+                                balance: Number(p.balance) || 0,
+                                avatar: name.charAt(0).toUpperCase() || '?'
+                            });
+                        }
+                    }
+
+                    players.sort((a, b) => b.balance - a.balance);
+                    currentPlayers = players;
+
+                    // Статистика
+                    document.getElementById('stat-total-players').innerText = players.length;
+                    const totalBalance = players.reduce((s, p) => s + p.balance, 0);
+                    document.getElementById('stat-total-balance').innerText =
+                        totalBalance.toLocaleString('ru-RU') + ' ₽';
+
+                    renderPlayers(players);
+
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerText = 'Обновить';
+                }, (error) => {
+                    console.error(error);
+                    listEl.innerHTML = '<div class="error-state">❌ Не удалось загрузить данные</div>';
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerText = 'Обновить';
+                });
+            }
+
+            refreshBtn.addEventListener('click', () => {
+                loadLeaderboard();
+            });
+
+            loadLeaderboard();
+        });
+    </script>
+</body>
+</html>
