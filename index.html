@@ -55,7 +55,7 @@
             animation: boostGlow 1s infinite alternate; font-family: sans-serif;
         }
         #boost-indicator.show { display: flex; }
-        .boost-bolt { font-size: 24px; line-height: 1; filter: drop-shadow(0 0 4px rgba(255, 255, 0, 0.9)); animation: boltShake 0.6s infinite alternate; }
+        .boost-bolt { font-size: 24px; line-height: 1; filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.9)); animation: boltShake 0.6s infinite alternate; }
         .boost-text { display: flex; flex-direction: column; line-height: 1.1; }
         .boost-mult { font-size: 16px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
         .boost-timer { font-size: 11px; opacity: 0.95; font-weight: 700; letter-spacing: 0.3px; }
@@ -488,6 +488,7 @@
             </div>
             <div class="setting-item"><span class="setting-text">Тёмная тема</span><label class="switch"><input type="checkbox" id="toggle-theme"><span class="slider"></span></label></div>
             <div class="setting-item"><span class="setting-text">Анимация</span><label class="switch"><input type="checkbox" id="toggle-animation" checked><span class="slider"></span></label></div>
+            <div class="setting-item"><span class="setting-text">Звуки</span><label class="switch"><input type="checkbox" id="toggle-sound" checked><span class="slider"></span></label></div>
             <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                 <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; align-items: center;">
                     <span class="setting-text">Предупреждение</span><label class="switch"><input type="checkbox" id="toggle-warning"><span class="slider"></span></label>
@@ -539,6 +540,110 @@
             const normPhoneKey = (v) => { let d = digitsOf(v); if (d.length === 11 && (d[0] === '7' || d[0] === '8')) d = d.slice(1); return d.length === 10 ? d : null; };
             const USERNAME_RE = /^(?=.*[a-z])[a-z0-9_]{3,32}$/;
             const lvlBadge = (it) => (it && it.lvl > 0) ? `<span class="lvl-badge">⭐${esc(it.lvl)}</span>` : '';
+
+            // ───────────── ЗВУКИ ─────────────
+            const SOUND = (() => {
+                let ctx = null;
+                let enabled = localStorage.getItem('blum_sound') !== 'false';
+
+                function getCtx() {
+                    if (!ctx) {
+                        try {
+                            const AC = window.AudioContext || window.webkitAudioContext;
+                            if (!AC) return null;
+                            ctx = new AC();
+                        } catch (e) { return null; }
+                    }
+                    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+                    return ctx;
+                }
+
+                function tone({ freq = 440, type = 'sine', duration = 0.15, volume = 0.15, attack = 0.01, release = 0.1, slideTo = null, delay = 0 } = {}) {
+                    if (!enabled) return;
+                    const c = getCtx();
+                    if (!c) return;
+                    const t0 = c.currentTime + delay;
+                    const osc = c.createOscillator();
+                    const gain = c.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, t0);
+                    if (slideTo !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t0 + duration);
+                    gain.gain.setValueAtTime(0.0001, t0);
+                    gain.gain.exponentialRampToValueAtTime(volume, t0 + attack);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration + release);
+                    osc.connect(gain).connect(c.destination);
+                    osc.start(t0);
+                    osc.stop(t0 + duration + release + 0.05);
+                }
+
+                function chord(freqs, opts = {}) {
+                    const spread = opts.spread || 0;
+                    const baseDelay = opts.delay || 0;
+                    freqs.forEach((f, i) => tone({ ...opts, freq: f, delay: baseDelay + i * spread }));
+                }
+
+                function noise({ duration = 0.5, volume = 0.12 } = {}) {
+                    if (!enabled) return;
+                    const c = getCtx();
+                    if (!c) return;
+                    const bufferSize = Math.floor(c.sampleRate * duration);
+                    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+                    const src = c.createBufferSource();
+                    src.buffer = buffer;
+                    const gain = c.createGain();
+                    gain.gain.value = volume;
+                    const filter = c.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 1200;
+                    src.connect(filter).connect(gain).connect(c.destination);
+                    src.start();
+                }
+
+                return {
+                    isEnabled: () => enabled,
+                    setEnabled(v) { enabled = !!v; localStorage.setItem('blum_sound', enabled ? 'true' : 'false'); if (enabled) this.click(); },
+                    unlock() { getCtx(); },
+                    click() { tone({ freq: 880, type: 'square', duration: 0.03, volume: 0.06 }); },
+                    genTick() { tone({ freq: 1600, type: 'square', duration: 0.02, volume: 0.04 }); },
+                    genSuccess() { chord([523.25, 659.25, 783.99], { type: 'sine', duration: 0.12, volume: 0.10, spread: 0.05 }); },
+                    genRare() {
+                        chord([523.25, 659.25, 783.99, 1046.5], { type: 'triangle', duration: 0.18, volume: 0.12, spread: 0.06 });
+                        tone({ freq: 1568, type: 'sine', duration: 0.4, volume: 0.10, delay: 0.25 });
+                    },
+                    genMega() {
+                        chord([261.63, 329.63, 392.0], { type: 'sawtooth', duration: 0.15, volume: 0.10, spread: 0.05 });
+                        setTimeout(() => chord([523.25, 659.25, 783.99, 1046.5], { type: 'triangle', duration: 0.25, volume: 0.13, spread: 0.05 }), 150);
+                        setTimeout(() => tone({ freq: 2093, type: 'sine', duration: 0.5, volume: 0.10 }), 400);
+                    },
+                    sell() {
+                        tone({ freq: 1200, type: 'sine', duration: 0.06, volume: 0.10 });
+                        tone({ freq: 1600, type: 'sine', duration: 0.10, volume: 0.10, delay: 0.06 });
+                    },
+                    buy() {
+                        tone({ freq: 600, type: 'triangle', duration: 0.08, volume: 0.10 });
+                        tone({ freq: 900, type: 'triangle', duration: 0.12, volume: 0.10, delay: 0.08 });
+                    },
+                    error() {
+                        tone({ freq: 220, type: 'square', duration: 0.15, volume: 0.10 });
+                        tone({ freq: 180, type: 'square', duration: 0.20, volume: 0.10, delay: 0.10 });
+                    },
+                    levelUp() {
+                        chord([523.25, 659.25, 783.99], { type: 'triangle', duration: 0.12, volume: 0.11, spread: 0.05 });
+                        setTimeout(() => chord([1046.5, 1318.5, 1568], { type: 'triangle', duration: 0.15, volume: 0.10, spread: 0.04 }), 200);
+                    },
+                    casinoWin() {
+                        chord([659.25, 783.99, 987.77, 1318.5], { type: 'triangle', duration: 0.15, volume: 0.12, spread: 0.06 });
+                        setTimeout(() => tone({ freq: 2093, type: 'sine', duration: 0.5, volume: 0.09 }), 300);
+                    },
+                    casinoLose() {
+                        noise({ duration: 0.6, volume: 0.15 });
+                        tone({ freq: 200, type: 'sawtooth', duration: 0.4, volume: 0.10, slideTo: 60 });
+                    },
+                    casinoSpin() { tone({ freq: 900, type: 'square', duration: 0.05, volume: 0.06, slideTo: 1400 }); }
+                };
+            })();
 
             function toInvItem(it) {
                 return {
@@ -699,6 +804,7 @@
                         this._state.boostEndTime = this.endTime;
                     }
                     showToast(`🚀 БУСТ! Множитель x${this.multiplier} на ${this.DURATION_MS / 1000} секунд!`);
+                    SOUND.levelUp();
                     this.tick();
                 },
                 tick() {
@@ -749,13 +855,14 @@
                     const lvl = item.lvl || 0;
                     if (lvl >= this.MAX_UPGRADES) { showToast('⭐ Номер уже улучшен до максимума!'); return; }
                     const cost = this.getUpgradeCost(item);
-                    if (state.balance < cost) { showToast('❌ Недостаточно средств!'); return; }
+                    if (state.balance < cost) { SOUND.error(); showToast('❌ Недостаточно средств!'); return; }
                     const gain = this.calculateIncome(item, lvl + 1) - this.calculateIncome(item, lvl);
                     if (!confirm(`Улучшить номер до ${lvl + 1}/${this.MAX_UPGRADES} за ${fmt(cost)} ₽?\nДоход вырастет на ${fmt(gain)} ₽/мин`)) return;
                     if (state.simwall.items[slotIndex] !== item || (item.lvl || 0) !== lvl || state.balance < cost) return;
                     state.balance -= cost;
                     item.lvl = lvl + 1;
                     this.render(); updateUI();
+                    SOUND.levelUp();
                     showToast(`⭐ Номер улучшен до ${item.lvl}/${this.MAX_UPGRADES}!`);
                 },
                 getTotalIncome() {
@@ -776,6 +883,7 @@
                             state.balance += income;
                             if (state.balance > state.maxBalance) state.maxBalance = state.balance;
                             showToast(`📱 СИМ-СТЕНА: +${fmt(income)} ₽`);
+                            SOUND.buy();
                             updateUI();
                         } else {
                             saveData();
@@ -867,6 +975,7 @@
                     state.inventory.splice(itemIndex, 1);
                     state.simwall.items[simwallSelectedSlotIndex] = item;
                     getEl('simwall-select-screen').style.display = 'none';
+                    SOUND.buy();
                     this.render(); updateUI(); showToast(`✅ Номер установлен на стену!`);
                 },
                 removeItem(slotIndex) {
@@ -874,15 +983,17 @@
                     if (!item) return;
                     state.inventory.push(item);
                     state.simwall.items[slotIndex] = null;
+                    SOUND.click();
                     this.render(); updateUI(); showToast(`Номер возвращён в рюкзак.`);
                 },
                 buySlot(slotIndex) {
                     if (slotIndex !== state.simwall.slotsUnlocked) return;
                     const cost = this.getSlotCost(slotIndex);
-                    if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
+                    if (state.balance < cost) { SOUND.error(); showToast("❌ Недостаточно средств!"); return; }
                     if (!confirm(`Купить слот ${slotIndex + 1} за ${fmt(cost)} ₽?`)) return;
                     state.balance -= cost;
                     state.simwall.slotsUnlocked++;
+                    SOUND.buy();
                     this.render(); updateUI(); showToast(`✅ Слот ${slotIndex + 1} куплен!`);
                 },
                 init() {
@@ -1060,6 +1171,7 @@
                     state.points -= ptsNeeded;
                     state.level++;
                     BOOST.give(state.level);
+                    SOUND.levelUp();
                     ptsNeeded = state.level * 100;
                 }
                 LEVEL_BONUS.apply(state);
@@ -1089,6 +1201,7 @@
                 getEl('toggle-theme').checked = state.isDarkTheme;
                 getEl('toggle-animation').checked = state.isAnimationEnabled;
                 getEl('toggle-warning').checked = state.useSellWarning;
+                getEl('toggle-sound').checked = SOUND.isEnabled();
                 const warnInput = getEl('input-warn-threshold');
                 if (document.activeElement !== warnInput) warnInput.value = state.warnThreshold;
 
@@ -1275,6 +1388,12 @@
                         setTimeout(() => { resDiv.classList.remove('shake-effect', 'flash-effect'); }, 1000);
                         showToast(`🔥 МЕГА-НОМЕР!<br>${esc(targetPhone)}<br>${fmt(price)} ₽`);
                     }
+                    if (!instant) {
+                        const cat = (category || '').toUpperCase();
+                        if (price >= 500000) { SOUND.genMega(); }
+                        else if (cat.includes('БРИЛЛИАНТ') || cat.includes('ЗОЛОТ')) { SOUND.genRare(); }
+                        else { SOUND.genSuccess(); }
+                    }
                     getEl('action-btns-wrapper').style.display = 'flex';
                     if (state.currentGen && state.currentGen.xpPending > 0) { state.points += state.currentGen.xpPending; state.currentGen.xpPending = 0; }
                     updateUI();
@@ -1325,6 +1444,7 @@
                     }
                     animPhone.innerText = currentStr.join('');
                     iterations += 1;
+                    SOUND.genTick();
 
                     if (iterations > targetChars.length) {
                         clearInterval(interval);
@@ -1412,14 +1532,14 @@
                     showToast('Юзернейм удалён.');
                     return;
                 }
-                if (!USERNAME_RE.test(lower)) { showToast('❌ Юзернейм: 3–32 символа, латиница, цифры и _, минимум одна буква.'); return; }
-                if (!dbReady() || !cloudReady) { showToast('❌ Нет связи с облаком. Попробуйте позже.'); return; }
+                if (!USERNAME_RE.test(lower)) { SOUND.error(); showToast('❌ Юзернейм: 3–32 символа, латиница, цифры и _, минимум одна буква.'); return; }
+                if (!dbReady() || !cloudReady) { SOUND.error(); showToast('❌ Нет связи с облаком. Попробуйте позже.'); return; }
 
                 if (old === lower) { state.username = raw; saveData(); renderProfile(); showToast('✅ Юзернейм сохранён.'); return; }
                 try {
                     const ok = await claimIndex('usernames/' + lower);
-                    if (!ok) { showToast('❌ Этот юзернейм уже занят.'); return; }
-                } catch (e) { showToast('❌ Не удалось сохранить юзернейм.'); return; }
+                    if (!ok) { SOUND.error(); showToast('❌ Этот юзернейм уже занят.'); return; }
+                } catch (e) { SOUND.error(); showToast('❌ Не удалось сохранить юзернейм.'); return; }
                 if (old) releaseIndex('usernames/' + old);
                 state.username = raw;
                 localStorage.removeItem('blum_username_optout');
@@ -1460,16 +1580,16 @@
             }
 
             async function setProfileNumber(phone) {
-                if (!state.inventory.some(it => it.phone === phone)) { showToast('❌ Этого номера нет в рюкзаке.'); return; }
+                if (!state.inventory.some(it => it.phone === phone)) { SOUND.error(); showToast('❌ Этого номера нет в рюкзаке.'); return; }
                 const key = normPhoneKey(phone);
-                if (!key) { showToast('❌ Неверный номер.'); return; }
+                if (!key) { SOUND.error(); showToast('❌ Неверный номер.'); return; }
                 if (state.profileNumber === phone) { getEl('number-select-screen').style.display = 'none'; return; }
-                if (!dbReady() || !cloudReady) { showToast('❌ Нет связи с облаком. Попробуйте позже.'); return; }
+                if (!dbReady() || !cloudReady) { SOUND.error(); showToast('❌ Нет связи с облаком. Попробуйте позже.'); return; }
                 try {
                     const ok = await claimIndex('phoneIndex/' + key);
-                    if (!ok) { showToast('❌ Этот номер уже закреплён за другим игроком.'); return; }
-                } catch (e) { showToast('❌ Не удалось сохранить номер.'); return; }
-                if (!state.inventory.some(it => it.phone === phone)) { releaseIndex('phoneIndex/' + key); showToast('❌ Номер уже не в рюкзаке.'); return; }
+                    if (!ok) { SOUND.error(); showToast('❌ Этот номер уже закреплён за другим игроком.'); return; }
+                } catch (e) { SOUND.error(); showToast('❌ Не удалось сохранить номер.'); return; }
+                if (!state.inventory.some(it => it.phone === phone)) { releaseIndex('phoneIndex/' + key); SOUND.error(); showToast('❌ Номер уже не в рюкзаке.'); return; }
                 const oldKey = state.profileNumber ? normPhoneKey(state.profileNumber) : null;
                 state.profileNumber = phone;
                 if (oldKey && oldKey !== key) releaseIndex('phoneIndex/' + oldKey);
@@ -1707,22 +1827,24 @@
                 const input = getEl('friend-add-input');
                 const q = input.value.trim();
                 if (!q) return;
-                if (!dbReady()) { showToast('❌ Нет подключения к базе.'); return; }
+                if (!dbReady()) { SOUND.error(); showToast('❌ Нет подключения к базе.'); return; }
                 addFriendBusy = true;
                 try {
                     const found = await findPlayer(q);
-                    if (found.error === 'format') { showToast('❌ Введите @юзернейм или номер игрока.'); return; }
-                    if (found.error === 'notfound') { showToast('❌ Игрок не найден.'); return; }
+                    if (found.error === 'format') { SOUND.error(); showToast('❌ Введите @юзернейм или номер игрока.'); return; }
+                    if (found.error === 'notfound') { SOUND.error(); showToast('❌ Игрок не найден.'); return; }
                     if (found.id === myId) { showToast('Это вы 🙂'); return; }
                     if (state.friends.includes(found.id)) { showToast('Этот игрок уже у вас в друзьях.'); return; }
-                    if (state.friends.length >= MAX_FRIENDS) { showToast(`❌ Максимум друзей: ${MAX_FRIENDS}.`); return; }
+                    if (state.friends.length >= MAX_FRIENDS) { SOUND.error(); showToast(`❌ Максимум друзей: ${MAX_FRIENDS}.`); return; }
                     state.friends.push(found.id);
                     saveData();
                     input.value = '';
+                    SOUND.buy();
                     showToast(`✅ ${esc(found.profile.name || 'Игрок')} добавлен в друзья!`);
                     if (friendsScreenOpen()) loadFriends();
                 } catch (e) {
                     console.log(e);
+                    SOUND.error();
                     showToast('❌ Не удалось найти игрока. Попробуйте ещё раз.');
                 } finally {
                     addFriendBusy = false;
@@ -1736,8 +1858,9 @@
                     state.friends = state.friends.filter(f => f !== id);
                     showToast('Игрок удалён из друзей.');
                 } else {
-                    if (state.friends.length >= MAX_FRIENDS) { showToast(`❌ Максимум друзей: ${MAX_FRIENDS}.`); return; }
+                    if (state.friends.length >= MAX_FRIENDS) { SOUND.error(); showToast(`❌ Максимум друзей: ${MAX_FRIENDS}.`); return; }
                     state.friends.push(id);
+                    SOUND.buy();
                     showToast('✅ Игрок добавлен в друзья!');
                 }
                 saveData();
@@ -1811,20 +1934,20 @@
                 try {
                     const snap = await window.fbGet(window.fbRef(window.db, 'market/' + key));
                     const preview = snap.val();
-                    if (!preview) { showToast("Лот уже продан!"); return; }
+                    if (!preview) { SOUND.error(); showToast("Лот уже продан!"); return; }
                     if (preview.sellerId === myId) return;
 
                     const previewPrice = Math.floor(num(preview.price));
-                    if (state.balance < previewPrice) { showToast("❌ Недостаточно средств!"); return; }
+                    if (state.balance < previewPrice) { SOUND.error(); showToast("❌ Недостаточно средств!"); return; }
                     if (!confirm(`Купить номер за ${fmt(previewPrice)} ₽?`)) return;
 
                     const lot = await claimLot(key);
-                    if (!lot) { showToast("Лот уже продан!"); return; }
+                    if (!lot) { SOUND.error(); showToast("Лот уже продан!"); return; }
 
                     const price = Math.floor(num(lot.price));
                     if (state.balance < price) {
                         await window.fbSet(window.fbRef(window.db, 'market/' + key), plain(lot));
-                        showToast("❌ Недостаточно средств!");
+                        SOUND.error(); showToast("❌ Недостаточно средств!");
                         return;
                     }
 
@@ -1833,6 +1956,7 @@
                     bought.category = categoryByPrice(bought.price);
                     state.inventory.push(bought);
                     updateUI();
+                    SOUND.buy();
                     showToast(`✅ Вы купили номер ${esc(lot.phone)}!`);
 
                     if (lot.sellerId) {
@@ -1843,6 +1967,7 @@
                     }
                 } catch (e) {
                     console.log(e);
+                    SOUND.error();
                     showToast("❌ Ошибка сделки. Попробуйте ещё раз.");
                 } finally {
                     marketBusy = false;
@@ -1856,10 +1981,10 @@
                 try {
                     const snap = await window.fbGet(window.fbRef(window.db, 'market/' + key));
                     const preview = snap.val();
-                    if (!preview) { showToast("Лот уже продан!"); return; }
+                    if (!preview) { SOUND.error(); showToast("Лот уже продан!"); return; }
                     if (preview.sellerId !== myId) return;
                     const lot = await claimLot(key);
-                    if (!lot) { showToast("Лот уже продан!"); return; }
+                    if (!lot) { SOUND.error(); showToast("Лот уже продан!"); return; }
                     // Возвращаем номер с ИСХОДНОЙ ценой (а не с ценой лота)
                     const restored = toInvItem({
                         ...lot,
@@ -1867,8 +1992,10 @@
                     });
                     state.inventory.push(restored);
                     updateUI();
+                    SOUND.click();
                     showToast("Лот снят, номер вернулся в рюкзак.");
                 } catch (e) {
+                    SOUND.error();
                     showToast("❌ Ошибка. Попробуйте ещё раз.");
                 } finally {
                     marketBusy = false;
@@ -1896,6 +2023,7 @@
                                 if (amt > 0) {
                                     state.balance += amt;
                                     showToast(`💸 Ваш номер купили: +${fmt(amt)} ₽`);
+                                    SOUND.sell();
                                     updateUI();
                                 }
                             }
@@ -1988,6 +2116,7 @@
                 const resultText = getEl('casino-result-text');
                 resultText.style.color = "";
                 resultText.innerText = "Крутим...";
+                SOUND.casinoSpin();
 
                 setTimeout(() => {
                     const idx = state.inventory.indexOf(item);
@@ -1999,6 +2128,7 @@
                         casinoBusy = false;
                         updateUI();
                         renderInventory();
+                        SOUND.casinoWin();
                         openCasino(`🎉 УСПЕХ! Номер улучшен до ${fmt(target)} ₽`, "#00ff00");
                     } else {
                         const selDiv = getEl('casino-inventory-list').querySelector('.casino-inv-item.selected');
@@ -2013,6 +2143,7 @@
                             casinoBusy = false;
                             updateUI();
                             renderInventory();
+                            SOUND.casinoLose();
                             openCasino(`😢 ПРОВАЛ... Номер сгорел.`, "#dc3545");
                         }, 600);
                     }
@@ -2055,6 +2186,7 @@
                 if (pidRow && !e.target.closest('button')) { openPlayerProfile(pidRow.getAttribute('data-pid')); return; }
                 const target = e.target.closest('button, .menu-item');
                 if (!target) return;
+                if (!target.disabled) SOUND.click();
 
                 if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
                 if (target.id === 'menu-simwall') { getEl('side-menu').classList.remove('open'); getEl('simwall-screen').style.display = 'flex'; SIM_WALL.render(); }
@@ -2106,7 +2238,7 @@
 
                     if (type === 1 && state.freeSpins > 0) state.freeSpins--;
                     else {
-                        if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
+                        if (state.balance < cost) { SOUND.error(); showToast("❌ Недостаточно средств!"); return; }
                         state.balance -= cost;
                     }
 
@@ -2137,6 +2269,7 @@
                     state.balance += state.currentGen.price; state.totalSold++;
                     state.currentGen = null;
                     resetGenUI();
+                    SOUND.sell();
                     updateUI();
                 }
 
@@ -2145,6 +2278,7 @@
                     state.inventory.push(toInvItem(state.currentGen));
                     state.currentGen = null;
                     resetGenUI();
+                    SOUND.buy();
                     updateUI();
                 }
 
@@ -2156,6 +2290,7 @@
                         if (!confirm(`Продать за ${fmt(item.price)} ₽?`)) return;
                     }
                     state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
+                    SOUND.sell();
                     updateUI(); renderInventory();
                 }
 
@@ -2167,8 +2302,8 @@
                     const inputPrice = prompt(`За сколько хотите продать номер ${item.phone}? (Вы получите 95%)`, Math.floor(item.price * 1.5));
                     if (inputPrice === null) return;
                     const listingPrice = parseInt(inputPrice);
-                    if (!Number.isFinite(listingPrice) || listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
-                    if (listingPrice > 10000000000) { showToast("Слишком большая цена."); return; }
+                    if (!Number.isFinite(listingPrice) || listingPrice < 100) { SOUND.error(); showToast("Минимальная цена: 100 ₽"); return; }
+                    if (listingPrice > 10000000000) { SOUND.error(); showToast("Слишком большая цена."); return; }
 
                     if (dbReady()) {
                         const itemDiv = target.closest('.inv-item');
@@ -2183,23 +2318,23 @@
                             updateUI();
                             renderInventory();
 
-                            // Сохраняем ИСХОДНУЮ цену номера в originalPrice,
-                            // чтобы при снятии лота вернуть её обратно, а не цену лота.
                             const lotRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
                             window.fbSet(lotRef, plain({
                                 phone: item.phone, price: listingPrice, originalPrice: item.price,
                                 category: item.category, chance: item.chance || '', reasons: item.reasons || [],
                                 lvl: item.lvl || 0, sellerId: myId, sellerName: myName, timestamp: Date.now()
                             })).then(() => {
+                                SOUND.sell();
                                 showToast(`✅ Лот выставлен на рынок!`);
                             }).catch(err => {
                                 console.log(err);
                                 state.inventory.push(item);
                                 updateUI(); renderInventory();
+                                SOUND.error();
                                 showToast("❌ Не удалось выставить лот, номер возвращён.");
                             });
                         }, 500);
-                    } else { showToast("❌ Ошибка подключения."); }
+                    } else { SOUND.error(); showToast("❌ Ошибка подключения."); }
                 }
 
                 if (target.id === 'btn-sell-all') {
@@ -2209,6 +2344,7 @@
                         if (!confirm(`Продать ВСЕ на ${fmt(total)} ₽?`)) return;
                     }
                     state.balance += total; state.totalSold += state.inventory.length; state.inventory = [];
+                    SOUND.sell();
                     updateUI(); renderInventory(); showToast(`✅ Вы получили ${fmt(total)} ₽`);
                 }
 
@@ -2217,8 +2353,8 @@
 
             getEl('btn-sync-email').addEventListener('click', async () => {
                 const email = getEl('sync-email-input').value.trim().toLowerCase();
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("❌ Неверный Email!"); return; }
-                if (!dbReady()) { showToast("❌ Нет подключения к базе."); return; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { SOUND.error(); showToast("❌ Неверный Email!"); return; }
+                if (!dbReady()) { SOUND.error(); showToast("❌ Нет подключения к базе."); return; }
 
                 const newId = keySafe("email_" + email);
                 showToast("🔄 Синхронизация...");
@@ -2244,6 +2380,7 @@
                     syncGenUI();
                     updateUI();
                 } catch (err) {
+                    SOUND.error();
                     showToast("❌ Не удалось связаться с облаком.");
                 }
             });
@@ -2274,6 +2411,7 @@
                 if (e.target.id === 'toggle-theme') { state.isDarkTheme = e.target.checked; document.body.classList.toggle('dark-theme', state.isDarkTheme); saveData(); }
                 if (e.target.id === 'toggle-animation') { state.isAnimationEnabled = e.target.checked; saveData(); }
                 if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
+                if (e.target.id === 'toggle-sound') { SOUND.setEnabled(e.target.checked); }
                 if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
             });
             getEl('casino-target-price').addEventListener('input', updateChanceDisplay);
@@ -2282,6 +2420,9 @@
 
             getEl('user-name-display').innerText = myName;
             if (state.isDarkTheme) document.body.classList.add('dark-theme');
+            SOUND.unlock();
+            document.addEventListener('touchstart', () => SOUND.unlock(), { once: true });
+            document.addEventListener('click', () => SOUND.unlock(), { once: true });
             BOOST.init(state);
             updateUI();
             syncGenUI();
