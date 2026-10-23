@@ -1,61 +1,108 @@
-function updateUI() {
-    getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-    getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-    getEl('bag-count').innerText = state.inventory.length;
-    getEl('lvl-text').innerText = `Уровень: ${state.level}`;
-    
-    if (state.balance > state.maxBalance) state.maxBalance = state.balance;
-    
-    let ptsNeeded = state.level * 100;
-    let totalBonus = 0;        // ← копим бонус (если перескочим сразу несколько уровней)
-    let levelsGained = [];     // ← какие "юбилейные" уровни достигнуты
+// ═══════════════════════════════════════════════════════════════════════
+// 🎁 LEVEL_BONUS — модуль наград за уровни
+// ─────────────────────────────────────────────────────────────────────
+// Каждый 10-й уровень даёт денежный бонус:
+//      10 ур.  → 10 000 ₽
+//      20 ур.  → 20 000 ₽
+//      30 ур.  → 30 000 ₽
+//      N  ур.  → (N / 10) × 10 000 ₽
+//
+// Работает бесконечно. Защита от повторной выдачи через localStorage.
+// Сам показывает уведомление и обновляет maxBalance.
+//
+// Публичный API:
+//   LEVEL_BONUS.apply(state)   → { totalBonus, levels, newLevel }
+//   LEVEL_BONUS.reset()        → сброс прогресса бонусов
+//   LEVEL_BONUS.amountForLevel(level) → сумма за конкретный уровень
+//   LEVEL_BONUS.getLastBonusLevel(currentLevel) → последний оплаченный уровень
+//   LEVEL_BONUS.setLastBonusLevel(level)        → вручную зафиксировать
+// ═══════════════════════════════════════════════════════════════════════
+const LEVEL_BONUS = (() => {
+    // ─── Конфигурация ───
+    const STORAGE_KEY = 'blum_last_bonus_level';
+    const STEP = 10;
+    const BASE_AMOUNT = 10000;
 
-    while (state.points >= ptsNeeded) {
-        state.points -= ptsNeeded;
-        state.level++;
+    // ─── Внутренние ───
+    const _amountForLevel = (level) => {
+        if (!Number.isFinite(level) || level <= 0) return 0;
+        if (level % STEP !== 0) return 0;
+        return (level / STEP) * BASE_AMOUNT;
+    };
 
-        // 🎁 БОНУС ЗА КАЖДЫЙ 10-Й УРОВЕНЬ (10, 20, 30, 40...)
-        if (state.level % 10 === 0) {
-            let bonus = (state.level / 10) * 10000;
-            totalBonus += bonus;
-            levelsGained.push(state.level);
+    const _getLastBonusLevel = (currentLevel) => {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw === null) {
+            const initial = Math.max(0, Math.floor(currentLevel) || 0);
+            localStorage.setItem(STORAGE_KEY, String(initial));
+            return initial;
+        }
+        const num = parseInt(raw, 10);
+        return Number.isFinite(num) ? num : 0;
+    };
+
+    const _setLastBonusLevel = (level) => {
+        localStorage.setItem(STORAGE_KEY, String(level));
+    };
+
+    const _reset = () => {
+        localStorage.removeItem(STORAGE_KEY);
+    };
+
+    // ─── Главный метод ───
+    const _apply = (state) => {
+        const result = { totalBonus: 0, levels: [], newLevel: 0 };
+        if (!state || typeof state.level !== 'number') return result;
+
+        result.newLevel = state.level;
+        const last = _getLastBonusLevel(state.level);
+
+        // Если игрок потерял уровень — синхронизируем указатель вниз
+        if (state.level < last) {
+            _setLastBonusLevel(state.level);
+            return result;
         }
 
-        giveBoost(state.level);
-        ptsNeeded = state.level * 100;
-    }
+        // Собираем все новые «круглые» уровни
+        for (let lvl = last + 1; lvl <= state.level; lvl++) {
+            if (lvl % STEP === 0) {
+                const bonus = _amountForLevel(lvl);
+                if (bonus > 0) {
+                    result.totalBonus += bonus;
+                    result.levels.push(lvl);
+                }
+            }
+        }
 
-    // Начисляем бонус и показываем уведомление
-    if (totalBonus > 0) {
-        state.balance += totalBonus;
-        if (state.balance > state.maxBalance) state.maxBalance = state.balance;
-        
-        let levelsText = levelsGained.join(', ');
-        showToast(
-            `🎉 Уровень ${levelsText}!<br>` +
-            `🎁 Бонус: +${totalBonus.toLocaleString('ru-RU')} ₽`
-        );
-    }
+        // Начисляем
+        if (result.totalBonus > 0) {
+            state.balance += result.totalBonus;
+            if (state.maxBalance !== undefined && state.balance > state.maxBalance) {
+                state.maxBalance = state.balance;
+            }
 
-    // Прогресс-бар (без ограничения уровня — до бесконечности)
-    getEl('pts-text').innerText = `Поинты: ${state.points} / ${ptsNeeded}`;
-    getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
+            // Уведомление (если showToast есть)
+            if (typeof showToast === 'function') {
+                showToast(
+                    `🎉 Уровень ${result.levels.join(', ')}!<br>` +
+                    `🎁 Бонус: +${result.totalBonus.toLocaleString('ru-RU')} ₽`
+                );
+            }
+        }
 
-    let btnMarketGen = getEl('btn-market-gen');
-    if (state.freeSpins > 0) {
-        btnMarketGen.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
-        btnMarketGen.style.background = '#17a2b8';
-    } else {
-        btnMarketGen.innerHTML = `Рынок<span>1 000 ₽</span>`;
-        btnMarketGen.style.background = '#28a745';
-    }
+        _setLastBonusLevel(state.level);
+        return result;
+    };
 
-    getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
-    getEl('toggle-animation').checked = state.isAnimationEnabled;
-    getEl('user-name-display').innerText = myName;
-
-    let btnAll = getEl('btn-sell-all');
-    btnAll.disabled = state.inventory.length === 0;
-    btnAll.innerText = state.inventory.length === 0 ? "Рюкзак пуст" : "Продать все номера (" + state.inventory.length + ")";
-    saveData();
-}
+    // ─── Публичный API ───
+    return {
+        STORAGE_KEY,
+        STEP,
+        BASE_AMOUNT,
+        apply: _apply,
+        reset: _reset,
+        amountForLevel: _amountForLevel,
+        getLastBonusLevel: _getLastBonusLevel,
+        setLastBonusLevel: _setLastBonusLevel
+    };
+})(); и
