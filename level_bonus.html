@@ -1,0 +1,61 @@
+function updateUI() {
+    getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
+    getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
+    getEl('bag-count').innerText = state.inventory.length;
+    getEl('lvl-text').innerText = `Уровень: ${state.level}`;
+    
+    if (state.balance > state.maxBalance) state.maxBalance = state.balance;
+    
+    let ptsNeeded = state.level * 100;
+    let totalBonus = 0;        // ← копим бонус (если перескочим сразу несколько уровней)
+    let levelsGained = [];     // ← какие "юбилейные" уровни достигнуты
+
+    while (state.points >= ptsNeeded) {
+        state.points -= ptsNeeded;
+        state.level++;
+
+        // 🎁 БОНУС ЗА КАЖДЫЙ 10-Й УРОВЕНЬ (10, 20, 30, 40...)
+        if (state.level % 10 === 0) {
+            let bonus = (state.level / 10) * 10000;
+            totalBonus += bonus;
+            levelsGained.push(state.level);
+        }
+
+        giveBoost(state.level);
+        ptsNeeded = state.level * 100;
+    }
+
+    // Начисляем бонус и показываем уведомление
+    if (totalBonus > 0) {
+        state.balance += totalBonus;
+        if (state.balance > state.maxBalance) state.maxBalance = state.balance;
+        
+        let levelsText = levelsGained.join(', ');
+        showToast(
+            `🎉 Уровень ${levelsText}!<br>` +
+            `🎁 Бонус: +${totalBonus.toLocaleString('ru-RU')} ₽`
+        );
+    }
+
+    // Прогресс-бар (без ограничения уровня — до бесконечности)
+    getEl('pts-text').innerText = `Поинты: ${state.points} / ${ptsNeeded}`;
+    getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
+
+    let btnMarketGen = getEl('btn-market-gen');
+    if (state.freeSpins > 0) {
+        btnMarketGen.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
+        btnMarketGen.style.background = '#17a2b8';
+    } else {
+        btnMarketGen.innerHTML = `Рынок<span>1 000 ₽</span>`;
+        btnMarketGen.style.background = '#28a745';
+    }
+
+    getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
+    getEl('toggle-animation').checked = state.isAnimationEnabled;
+    getEl('user-name-display').innerText = myName;
+
+    let btnAll = getEl('btn-sell-all');
+    btnAll.disabled = state.inventory.length === 0;
+    btnAll.innerText = state.inventory.length === 0 ? "Рюкзак пуст" : "Продать все номера (" + state.inventory.length + ")";
+    saveData();
+}
