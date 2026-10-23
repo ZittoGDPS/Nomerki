@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
-    
+
+    <!-- Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
+
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue, remove, runTransaction } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
@@ -24,15 +26,17 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.fbRemove = remove; window.db = db;
+
+        window.fbRef = ref; window.fbSet = set; window.fbGet = get; window.fbOnValue = onValue;
+        window.fbRemove = remove; window.fbRunTransaction = runTransaction; window.db = db;
     </script>
 
     <style>
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
-        body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
 
+        /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; width: 70%; }
         #user-name-display { font-size: 12px; color: #ffcc00; font-weight: bold; margin-bottom: 2px; }
@@ -41,9 +45,11 @@
         #xp-bar-container { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
         #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
         #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
-        
+
+        /* Кнопка меню */
         #btn-menu { border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 20px; }
 
+        /* ⚡ ИНДИКАТОР БУСТА */
         #boost-indicator {
             display: none; position: fixed; top: 70px; right: 15px;
             background: linear-gradient(135deg, #ff007f, #ff6b00);
@@ -64,16 +70,17 @@
         }
         @keyframes boltShake { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
+        /* Главный экран */
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
-        
-        .info-icon { 
-            position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; 
-            background: #0088cc; color: white; border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; 
-            font-weight: bold; font-family: serif; font-style: italic; 
-            cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+
+        .info-icon {
+            position: absolute; top: 10px; right: 10px; width: 24px; height: 24px;
+            background: #0088cc; color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-family: serif; font-style: italic;
+            cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             z-index: 10; pointer-events: auto;
         }
         .info-icon:active { transform: scale(0.9); }
@@ -84,6 +91,7 @@
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
         .chance-text { font-size: 12px; color: #888; margin-top: 5px; display: block; }
 
+        /* БЛОК ПРИЧИН ЦЕНЫ */
         .reasons-block {
             margin-top: 12px; padding: 10px 12px; background: rgba(0,136,204,0.06);
             border-left: 3px solid #0088cc; border-radius: 6px; font-size: 12px; text-align: left;
@@ -94,6 +102,7 @@
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
+        /* Нижние кнопки */
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         .shop-buttons-row { display: flex; gap: 10px; width: 100%; }
         .shop-btn { color: white; border: none; padding: 15px 5px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
@@ -103,11 +112,12 @@
         #btn-shop-gen { background: #fd7e14; }
         #btn-jewelry-gen { background: #dc3545; }
 
-        #btn-open-bag-float { 
-            position: fixed; bottom: 100px; left: 20px; 
-            background: #0088cc; color: white; border: none; 
-            padding: 15px; border-radius: 50%; font-size: 24px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 150; 
+        /* Кнопка Рюкзака */
+        #btn-open-bag-float {
+            position: fixed; bottom: 100px; left: 20px;
+            background: #0088cc; color: white; border: none;
+            padding: 15px; border-radius: 50%; font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 150;
             cursor: pointer; display: flex; justify-content: center; align-items: center; width: 60px; height: 60px;
         }
         #btn-open-bag-float:active { transform: scale(0.9); }
@@ -116,21 +126,25 @@
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
+        /* Всплывающее меню */
         #side-menu { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #1e1e1e; z-index: 999999; transition: right 0.3s ease; display: flex; flex-direction: column; padding-top: 60px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
         #side-menu.open { right: 0; }
         .menu-item { padding: 15px 20px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #333; transition: background 0.2s; }
         .menu-item:active { background: #333; }
         .menu-item span { font-size: 20px; }
 
+        /* Модальные окна */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
+        /* Рынок и Рюкзак */
         #inv-balance-box, #market-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
-        #inv-list, #market-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
-        
+        #inv-list, #market-list, #global-market-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
+        #global-market-list { padding-top: 15px; }
+
         .inv-item, .market-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); flex-wrap: wrap; gap: 10px;}
         .item-info { flex: 1; min-width: 150px;}
         .item-actions { display: flex; gap: 5px; }
@@ -166,7 +180,7 @@
         .profile-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .profile-row span:last-child { font-weight: bold; }
         .best-num { font-family: monospace; font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: rgba(0,136,204,0.1); margin-bottom: 5px; }
-        
+
         #info-current-number { font-size: 18px; padding: 12px; }
 
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
@@ -177,7 +191,7 @@
         .casino-inv-item.selected { border-color: #ffcc00; background: #333; }
         .casino-inv-item .num { font-family: monospace; font-size: 16px; font-weight: bold; }
         .casino-inv-item .prc { color: #28a745; font-weight: bold; }
-        
+
         @keyframes burnAnim {
             0% { transform: scale(1); opacity: 1; filter: none; border-color: #ffcc00; background: #333; }
             30% { transform: scale(1.05) rotate(2deg); filter: sepia(1) hue-rotate(-50deg) saturate(5); border-color: #ff0000; background: #3a0000; color: #ff0000; }
@@ -191,7 +205,8 @@
         .chance-display { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; color: #ffcc00; }
         .btn-spin { background: #dc3545; color: white; border: none; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: background 0.2s; }
         .btn-spin:active { background: #a71d2a; }
-        .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; height: 30px; }
+        .btn-spin:disabled { background: #555; cursor: not-allowed; }
+        .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; min-height: 30px; }
 
         #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
         .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; }
@@ -240,93 +255,25 @@
         .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); font-weight: 900; }
         .rarity-lucky { color: #ff007f !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); }
 
-        #toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #28a745, #1e7e34); color: white; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 99999999; text-align: center; width: 85%; box-sizing: border-box; animation: slideDown 0.4s forwards; }
+        #toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #28a745, #1e7e34); color: white; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 999999999; text-align: center; width: 85%; box-sizing: border-box; animation: slideDown 0.4s forwards; }
         @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
         /* СИМ-СТЕНА */
-        #simwall-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            padding: 15px; 
-            overflow-y: auto; 
-            flex: 1; 
-            align-content: start; 
-        }
-        .sim-slot { 
-            background: var(--card-bg); 
-            border-radius: 12px; 
-            padding: 12px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 130px; 
-            text-align: center; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
-            border: 2px solid transparent; 
-            transition: 0.3s; 
-            position: relative;
-        }
-        .sim-slot.locked { 
-            opacity: 0.75; 
-            border-color: #555; 
-            background: rgba(0,0,0,0.05); 
-        }
-        .sim-slot.empty { 
-            border: 2px dashed #0088cc; 
-            background: rgba(0,136,204,0.05); 
-            cursor: pointer;
-        }
-        .sim-slot.active { 
-            border-color: #28a745; 
-            background: rgba(40, 167, 69, 0.08);
-        }
-        .sim-slot .slot-label {
-            font-size: 10px; 
-            color: var(--text-sub); 
-            position: absolute;
-            top: 5px;
-            left: 8px;
-            font-weight: bold;
-        }
-        .sim-slot .s-phone { 
-            font-family: monospace; 
-            font-weight: bold; 
-            font-size: 12px; 
-            margin-bottom: 4px; 
-            word-break: break-all; 
-            margin-top: 10px;
-        }
-        .sim-slot .s-income { 
-            font-size: 13px; 
-            color: #28a745; 
-            font-weight: bold; 
-            margin-bottom: 8px; 
-        }
+        #simwall-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; flex: 1; align-content: start; }
+        .sim-slot { background: var(--card-bg); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.3s; position: relative; }
+        .sim-slot.locked { opacity: 0.75; border-color: #555; background: rgba(0,0,0,0.05); }
+        .sim-slot.empty { border: 2px dashed #0088cc; background: rgba(0,136,204,0.05); cursor: pointer; }
+        .sim-slot.active { border-color: #28a745; background: rgba(40, 167, 69, 0.08); }
+        .sim-slot .slot-label { font-size: 10px; color: var(--text-sub); position: absolute; top: 5px; left: 8px; font-weight: bold; }
+        .sim-slot .s-phone { font-family: monospace; font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-all; margin-top: 10px; }
+        .sim-slot .s-income { font-size: 13px; color: #28a745; font-weight: bold; margin-bottom: 8px; }
         .sim-slot .s-income span { font-size: 10px; font-weight: normal; color: var(--text-sub); }
-        .sim-slot button { 
-            padding: 6px 10px; 
-            font-size: 12px; 
-            border-radius: 5px; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: bold; 
-            width: 100%; 
-            transition: 0.2s; 
-            margin-top: auto;
-        }
+        .sim-slot button { padding: 6px 10px; font-size: 12px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; margin-top: auto; }
         .sim-slot button:active { transform: scale(0.95); }
         .s-btn-buy { background: #0088cc; color: white; }
         .s-btn-set { background: #28a745; color: white; }
         .s-btn-remove { background: #dc3545; color: white; }
-        
-        .empty-icon {
-            font-size: 24px; 
-            color: #0088cc; 
-            opacity: 0.7; 
-            margin-bottom: 5px;
-        }
+        .empty-icon { font-size: 24px; color: #0088cc; opacity: 0.7; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -350,12 +297,12 @@
             </div>
             <button id="btn-menu">☰</button>
         </div>
-        
+
         <div id="main-screen">
             <div id="custom-gen-result"><div class="info-icon" id="btn-show-info">i</div></div>
             <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
-        
+
         <button id="btn-open-bag-float">🎒 <span id="bag-count" style="font-size:14px; margin-left:5px;">0</span></button>
 
         <div id="bottom-action-area">
@@ -426,8 +373,8 @@
                 <div class="casino-input-group"><input type="number" id="casino-target-price" class="casino-input" placeholder="Желаемая цена"></div>
                 <div class="chance-display" id="casino-chance">Шанс: 0%</div>
                 <button class="btn-spin" id="btn-do-upgrade">Апгрейд!</button>
-                <div class="casino-result" id="casino-result-text"></div>
             </div>
+            <div class="casino-result" id="casino-result-text"></div>
         </div>
     </div>
 
@@ -495,7 +442,7 @@
 
             <div class="profile-section">
                 <h3>🎲 Шансы выпадения</h3>
-                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>< 0.001%</span></div>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>&lt; 0.001%</span></div>
                 <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>~1%</span></div>
                 <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>~5%</span></div>
                 <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>~15%</span></div>
@@ -541,6 +488,46 @@
             const tg = window.Telegram ? window.Telegram.WebApp : null;
             if (tg) { tg.ready(); tg.expand(); }
 
+            // ───────────── Хелперы ─────────────
+            const getEl = (id) => document.getElementById(id);
+            const esc = (s) => String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const num = (v) => { v = Number(v); return Number.isFinite(v) ? v : 0; };
+            const fmt = (n) => num(n).toLocaleString('ru-RU');
+            // Firebase запрещает в ключах . # $ [ ] /
+            const keySafe = (s) => String(s).replace(/[.#$\[\]\/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+            // Firebase не принимает undefined — чистим объект
+            const plain = (o) => JSON.parse(JSON.stringify(o));
+            const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return (v === null || v === undefined) ? fb : v; } catch (e) { return fb; } };
+            const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
+            const dbReady = () => !!(window.db && window.fbRef && window.fbSet && window.fbGet);
+
+            function toInvItem(it) {
+                return {
+                    phone: String(it.phone),
+                    price: Math.max(0, Math.floor(num(it.price))),
+                    category: String(it.category || 'Обычный'),
+                    chance: it.chance ? String(it.chance) : '',
+                    reasons: Array.isArray(it.reasons) ? it.reasons.map(String) : []
+                };
+            }
+            // Firebase превращает массивы в объекты/выкидывает пустые — нормализуем
+            function normInventory(v) {
+                const arr = Array.isArray(v) ? v : Object.values(v || {});
+                return arr.filter(x => x && x.phone).map(toInvItem);
+            }
+            function normSimwall(sw) {
+                const items = Array(10).fill(null);
+                if (sw && sw.items) {
+                    for (let i = 0; i < 10; i++) {
+                        const v = sw.items[i];
+                        items[i] = (v && v.phone) ? toInvItem(v) : null;
+                    }
+                }
+                const unlocked = Math.max(1, Math.min(10, parseInt(sw && sw.slotsUnlocked) || 1));
+                return { slotsUnlocked: unlocked, items, lastTick: num(sw && sw.lastTick) || Date.now() };
+            }
+
+            // ───────────── Идентификатор игрока ─────────────
             let myName = localStorage.getItem('blum_user_name') || "Игрок";
             let myId = null;
             const urlParams = new URLSearchParams(window.location.search);
@@ -560,30 +547,35 @@
 
             let savedEmailId = localStorage.getItem('blum_email_id');
             if (savedEmailId) { myId = savedEmailId; myName = localStorage.getItem('blum_user_name') || "Игрок"; }
+            myId = keySafe(myId);
+
+            // ───────────── Состояние ─────────────
+            let cloudReady = false;   // пока облако не загружено — в Firebase ничего не пишем
+            let resetting = false;
+
+            const savedFreeSpins = localStorage.getItem('blum_free_spins');
+            const savedOperator = localStorage.getItem('blum_operator');
 
             let state = {
                 balance: parseInt(localStorage.getItem('blum_balance')) || 0,
-                inventory: JSON.parse(localStorage.getItem('blum_inventory')) || [],
+                inventory: normInventory(readJSON('blum_inventory', [])),
                 isDarkTheme: localStorage.getItem('blum_theme') === 'dark',
                 points: parseInt(localStorage.getItem('blum_points')) || 0,
                 level: parseInt(localStorage.getItem('blum_level')) || 1,
                 useSellWarning: localStorage.getItem('blum_use_warning') === 'true',
                 warnThreshold: parseInt(localStorage.getItem('blum_warn_threshold')) || 100000,
-                boostMultiplier: 1,
+                boostMultiplier: parseFloat(localStorage.getItem('blum_boost_mult')) || 1,
                 boostEndTime: parseInt(localStorage.getItem('blum_boost_end')) || 0,
                 currentGen: null,
-                bestNumber: JSON.parse(localStorage.getItem('blum_best_number')) || null,
+                bestNumber: readJSON('blum_best_number', null),
                 totalGenerated: parseInt(localStorage.getItem('blum_total_generated')) || 0,
                 totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
                 maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
-                freeSpins: parseInt(localStorage.getItem('blum_free_spins')) || 10,
-                currentOperator: localStorage.getItem('blum_operator') || null,
+                // ВАЖНО: 0 — валидное значение (раньше `|| 10` сбрасывал спины при каждой перезагрузке)
+                freeSpins: savedFreeSpins === null ? 10 : (parseInt(savedFreeSpins) || 0),
+                currentOperator: (savedOperator && savedOperator !== 'null') ? savedOperator : null,
                 isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false',
-                simwall: JSON.parse(localStorage.getItem('blum_simwall')) || {
-                    slotsUnlocked: 1,
-                    items: Array(10).fill(null),
-                    lastTick: Date.now()
-                }
+                simwall: normSimwall(readJSON('blum_simwall', null))
             };
 
             // 💰 СТАРТОВЫЙ НАБОР
@@ -594,7 +586,7 @@
                 localStorage.setItem(STARTER_KEY, 'true');
                 localStorage.setItem('blum_balance', state.balance);
                 localStorage.setItem('blum_max_balance', state.maxBalance);
-                setTimeout(() => { if (typeof showToast === 'function') showToast('🎁 Стартовый набор: +100 000 ₽!'); }, 300);
+                setTimeout(() => showToast('🎁 Стартовый набор: +100 000 ₽!'), 300);
             }
 
             // 🎁 LEVEL_BONUS
@@ -612,8 +604,8 @@
                         localStorage.setItem(STORAGE_KEY, String(initial));
                         return initial;
                     }
-                    const num = parseInt(raw, 10);
-                    return Number.isFinite(num) ? num : 0;
+                    const n = parseInt(raw, 10);
+                    return Number.isFinite(n) ? n : 0;
                 };
                 const _setLastBonusLevel = (level) => localStorage.setItem(STORAGE_KEY, String(level));
                 const _reset = () => localStorage.removeItem(STORAGE_KEY);
@@ -632,7 +624,7 @@
                     if (result.totalBonus > 0) {
                         stateObj.balance += result.totalBonus;
                         if (stateObj.maxBalance !== undefined && stateObj.balance > stateObj.maxBalance) stateObj.maxBalance = stateObj.balance;
-                        if (typeof showToast === 'function') showToast(`🎉 Уровень ${result.levels.join(', ')}!<br>🎁 Бонус: +${result.totalBonus.toLocaleString('ru-RU')} ₽`);
+                        showToast(`🎉 Уровень ${result.levels.join(', ')}!<br>🎁 Бонус: +${fmt(result.totalBonus)} ₽`);
                     }
                     _setLastBonusLevel(stateObj.level);
                     return result;
@@ -661,46 +653,46 @@
                     if (this._state) {
                         this._state.boostMultiplier = this.multiplier;
                         this._state.boostEndTime = this.endTime;
-                        if (typeof saveData === 'function') saveData();
                     }
-                    if (typeof showToast === 'function') showToast(`🚀 БУСТ! Множитель x${this.multiplier} на ${this.DURATION_MS / 1000} секунд!`);
+                    showToast(`🚀 БУСТ! Множитель x${this.multiplier} на ${this.DURATION_MS / 1000} секунд!`);
                     this.tick();
                 },
                 tick() {
-                    const el = document.getElementById('boost-indicator');
+                    const el = getEl('boost-indicator');
                     if (!el) return;
                     const now = Date.now();
                     if (now < this.endTime) {
                         const timeLeft = Math.max(0, Math.ceil((this.endTime - now) / 1000));
                         el.classList.add('show');
-                        const multEl = document.getElementById('boost-mult');
-                        const timerEl = document.getElementById('boost-timer');
+                        const multEl = getEl('boost-mult');
+                        const timerEl = getEl('boost-timer');
                         if (multEl) multEl.innerText = `x${this.multiplier}`;
                         if (timerEl) timerEl.innerText = `${timeLeft}с`;
                     } else {
                         if (el.classList.contains('show')) el.classList.remove('show');
                         if (this.multiplier !== 1) {
                             this.multiplier = 1;
-                            if (this._state) { this._state.boostMultiplier = 1; if (typeof saveData === 'function') saveData(); }
+                            if (this._state) { this._state.boostMultiplier = 1; saveData(); }
                         }
                     }
                 },
                 getMultiplier() { return (Date.now() < this.endTime) ? this.multiplier : 1; }
             };
 
-            // 📱 СИМ-СТЕНА МОДУЛЬ
+            // 📱 СИМ-СТЕНА
             let simwallSelectedSlotIndex = null;
             const SIM_WALL = {
-                MAX_SLOTS: 10, BASE_PRICE: 25000, MINUTE_MS: 60000, OFFLINE_CAP_MIN: 1440,
+                MAX_SLOTS: 10, BASE_PRICE: 25000, MINUTE_MS: 60000, OFFLINE_CAP_MIN: 1440, _started: false,
                 getSlotCost(slotIndex) { return slotIndex === 0 ? 0 : slotIndex * this.BASE_PRICE; },
                 calculateIncome(item) {
                     if (!item || !item.price) return 0;
                     let base = item.price * 0.01;
                     let mult = 1;
-                    if (item.category.includes("БРИЛЛИАНТОВЫЙ")) mult = 10;
-                    else if (item.category.includes("ЗОЛОТОЙ")) mult = 5;
-                    else if (item.category.includes("СЕРЕБРЯНЫЙ")) mult = 2;
-                    else if (item.category.includes("БРОНЗОВЫЙ")) mult = 1.5;
+                    const cat = item.category || '';
+                    if (cat.includes("БРИЛЛИАНТОВЫЙ")) mult = 10;
+                    else if (cat.includes("ЗОЛОТОЙ")) mult = 5;
+                    else if (cat.includes("СЕРЕБРЯНЫЙ")) mult = 2;
+                    else if (cat.includes("БРОНЗОВЫЙ")) mult = 1.5;
                     return Math.floor(base * mult);
                 },
                 getTotalIncome() {
@@ -709,59 +701,67 @@
                     return total;
                 },
                 tick() {
-                    let now = Date.now();
-                    let diff = now - state.simwall.lastTick;
-                    let minutesPassed = Math.floor(diff / this.MINUTE_MS);
+                    const now = Date.now();
+                    if (state.simwall.lastTick > now) state.simwall.lastTick = now; // защита от сдвига часов
+                    const diff = now - state.simwall.lastTick;
+                    const minutesPassed = Math.floor(diff / this.MINUTE_MS);
                     if (minutesPassed > 0) {
-                        if (minutesPassed > this.OFFLINE_CAP_MIN) minutesPassed = this.OFFLINE_CAP_MIN;
-                        let income = this.getTotalIncome() * minutesPassed;
+                        // Платим максимум за OFFLINE_CAP_MIN, но таймер двигаем на ВСЁ прошедшее время
+                        // (раньше остаток копился и выплачивался повторно каждую секунду)
+                        const paidMinutes = Math.min(minutesPassed, this.OFFLINE_CAP_MIN);
+                        const income = this.getTotalIncome() * paidMinutes;
+                        state.simwall.lastTick += minutesPassed * this.MINUTE_MS;
                         if (income > 0) {
                             state.balance += income;
                             if (state.balance > state.maxBalance) state.maxBalance = state.balance;
-                            showToast(`📱 СИМ-СТЕНА: +${income.toLocaleString('ru-RU')} ₽`);
+                            showToast(`📱 СИМ-СТЕНА: +${fmt(income)} ₽`);
                             updateUI();
+                        } else {
+                            saveData();
                         }
-                        state.simwall.lastTick += minutesPassed * this.MINUTE_MS;
-                        saveData();
                     }
-                    let timeLeft = Math.max(0, Math.ceil((this.MINUTE_MS - (Date.now() - state.simwall.lastTick)) / 1000));
-                    let timerEl = getEl('simwall-timer');
+                    const timeLeft = Math.max(0, Math.ceil((this.MINUTE_MS - (Date.now() - state.simwall.lastTick)) / 1000));
+                    const timerEl = getEl('simwall-timer');
                     if (timerEl) timerEl.innerText = `Следующее начисление: ${timeLeft}с`;
                 },
                 render() {
-                    let grid = getEl('simwall-grid');
+                    const grid = getEl('simwall-grid');
                     if (!grid) return;
                     grid.innerHTML = '';
-                    getEl('simwall-total-income').innerText = this.getTotalIncome().toLocaleString('ru-RU') + ' ₽/мин';
+                    getEl('simwall-total-income').innerText = fmt(this.getTotalIncome()) + ' ₽/мин';
                     for (let i = 0; i < this.MAX_SLOTS; i++) {
-                        let isUnlocked = i < state.simwall.slotsUnlocked;
-                        let item = state.simwall.items[i];
-                        let cost = this.getSlotCost(i);
-                        let div = document.createElement('div');
-                        
+                        const isUnlocked = i < state.simwall.slotsUnlocked;
+                        const item = state.simwall.items[i];
+                        const cost = this.getSlotCost(i);
+                        const div = document.createElement('div');
+
                         if (!isUnlocked) {
                             div.className = `sim-slot locked`;
+                            // Покупать можно только следующий по порядку слот
+                            const canBuy = i === state.simwall.slotsUnlocked;
                             div.innerHTML = `
-                                <div class="slot-label">Слот ${i+1}</div>
+                                <div class="slot-label">Слот ${i + 1}</div>
                                 <div style="font-size:20px; margin-bottom:5px;">🔒</div>
-                                <button class="s-btn-buy" data-buy="${i}">Купить<br>${cost.toLocaleString('ru-RU')} ₽</button>
+                                ${canBuy
+                                    ? `<button class="s-btn-buy" data-buy="${i}">Купить<br>${fmt(cost)} ₽</button>`
+                                    : `<div style="font-size:11px; color:var(--text-sub); margin-top:auto;">Сначала купите<br>предыдущий слот</div>`}
                             `;
                         } else if (!item) {
                             div.className = `sim-slot empty`;
                             div.innerHTML = `
-                                <div class="slot-label">Слот ${i+1}</div>
+                                <div class="slot-label">Слот ${i + 1}</div>
                                 <div class="empty-icon">➕</div>
                                 <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px;">Добавить номер</div>
                                 <button class="s-btn-set" data-set="${i}">Установить</button>
                             `;
                         } else {
-                            let inc = this.calculateIncome(item);
-                            let rarityCls = getRarity(item.category).cls;
+                            const inc = this.calculateIncome(item);
+                            const rarityCls = getRarity(item.category).cls;
                             div.className = `sim-slot active`;
                             div.innerHTML = `
-                                <div class="slot-label">Слот ${i+1}</div>
-                                <div class="s-phone ${rarityCls}">${item.phone}</div>
-                                <div class="s-income">+${inc.toLocaleString('ru-RU')} <span>₽/мин</span></div>
+                                <div class="slot-label">Слот ${i + 1}</div>
+                                <div class="s-phone ${rarityCls}">${esc(item.phone)}</div>
+                                <div class="s-income">+${fmt(inc)} <span>₽/мин</span></div>
                                 <button class="s-btn-remove" data-remove="${i}">Снять</button>
                             `;
                         }
@@ -771,62 +771,67 @@
                 openSelect(slotIndex) {
                     simwallSelectedSlotIndex = slotIndex;
                     getEl('simwall-select-screen').style.display = 'flex';
-                    let list = getEl('simwall-select-list');
+                    const list = getEl('simwall-select-list');
                     list.innerHTML = '';
-                    let availableItems = state.inventory.filter(invItem => !state.simwall.items.some(swItem => swItem && swItem.phone === invItem.phone));
-                    if (availableItems.length === 0) { 
-                        list.innerHTML = '<div style="text-align:center; margin-top:20px; color: var(--text-sub);">Нет доступных номеров.<br>Купите или сгенерируйте новый.</div>'; 
-                        return; 
+                    if (state.inventory.length === 0) {
+                        list.innerHTML = '<div style="text-align:center; margin-top:20px; color: var(--text-sub);">Нет доступных номеров.<br>Купите или сгенерируйте новый.</div>';
+                        return;
                     }
-                    availableItems.forEach(item => {
-                        let rarity = getRarity(item.category);
-                        let inc = this.calculateIncome(item);
-                        let div = document.createElement('div');
+                    state.inventory.forEach(item => {
+                        const rarity = getRarity(item.category);
+                        const inc = this.calculateIncome(item);
+                        const div = document.createElement('div');
                         div.className = 'inv-item';
                         div.innerHTML = `
                             <div class="item-info">
-                                <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
-                                <div style="color:#28a745; font-size:13px;">Цена: ${item.price.toLocaleString('ru-RU')} ₽</div>
-                                <div style="color:#0088cc; font-size:13px; font-weight:bold;">Доход: +${inc.toLocaleString('ru-RU')} ₽/мин</div>
+                                <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${esc(item.phone)}</div>
+                                <div style="color:#28a745; font-size:13px;">Цена: ${fmt(item.price)} ₽</div>
+                                <div style="color:#0088cc; font-size:13px; font-weight:bold;">Доход: +${fmt(inc)} ₽/мин</div>
                             </div>
-                            <button class="btn-sell-item" data-select-phone="${item.phone}" style="background:#0088cc;">Выбрать</button>
+                            <button class="btn-sell-item" data-select-phone="${esc(item.phone)}" style="background:#0088cc;">Выбрать</button>
                         `;
                         list.appendChild(div);
                     });
                 },
                 assignItem(phone) {
                     if (simwallSelectedSlotIndex === null) return;
-                    let itemIndex = state.inventory.findIndex(it => it.phone === phone);
+                    if (state.simwall.items[simwallSelectedSlotIndex]) return;
+                    const itemIndex = state.inventory.findIndex(it => it.phone === phone);
                     if (itemIndex === -1) return;
-                    let item = state.inventory[itemIndex];
+                    const item = state.inventory[itemIndex];
                     state.inventory.splice(itemIndex, 1);
-                    state.simwall.items[simwallSelectedSlotIndex] = { phone: item.phone, price: item.price, category: item.category };
+                    state.simwall.items[simwallSelectedSlotIndex] = item;
                     getEl('simwall-select-screen').style.display = 'none';
-                    this.render(); updateUI(); saveData(); showToast(`✅ Номер установлен на стену!`);
+                    this.render(); updateUI(); showToast(`✅ Номер установлен на стену!`);
                 },
                 removeItem(slotIndex) {
-                    let item = state.simwall.items[slotIndex];
+                    const item = state.simwall.items[slotIndex];
                     if (!item) return;
                     state.inventory.push(item);
                     state.simwall.items[slotIndex] = null;
-                    this.render(); updateUI(); saveData(); showToast(`Номер возвращён в рюкзак.`);
+                    this.render(); updateUI(); showToast(`Номер возвращён в рюкзак.`);
                 },
                 buySlot(slotIndex) {
-                    let cost = this.getSlotCost(slotIndex);
+                    // Можно купить только следующий слот (раньше можно было заплатить за любой, а открывался следующий)
+                    if (slotIndex !== state.simwall.slotsUnlocked) return;
+                    const cost = this.getSlotCost(slotIndex);
                     if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
-                    if (!confirm(`Купить слот ${slotIndex + 1} за ${cost.toLocaleString('ru-RU')} ₽?`)) return;
+                    if (!confirm(`Купить слот ${slotIndex + 1} за ${fmt(cost)} ₽?`)) return;
                     state.balance -= cost;
                     state.simwall.slotsUnlocked++;
-                    this.render(); updateUI(); saveData(); showToast(`✅ Слот ${slotIndex + 1} куплен!`);
+                    this.render(); updateUI(); showToast(`✅ Слот ${slotIndex + 1} куплен!`);
                 },
                 init() {
+                    if (this._started) return;
+                    this._started = true;
                     this.tick();
                     setInterval(() => this.tick(), 1000);
                 }
             };
 
-            // СОХРАНЕНИЕ
+            // ───────────── Сохранение ─────────────
             function saveData() {
+                if (resetting) return;
                 localStorage.setItem('blum_balance', state.balance);
                 localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
                 localStorage.setItem('blum_theme', state.isDarkTheme ? 'dark' : 'light');
@@ -835,31 +840,61 @@
                 localStorage.setItem('blum_use_warning', state.useSellWarning);
                 localStorage.setItem('blum_warn_threshold', state.warnThreshold);
                 localStorage.setItem('blum_boost_end', state.boostEndTime);
+                localStorage.setItem('blum_boost_mult', state.boostMultiplier);
                 localStorage.setItem('blum_best_number', JSON.stringify(state.bestNumber));
                 localStorage.setItem('blum_total_generated', state.totalGenerated);
                 localStorage.setItem('blum_total_sold', state.totalSold);
                 localStorage.setItem('blum_max_balance', state.maxBalance);
                 localStorage.setItem('blum_free_spins', state.freeSpins);
-                localStorage.setItem('blum_operator', state.currentOperator);
+                if (state.currentOperator) localStorage.setItem('blum_operator', state.currentOperator);
+                else localStorage.removeItem('blum_operator');
                 localStorage.setItem('blum_animation', state.isAnimationEnabled);
                 localStorage.setItem('blum_user_name', myName);
                 localStorage.setItem('blum_simwall', JSON.stringify(state.simwall));
 
-                try {
-                    if (window.db && myId) {
-                        window.fbSet(window.fbRef(window.db, 'players/' + myId), {
+                if (cloudReady && dbReady()) {
+                    try {
+                        window.fbSet(window.fbRef(window.db, 'players/' + myId), plain({
                             name: myName, balance: state.balance, level: state.level, points: state.points,
                             inventory: state.inventory, bestNumber: state.bestNumber,
                             totalGenerated: state.totalGenerated, totalSold: state.totalSold,
-                            maxBalance: state.maxBalance, simwall: state.simwall, lastSeen: Date.now()
-                        });
-                    }
-                } catch (e) { console.log("Ошибка БД", e); }
+                            maxBalance: state.maxBalance, freeSpins: state.freeSpins,
+                            lastBonusLevel: LEVEL_BONUS.getLastBonusLevel(state.level),
+                            simwall: state.simwall, lastSeen: Date.now()
+                        })).catch(e => console.log("Ошибка БД", e));
+                    } catch (e) { console.log("Ошибка БД", e); }
+                }
             }
 
-            const getEl = (id) => document.getElementById(id);
+            // Применить данные, пришедшие из облака
+            function applyCloudData(data) {
+                state.balance = Math.floor(num(data.balance));
+                state.level = Math.max(1, parseInt(data.level) || 1);
+                state.points = Math.max(0, parseInt(data.points) || 0);
+                state.inventory = normInventory(data.inventory);
+                state.bestNumber = (data.bestNumber && data.bestNumber.phone) ? toInvItem(data.bestNumber) : null;
+                state.totalGenerated = parseInt(data.totalGenerated) || 0;
+                state.totalSold = parseInt(data.totalSold) || 0;
+                state.maxBalance = Math.floor(num(data.maxBalance));
+                if (data.freeSpins !== undefined && data.freeSpins !== null) state.freeSpins = Math.max(0, parseInt(data.freeSpins) || 0);
+                state.simwall = normSimwall(data.simwall);
+                // Чтобы бонусы за уровни не выдавались повторно на другом устройстве
+                const lb = (data.lastBonusLevel !== undefined && data.lastBonusLevel !== null) ? parseInt(data.lastBonusLevel) : state.level;
+                LEVEL_BONUS.setLastBonusLevel(Number.isFinite(lb) ? lb : state.level);
+            }
+
+            // ───────────── Рендер ─────────────
+            const CATEGORY_THRESHOLDS = [
+                [1000000000, "БРИЛЛИАНТОВЫЙ"], [1000000, "ЗОЛОТОЙ"], [100000, "СЕРЕБРЯНЫЙ"],
+                [10000, "БРОНЗОВЫЙ"], [1000, "КРАСИВОЕ ОКОНЧАНИЕ"]
+            ];
+            function categoryByPrice(price) {
+                for (const [limit, name] of CATEGORY_THRESHOLDS) if (price >= limit) return name;
+                return "Обычный";
+            }
 
             function getRarity(category) {
+                category = category || '';
                 if (category.includes("БРИЛЛИАНТОВЫЙ")) return { cls: "rarity-diamond", xp: 1000 };
                 if (category.includes("ЗОЛОТОЙ")) return { cls: "rarity-gold", xp: 150 };
                 if (category.includes("СЕРЕБРЯНЫЙ")) return { cls: "rarity-silver", xp: 50 };
@@ -876,7 +911,7 @@
                 let multiplier = 1;
                 let reasons = [];
                 const last2 = fullNum.slice(-2), last3 = fullNum.slice(-3), last4 = fullNum.slice(-4);
-                
+
                 if (/^(\d)\1{9}$/.test(fullNum)) { multiplier *= 100000; reasons.push("Все 10 цифр одинаковые — идеальный номер"); }
                 else if (/(\d)\1{7,}/.test(fullNum)) { multiplier *= 10000; reasons.push("8+ одинаковых цифр подряд — фантастика"); }
                 else if (/(\d)\1{6}/.test(fullNum)) { multiplier *= 2000; reasons.push("7 одинаковых цифр подряд"); }
@@ -893,7 +928,7 @@
                 const isSeq = (s) => {
                     const arr = s.split('').map(Number), diff = arr[1] - arr[0];
                     if (diff !== 1 && diff !== -1) return false;
-                    for (let i = 2; i < arr.length; i++) if (arr[i] - arr[i-1] !== diff) return false;
+                    for (let i = 2; i < arr.length; i++) if (arr[i] - arr[i - 1] !== diff) return false;
                     return true;
                 };
                 if (isSeq(last4)) { multiplier *= 8; reasons.push(`Последовательность в конце (${last4})`); }
@@ -913,12 +948,7 @@
                 if (price < basePrice) price = basePrice;
                 if (price > 1000000000) price = 1000000000;
 
-                let category = "Обычный";
-                if (price >= 1000000000) category = "БРИЛЛИАНТОВЫЙ";
-                else if (price >= 1000000) category = "ЗОЛОТОЙ";
-                else if (price >= 100000) category = "СЕРЕБРЯНЫЙ";
-                else if (price >= 10000) category = "БРОНЗОВЫЙ";
-                else if (price >= 1000) category = "КРАСИВОЕ ОКОНЧАНИЕ";
+                const category = categoryByPrice(price);
 
                 let chance = "< 0.001%";
                 if (category === "ЗОЛОТОЙ") chance = "~1%";
@@ -942,22 +972,16 @@
             }
 
             function showToast(text) {
-                let old = getEl('toast-notification');
+                const old = getEl('toast-notification');
                 if (old) old.remove();
-                let toast = document.createElement('div');
+                const toast = document.createElement('div');
                 toast.id = 'toast-notification'; toast.innerHTML = text;
                 document.body.appendChild(toast);
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
             }
 
             function updateUI() {
-                getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-                getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-                getEl('bag-count').innerText = state.inventory.length;
-                getEl('lvl-text').innerText = `Уровень: ${state.level}`;
-
-                if (state.balance > state.maxBalance) state.maxBalance = state.balance;
-
+                // 1. Сначала логика уровней/бонусов, потом отрисовка (раньше бонус появлялся в UI только со следующим обновлением)
                 let ptsNeeded = state.level * 100;
                 while (state.points >= ptsNeeded) {
                     state.points -= ptsNeeded;
@@ -965,13 +989,18 @@
                     BOOST.give(state.level);
                     ptsNeeded = state.level * 100;
                 }
-
                 LEVEL_BONUS.apply(state);
+                if (state.balance > state.maxBalance) state.maxBalance = state.balance;
 
+                // 2. Отрисовка
+                getEl('balance-display').innerText = fmt(state.balance) + ' ₽';
+                getEl('inv-balance-amount').innerText = fmt(state.balance) + ' ₽';
+                getEl('bag-count').innerText = state.inventory.length;
+                getEl('lvl-text').innerText = `Уровень: ${state.level}`;
                 getEl('pts-text').innerText = `Поинты: ${state.points} / ${ptsNeeded}`;
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
 
-                let btnMarketGen = getEl('btn-market-gen');
+                const btnMarketGen = getEl('btn-market-gen');
                 if (state.freeSpins > 0) {
                     btnMarketGen.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
                     btnMarketGen.style.background = '#17a2b8';
@@ -981,37 +1010,41 @@
                 }
 
                 getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
-                getEl('toggle-animation').checked = state.isAnimationEnabled;
                 getEl('user-name-display').innerText = myName;
 
-                let btnAll = getEl('btn-sell-all');
+                // Настройки отражают реальное состояние (раньше после перезагрузки тумблеры показывали значения по умолчанию)
+                document.body.classList.toggle('dark-theme', state.isDarkTheme);
+                getEl('toggle-theme').checked = state.isDarkTheme;
+                getEl('toggle-animation').checked = state.isAnimationEnabled;
+                getEl('toggle-warning').checked = state.useSellWarning;
+                const warnInput = getEl('input-warn-threshold');
+                if (document.activeElement !== warnInput) warnInput.value = state.warnThreshold;
+
+                const btnAll = getEl('btn-sell-all');
                 btnAll.disabled = state.inventory.length === 0;
                 btnAll.innerText = state.inventory.length === 0 ? "Рюкзак пуст" : "Продать все номера (" + state.inventory.length + ")";
-                
-                // Обновляем СИМ-СТЕНУ если она открыта
-                if (getEl('simwall-screen').style.display === 'flex') {
-                    SIM_WALL.render();
-                }
-                
+
+                if (getEl('simwall-screen').style.display === 'flex') SIM_WALL.render();
+
                 saveData();
             }
 
             function renderInventory() {
-                let list = getEl('inv-list');
+                const list = getEl('inv-list');
                 list.innerHTML = '';
                 if (state.inventory.length === 0) {
                     list.innerHTML = '<div style="text-align:center; margin-top:20px;">Рюкзак пуст.</div>';
                     return;
                 }
                 [...state.inventory].reverse().forEach((item, index) => {
-                    let realIndex = state.inventory.length - 1 - index;
-                    let rarity = getRarity(item.category);
-                    let div = document.createElement('div');
+                    const realIndex = state.inventory.length - 1 - index;
+                    const rarity = getRarity(item.category);
+                    const div = document.createElement('div');
                     div.className = 'inv-item';
                     div.innerHTML = `
                         <div class="item-info">
-                            <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
-                            <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
+                            <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${esc(item.phone)}</div>
+                            <div style="color:#28a745; font-size:14px; font-weight:bold;">${fmt(item.price)} ₽</div>
                         </div>
                         <div class="item-actions">
                             <button class="btn-sell-item" data-index="${realIndex}">Продать</button>
@@ -1026,29 +1059,30 @@
                 if (state.bestNumber) {
                     getEl('best-number-display').innerText = state.bestNumber.phone;
                     getEl('best-number-display').className = `best-num ${getRarity(state.bestNumber.category).cls}`;
-                    getEl('best-number-price').innerText = state.bestNumber.price.toLocaleString('ru-RU') + ' ₽';
+                    getEl('best-number-price').innerText = fmt(state.bestNumber.price) + ' ₽';
                 } else {
                     getEl('best-number-display').innerText = "Пока нет";
+                    getEl('best-number-display').className = 'best-num';
                     getEl('best-number-price').innerText = "0 ₽";
                 }
 
-                let top3Container = getEl('top3-inventory');
+                const top3Container = getEl('top3-inventory');
                 if (state.inventory.length === 0) {
                     top3Container.innerHTML = "Рюкзак пуст";
                 } else {
-                    let sortedInv = [...state.inventory].sort((a, b) => b.price - a.price).slice(0, 3);
+                    const sortedInv = [...state.inventory].sort((a, b) => b.price - a.price).slice(0, 3);
                     top3Container.innerHTML = sortedInv.map((item, i) => `
                         <div class="profile-row">
-                            <span class="${getRarity(item.category).cls}" style="font-family: monospace;">${i+1}. ${item.phone}</span>
-                            <span style="color:#28a745;">${item.price.toLocaleString('ru-RU')} ₽</span>
+                            <span class="${getRarity(item.category).cls}" style="font-family: monospace;">${i + 1}. ${esc(item.phone)}</span>
+                            <span style="color:#28a745;">${fmt(item.price)} ₽</span>
                         </div>
                     `).join('');
                 }
 
                 getEl('stat-generated').innerText = state.totalGenerated;
                 getEl('stat-sold').innerText = state.totalSold;
-                getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-                getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
+                getEl('stat-current-balance').innerText = fmt(state.balance) + ' ₽';
+                getEl('stat-max-balance').innerText = fmt(state.maxBalance) + ' ₽';
             }
 
             function openInfo() {
@@ -1060,7 +1094,7 @@
                     getEl('info-current-number').innerText = cg.phone;
                     getEl('info-current-number').className = `best-num ${cgRarity.cls}`;
                     getEl('info-current-category').innerText = cg.category;
-                    getEl('info-current-price').innerText = cg.price.toLocaleString('ru-RU') + ' ₽';
+                    getEl('info-current-price').innerText = fmt(cg.price) + ' ₽';
                     getEl('info-current-xp').innerText = '+' + cgRarity.xp + ' XP';
                     getEl('info-current-chance').innerText = cg.chance || '—';
 
@@ -1068,7 +1102,7 @@
                     const reasonsList = getEl('info-reasons-list');
                     if (cg.reasons && cg.reasons.length > 0) {
                         reasonsSection.style.display = 'block';
-                        reasonsList.innerHTML = cg.reasons.map(r => `<li>${r}</li>`).join('');
+                        reasonsList.innerHTML = cg.reasons.map(r => `<li>${esc(r)}</li>`).join('');
                     } else {
                         reasonsSection.style.display = 'none';
                     }
@@ -1088,19 +1122,18 @@
 
                 const nextBonusLevel = (Math.floor(state.level / 10) + 1) * 10;
                 const nextBonusAmount = (nextBonusLevel / 10) * 10000;
-                getEl('info-next-bonus').innerText = `${nextBonusLevel} ур. → ${nextBonusAmount.toLocaleString('ru-RU')} ₽`;
+                getEl('info-next-bonus').innerText = `${nextBonusLevel} ур. → ${fmt(nextBonusAmount)} ₽`;
 
                 const boostLeft = Math.max(0, Math.ceil((state.boostEndTime - Date.now()) / 1000));
-                if (boostLeft > 0) getEl('info-boost').innerText = `⚡ x${state.boostMultiplier} (${boostLeft}с)`;
-                else getEl('info-boost').innerText = 'Нет';
+                getEl('info-boost').innerText = boostLeft > 0 ? `⚡ x${state.boostMultiplier} (${boostLeft}с)` : 'Нет';
 
                 getEl('info-free-spins').innerText = state.freeSpins;
 
                 const invValue = state.inventory.reduce((s, it) => s + it.price, 0);
-                getEl('info-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-                getEl('info-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
-                getEl('info-inventory-value').innerText = invValue.toLocaleString('ru-RU') + ' ₽';
-                getEl('info-total-worth').innerText = (state.balance + invValue).toLocaleString('ru-RU') + ' ₽';
+                getEl('info-balance').innerText = fmt(state.balance) + ' ₽';
+                getEl('info-max-balance').innerText = fmt(state.maxBalance) + ' ₽';
+                getEl('info-inventory-value').innerText = fmt(invValue) + ' ₽';
+                getEl('info-total-worth').innerText = fmt(state.balance + invValue) + ' ₽';
 
                 getEl('info-total-generated').innerText = state.totalGenerated;
                 getEl('info-total-sold').innerText = state.totalSold;
@@ -1108,11 +1141,10 @@
 
                 if (state.bestNumber) {
                     const best = state.bestNumber;
-                    const bestRarity = getRarity(best.category);
                     const bestEl = getEl('info-best-number');
                     bestEl.innerText = best.phone;
-                    bestEl.className = bestRarity.cls;
-                    getEl('info-best-price').innerText = best.price.toLocaleString('ru-RU') + ' ₽';
+                    bestEl.className = getRarity(best.category).cls;
+                    getEl('info-best-price').innerText = fmt(best.price) + ' ₽';
                 } else {
                     getEl('info-best-number').innerText = '—';
                     getEl('info-best-number').className = '';
@@ -1123,31 +1155,35 @@
             }
 
             function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP, chance, reasons) {
-                let resDiv = getEl('custom-gen-result');
-                let btnRow = getEl('gen-buttons-row');
+                const resDiv = getEl('custom-gen-result');
+                const btnRow = getEl('gen-buttons-row');
                 btnRow.style.display = 'none';
                 resDiv.classList.add('force-show');
-                
-                if (!state.isAnimationEnabled) {
-                    resDiv.innerHTML = `
-                        <div class="info-icon" id="btn-show-info">i</div>
-                        <div class="phone-number ${rarityClass}">${targetPhone}</div>
-                        <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
-                        <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
-                        <div class="chance-text">🎲 Шанс выпадения: ${chance}</div>
-                        <div class="reasons-block">
-                            <div class="reasons-title">💡 Почему такая цена:</div>
-                            <ul class="reasons-list">${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
-                        </div>
-                    `;
+
+                const finish = () => {
                     if (price >= 500000) {
                         resDiv.classList.add('shake-effect', 'flash-effect');
                         setTimeout(() => { resDiv.classList.remove('shake-effect', 'flash-effect'); }, 1000);
-                        showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
+                        showToast(`🔥 МЕГА-НОМЕР!<br>${esc(targetPhone)}<br>${fmt(price)} ₽`);
                     }
                     getEl('action-btns-wrapper').style.display = 'flex';
                     state.points += earnedXP;
                     updateUI();
+                };
+
+                if (!state.isAnimationEnabled) {
+                    resDiv.innerHTML = `
+                        <div class="info-icon" id="btn-show-info">i</div>
+                        <div class="phone-number ${rarityClass}">${esc(targetPhone)}</div>
+                        <div class="price-tag">${fmt(price)} ₽</div>
+                        <div class="category-text">${esc(category)} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
+                        <div class="chance-text">🎲 Шанс выпадения: ${esc(chance)}</div>
+                        <div class="reasons-block">
+                            <div class="reasons-title">💡 Почему такая цена:</div>
+                            <ul class="reasons-list">${reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+                        </div>
+                    `;
+                    finish();
                     return;
                 }
 
@@ -1163,111 +1199,111 @@
                     </div>
                 `;
 
-                let animPhone = getEl('anim-phone');
-                let animPrice = getEl('anim-price');
-                let animCategory = getEl('anim-category');
-                let animChance = getEl('anim-chance');
-                let animReasons = getEl('anim-reasons');
-                let animReasonsList = getEl('anim-reasons-list');
-                let targetChars = targetPhone.split('');
-                let currentStr = "+7-XXX-XXX-XX-XX".split('');
+                const animPhone = getEl('anim-phone');
+                const animPrice = getEl('anim-price');
+                const animCategory = getEl('anim-category');
+                const animChance = getEl('anim-chance');
+                const animReasons = getEl('anim-reasons');
+                const animReasonsList = getEl('anim-reasons-list');
+                const targetChars = targetPhone.split('');
+                const currentStr = "+7-XXX-XXX-XX-XX".split('');
                 let iterations = 0;
-                
-                let interval = setInterval(() => {
+
+                const interval = setInterval(() => {
                     for (let i = 0; i < targetChars.length; i++) {
                         if (targetChars[i] === '-' || targetChars[i] === '+') currentStr[i] = targetChars[i];
                         else currentStr[i] = (i < iterations) ? targetChars[i] : Math.floor(Math.random() * 10).toString();
                     }
                     animPhone.innerText = currentStr.join('');
                     iterations += 1;
-                    
+
                     if (iterations > targetChars.length) {
                         clearInterval(interval);
                         animPhone.innerText = targetPhone;
                         animPhone.className = `phone-number ${rarityClass}`;
-                        animPrice.innerText = price.toLocaleString('ru-RU') + ' ₽';
+                        animPrice.innerText = fmt(price) + ' ₽';
                         animPrice.style.opacity = '1';
-                        animCategory.innerHTML = `${category} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
+                        animCategory.innerHTML = `${esc(category)} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
                         animCategory.style.opacity = '1';
                         animChance.innerText = `🎲 Шанс выпадения: ${chance}`;
                         animChance.style.opacity = '1';
-                        
-                        animReasonsList.innerHTML = reasons.map(r => `<li>${r}</li>`).join('');
+                        animReasonsList.innerHTML = reasons.map(r => `<li>${esc(r)}</li>`).join('');
                         animReasons.style.opacity = '1';
-                        
-                        if (price >= 500000) {
-                            resDiv.classList.add('shake-effect', 'flash-effect');
-                            setTimeout(() => { resDiv.classList.remove('shake-effect', 'flash-effect'); }, 1000);
-                            showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
-                        }
-
-                        getEl('action-btns-wrapper').style.display = 'flex';
-                        state.points += earnedXP;
-                        updateUI();
+                        finish();
                     }
                 }, 50);
             }
 
-            function openLeaderboard() {
+            // ───────────── Лидерборд ─────────────
+            async function openLeaderboard() {
                 getEl('leaderboard-screen').style.display = 'flex';
-                let list = getEl('leaderboard-list');
+                const list = getEl('leaderboard-list');
                 list.innerHTML = 'Загрузка...';
 
-                if (!window.db || !window.fbRef || !window.fbOnValue) {
-                    list.innerHTML = 'Ошибка подключения к базе.';
-                    return;
-                }
+                if (!dbReady()) { list.innerHTML = 'Ошибка подключения к базе.'; return; }
 
-                window.fbOnValue(window.fbRef(window.db, 'players'), (snapshot) => {
-                    let data = snapshot.val();
+                try {
+                    const snapshot = await window.fbGet(window.fbRef(window.db, 'players'));
+                    const data = snapshot.val();
                     let players = [];
                     if (data) {
-                        for (let id in data) {
-                            let p = data[id];
-                            players.push({
-                                id: id, name: p.name || "Игрок", balance: p.balance || 0,
-                                avatar: (p.name || "И").charAt(0).toUpperCase(), isYou: id === myId
-                            });
+                        for (const id in data) {
+                            const p = data[id] || {};
+                            const nm = String(p.name || "Игрок");
+                            players.push({ id, name: nm, balance: num(p.balance), avatar: nm.charAt(0).toUpperCase(), isYou: id === myId });
                         }
                     }
                     players.sort((a, b) => b.balance - a.balance);
                     players = players.slice(0, 50);
 
                     list.innerHTML = '';
-                    if(players.length === 0) { list.innerHTML = 'Пока нет игроков.'; return; }
+                    if (players.length === 0) { list.innerHTML = 'Пока нет игроков.'; return; }
 
                     players.forEach((p, i) => {
-                        let rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-                        let div = document.createElement('div');
+                        const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                        const div = document.createElement('div');
                         div.className = `leader-item ${rankClass}`;
                         div.innerHTML = `
-                            <div class="leader-rank">#${i+1}</div>
-                            <div class="leader-avatar">${p.avatar}</div>
-                            <div class="leader-name">${p.name} ${p.isYou ? '(Вы)' : ''}</div>
-                            <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
+                            <div class="leader-rank">#${i + 1}</div>
+                            <div class="leader-avatar">${esc(p.avatar)}</div>
+                            <div class="leader-name">${esc(p.name)} ${p.isYou ? '(Вы)' : ''}</div>
+                            <div class="leader-balance">${fmt(p.balance)} ₽</div>
                         `;
                         list.appendChild(div);
                     });
-                });
+                } catch (e) {
+                    list.innerHTML = 'Не удалось загрузить лидерборд.';
+                }
+            }
+
+            // ───────────── Глобальный рынок ─────────────
+            let unsubMarket = null;
+            let marketBusy = false;
+
+            function closeGlobalMarket() {
+                if (unsubMarket) { unsubMarket(); unsubMarket = null; }
+                getEl('global-market-screen').style.display = 'none';
             }
 
             function openGlobalMarket() {
                 getEl('global-market-screen').style.display = 'flex';
-                let list = getEl('global-market-list');
+                const list = getEl('global-market-list');
                 list.innerHTML = 'Загрузка...';
 
-                if (!window.db || !window.fbRef || !window.fbOnValue) {
-                    list.innerHTML = 'Ошибка подключения к базе.';
-                    return;
-                }
+                if (!dbReady() || !window.fbOnValue) { list.innerHTML = 'Ошибка подключения к базе.'; return; }
+                if (unsubMarket) { unsubMarket(); unsubMarket = null; }
 
-                window.fbOnValue(window.fbRef(window.db, 'market'), (snapshot) => {
-                    let data = snapshot.val();
-                    let items = [];
+                // Подписка одна и отписывается при закрытии (раньше слушатели копились при каждом открытии)
+                unsubMarket = window.fbOnValue(window.fbRef(window.db, 'market'), (snapshot) => {
+                    const data = snapshot.val();
+                    const items = [];
                     if (data) {
-                        for (let id in data) items.push({ ...data[id], key: id });
+                        for (const id in data) {
+                            const it = data[id];
+                            if (it && it.phone) items.push({ ...it, key: id });
+                        }
                     }
-                    items.sort((a, b) => b.price - a.price);
+                    items.sort((a, b) => num(b.price) - num(a.price));
 
                     list.innerHTML = '';
                     if (items.length === 0) {
@@ -1276,161 +1312,281 @@
                     }
 
                     items.forEach(item => {
-                        let rarity = getRarity(item.category);
-                        let isMyItem = item.sellerId === myId;
-                        let div = document.createElement('div');
+                        const rarity = getRarity(item.category);
+                        const isMyItem = item.sellerId === myId;
+                        const div = document.createElement('div');
                         div.className = 'market-item';
                         div.innerHTML = `
                             <div class="item-info">
-                                <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
-                                <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
-                                <div style="font-size:11px; color:#aaa;">Продавец: ${item.sellerName} ${isMyItem ? '(Вы)' : ''}</div>
+                                <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${esc(item.phone)}</div>
+                                <div style="color:#28a745; font-size:14px; font-weight:bold;">${fmt(item.price)} ₽</div>
+                                <div style="font-size:11px; color:#aaa;">Продавец: ${esc(item.sellerName)} ${isMyItem ? '(Вы)' : ''}</div>
                             </div>
-                            ${isMyItem 
-                                ? `<button class="btn-close-market-item" style="background:#dc3545;color:white;border:none;padding:8px;border-radius:5px;cursor:pointer;" data-key="${item.key}">Снять</button>` 
-                                : `<button class="btn-buy-market" style="background:#28a745;color:white;border:none;padding:8px 12px;border-radius:5px;cursor:pointer;font-weight:bold;" data-key="${item.key}" data-price="${item.price}" data-seller="${item.sellerId}">Купить</button>`
+                            ${isMyItem
+                                ? `<button class="btn-close-market-item" style="background:#dc3545;color:white;border:none;padding:8px;border-radius:5px;cursor:pointer;" data-key="${esc(item.key)}">Снять</button>`
+                                : `<button class="btn-buy-market" style="background:#28a745;color:white;border:none;padding:8px 12px;border-radius:5px;cursor:pointer;font-weight:bold;" data-key="${esc(item.key)}">Купить</button>`
                             }
                         `;
                         list.appendChild(div);
                     });
+                }, () => { list.innerHTML = 'Ошибка загрузки рынка.'; });
+            }
 
-                    document.querySelectorAll('.btn-buy-market').forEach(btn => {
-                        btn.onclick = () => buyMarketItem(btn.getAttribute('data-key'), parseInt(btn.getAttribute('data-price')), btn.getAttribute('data-seller'));
-                    });
-                    document.querySelectorAll('.btn-close-market-item').forEach(btn => {
-                        btn.onclick = () => {
-                            if(confirm("Снять лот с продажи?")) {
-                                window.fbRemove(window.fbRef(window.db, 'market/' + btn.getAttribute('data-key')));
-                                showToast("Лот снят.");
+            // Атомарно забрать лот с рынка: победит только один покупатель
+            async function claimLot(key) {
+                let claimed = null;
+                await window.fbRunTransaction(window.fbRef(window.db, 'market/' + key), (cur) => { claimed = cur; return null; });
+                return (claimed && claimed.phone) ? claimed : null;
+            }
+
+            async function buyMarketItem(key) {
+                if (marketBusy || !dbReady() || !window.fbRunTransaction) return;
+                marketBusy = true;
+                try {
+                    const snap = await window.fbGet(window.fbRef(window.db, 'market/' + key));
+                    const preview = snap.val();
+                    if (!preview) { showToast("Лот уже продан!"); return; }
+                    if (preview.sellerId === myId) return;
+
+                    const previewPrice = Math.floor(num(preview.price));
+                    if (state.balance < previewPrice) { showToast("❌ Недостаточно средств!"); return; }
+                    if (!confirm(`Купить номер за ${fmt(previewPrice)} ₽?`)) return;
+
+                    const lot = await claimLot(key);
+                    if (!lot) { showToast("Лот уже продан!"); return; }
+
+                    const price = Math.floor(num(lot.price));
+                    if (state.balance < price) {
+                        // цена/баланс изменились — возвращаем лот
+                        await window.fbSet(window.fbRef(window.db, 'market/' + key), plain(lot));
+                        showToast("❌ Недостаточно средств!");
+                        return;
+                    }
+
+                    state.balance -= price;
+                    state.inventory.push(toInvItem(lot));
+                    updateUI();
+                    showToast(`✅ Вы купили номер ${esc(lot.phone)}!`);
+
+                    // Деньги продавцу — через очередь выплат (прямая перезапись его профиля затирала его прогресс)
+                    if (lot.sellerId) {
+                        const payKey = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+                        window.fbSet(window.fbRef(window.db, 'payouts/' + keySafe(lot.sellerId) + '/' + payKey),
+                            plain({ amount: Math.floor(price * 0.95), phone: lot.phone, ts: Date.now() }))
+                            .catch(e => console.log("Ошибка выплаты", e));
+                    }
+                } catch (e) {
+                    console.log(e);
+                    showToast("❌ Ошибка сделки. Попробуйте ещё раз.");
+                } finally {
+                    marketBusy = false;
+                }
+            }
+
+            async function takeBackMyLot(key) {
+                if (marketBusy || !dbReady() || !window.fbRunTransaction) return;
+                if (!confirm("Снять лот с продажи?")) return;
+                marketBusy = true;
+                try {
+                    const snap = await window.fbGet(window.fbRef(window.db, 'market/' + key));
+                    const preview = snap.val();
+                    if (!preview) { showToast("Лот уже продан!"); return; }
+                    if (preview.sellerId !== myId) return;
+                    const lot = await claimLot(key);
+                    if (!lot) { showToast("Лот уже продан!"); return; }
+                    // Раньше номер при снятии лота просто пропадал — теперь возвращается в рюкзак
+                    state.inventory.push(toInvItem(lot));
+                    updateUI();
+                    showToast("Лот снят, номер вернулся в рюкзак.");
+                } catch (e) {
+                    showToast("❌ Ошибка. Попробуйте ещё раз.");
+                } finally {
+                    marketBusy = false;
+                }
+            }
+
+            // Выплаты продавцу
+            let unsubPayouts = null;
+            const payoutInFlight = new Set();
+            function subscribePayouts() {
+                if (!dbReady() || !window.fbOnValue || !window.fbRunTransaction) return;
+                if (unsubPayouts) { unsubPayouts(); unsubPayouts = null; }
+                const base = 'payouts/' + myId;
+                unsubPayouts = window.fbOnValue(window.fbRef(window.db, base), (snap) => {
+                    const data = snap.val();
+                    if (!data) return;
+                    Object.keys(data).forEach(async (k) => {
+                        const path = base + '/' + k;
+                        if (payoutInFlight.has(path)) return;
+                        payoutInFlight.add(path);
+                        try {
+                            let claimed = null;
+                            await window.fbRunTransaction(window.fbRef(window.db, path), (cur) => { claimed = cur; return null; });
+                            if (claimed) {
+                                const amt = Math.floor(num(claimed.amount));
+                                if (amt > 0) {
+                                    state.balance += amt;
+                                    showToast(`💸 Ваш номер купили: +${fmt(amt)} ₽`);
+                                    updateUI();
+                                }
                             }
-                        };
+                        } catch (e) { console.log(e); }
+                        finally { payoutInFlight.delete(path); }
                     });
                 });
             }
 
-            function buyMarketItem(key, price, sellerId) {
-                if (state.balance < price) { showToast("❌ Недостаточно средств!"); return; }
-                if (!confirm(`Купить номер за ${price.toLocaleString('ru-RU')} ₽?`)) return;
+            // ───────────── Апгрейдер ─────────────
+            let selectedCasinoItemIndex = null;
+            let casinoBusy = false;
+            const MAX_PRICE = 1000000000;
 
-                window.fbOnValue(window.fbRef(window.db, 'market/' + key), (snapshot) => {
-                    let item = snapshot.val();
-                    if (!item) { showToast("Лот уже продан!"); openGlobalMarket(); return; }
-                    
-                    window.fbRemove(window.fbRef(window.db, 'market/' + key));
-                    state.balance -= price;
-                    state.inventory.push({ phone: item.phone, price: item.price, category: item.category, chance: item.chance, reasons: item.reasons || [] });
-                    updateUI(); saveData();
-                    showToast(`✅ Вы купили номер ${item.phone}!`);
-
-                    if (window.db && window.fbRef && window.fbOnValue && window.fbSet) {
-                        window.fbOnValue(window.fbRef(window.db, 'players/' + sellerId), (sSnap) => {
-                            let seller = sSnap.val();
-                            if (seller) {
-                                seller.balance = (seller.balance || 0) + item.price * 0.95;
-                                window.fbSet(window.fbRef(window.db, 'players/' + sellerId), seller);
-                            }
-                        }, { onlyOnce: true });
-                    }
-                    openGlobalMarket();
-                }, { onlyOnce: true });
+            function calcChance(currentPrice, targetPrice) {
+                if (!(targetPrice > currentPrice)) return null;
+                // честная вероятность с небольшим преимуществом казино; без нижнего «пола» в 1% (он давал бесконечные деньги)
+                return Math.min(95, (currentPrice / targetPrice) * 100 * 0.95);
             }
+            function formatChance(c) { return c < 0.01 ? '<0.01' : (Math.round(c * 100) / 100).toString(); }
 
-            function openCasino() {
+            function openCasino(message, color) {
                 getEl('casino-screen').style.display = 'flex';
                 selectedCasinoItemIndex = null;
                 getEl('casino-controls').style.display = 'none';
-                getEl('casino-result-text').innerText = "";
+                getEl('btn-do-upgrade').disabled = false;
                 getEl('casino-target-price').value = "";
                 getEl('casino-chance').innerText = "Шанс: 0%";
 
-                let list = getEl('casino-inventory-list');
+                const resultText = getEl('casino-result-text');
+                resultText.innerText = message || "";
+                resultText.style.color = color || "";
+
+                const list = getEl('casino-inventory-list');
                 list.innerHTML = '';
                 if (state.inventory.length === 0) {
                     list.innerHTML = '<div style="text-align:center; color:#aaa;">Рюкзак пуст.</div>';
                     return;
                 }
                 state.inventory.forEach((item, index) => {
-                    let div = document.createElement('div');
+                    const div = document.createElement('div');
                     div.className = 'casino-inv-item';
                     div.onclick = () => {
+                        if (casinoBusy) return;
                         document.querySelectorAll('.casino-inv-item').forEach(el => el.classList.remove('selected'));
                         div.classList.add('selected');
                         selectedCasinoItemIndex = index;
                         getEl('casino-controls').style.display = 'flex';
-                        getEl('casino-target-price').value = Math.floor(item.price * 2);
-                        calculateChance();
+                        getEl('casino-target-price').value = Math.min(MAX_PRICE, Math.floor(item.price * 2));
+                        getEl('casino-result-text').innerText = "";
+                        updateChanceDisplay();
                     };
-                    div.innerHTML = `<div class="num">${item.phone}</div><div class="prc">${item.price.toLocaleString('ru-RU')} ₽</div>`;
+                    div.innerHTML = `<div class="num">${esc(item.phone)}</div><div class="prc">${fmt(item.price)} ₽</div>`;
                     list.appendChild(div);
                 });
             }
 
-            function calculateChance() {
-                if (selectedCasinoItemIndex === null) return;
-                let currentPrice = state.inventory[selectedCasinoItemIndex].price;
-                let targetPrice = parseInt(getEl('casino-target-price').value);
+            function readTarget() { return Math.floor(num(getEl('casino-target-price').value)); }
 
-                if (!targetPrice || targetPrice <= currentPrice) {
-                    getEl('casino-chance').innerText = "Цена должна быть выше!";
-                    getEl('casino-chance').style.color = "#dc3545";
-                    return;
+            function updateChanceDisplay() {
+                if (selectedCasinoItemIndex === null) return null;
+                const item = state.inventory[selectedCasinoItemIndex];
+                if (!item) return null;
+                const target = readTarget();
+                const chanceEl = getEl('casino-chance');
+                if (target > MAX_PRICE) {
+                    chanceEl.innerText = `Максимум ${fmt(MAX_PRICE)} ₽`;
+                    chanceEl.style.color = "#dc3545";
+                    return null;
                 }
-                let chance = Math.floor((1 / (targetPrice / currentPrice)) * 100);
-                if (chance > 95) chance = 95;
-                if (chance < 1) chance = 1;
-
-                getEl('casino-chance').innerText = `Шанс: ${chance}%`;
-                getEl('casino-chance').style.color = chance > 50 ? "#28a745" : chance > 20 ? "#ffcc00" : "#dc3545";
+                const chance = calcChance(item.price, target);
+                if (chance === null) {
+                    chanceEl.innerText = "Цена должна быть выше!";
+                    chanceEl.style.color = "#dc3545";
+                    return null;
+                }
+                chanceEl.innerText = `Шанс: ${formatChance(chance)}%`;
+                chanceEl.style.color = chance > 50 ? "#28a745" : chance > 20 ? "#ffcc00" : "#dc3545";
                 return chance;
             }
 
             function doUpgrade() {
-                if (selectedCasinoItemIndex === null) return;
-                let item = state.inventory[selectedCasinoItemIndex];
-                let currentPrice = item.price;
-                let targetPrice = parseInt(getEl('casino-target-price').value);
-                let chance = calculateChance();
+                if (casinoBusy || selectedCasinoItemIndex === null) return;
+                const item = state.inventory[selectedCasinoItemIndex];
+                if (!item) return;
+                const target = readTarget();
+                const chance = updateChanceDisplay();
+                if (chance === null) return;
 
-                if (!targetPrice || targetPrice <= currentPrice) return;
-
-                let resultText = getEl('casino-result-text');
+                casinoBusy = true;
+                getEl('btn-do-upgrade').disabled = true;
+                const resultText = getEl('casino-result-text');
+                resultText.style.color = "";
                 resultText.innerText = "Крутим...";
 
                 setTimeout(() => {
-                    let roll = Math.random() * 100;
-                    if (roll <= chance) {
-                        state.inventory[selectedCasinoItemIndex].price = targetPrice;
-                        if (targetPrice >= 1000000) state.inventory[selectedCasinoItemIndex].category = "ЗОЛОТОЙ";
-                        else if (targetPrice >= 100000) state.inventory[selectedCasinoItemIndex].category = "СЕРЕБРЯНЫЙ";
+                    const idx = state.inventory.indexOf(item);
+                    if (idx === -1) { casinoBusy = false; openCasino(); return; }
 
-                        resultText.innerText = `🎉 УСПЕХ! Номер улучшен до ${targetPrice.toLocaleString('ru-RU')} ₽`;
-                        resultText.style.color = "#00ff00";
-                        
+                    if (Math.random() * 100 < chance) {
+                        item.price = target;
+                        item.category = categoryByPrice(target);
+                        casinoBusy = false;
                         updateUI();
                         renderInventory();
-                        openCasino();
+                        openCasino(`🎉 УСПЕХ! Номер улучшен до ${fmt(target)} ₽`, "#00ff00");
                     } else {
-                        let casinoItemDiv = getEl('casino-inventory-list').querySelector('.casino-inv-item.selected');
-                        if (casinoItemDiv) casinoItemDiv.classList.add('burning-anim');
-
+                        const selDiv = getEl('casino-inventory-list').querySelector('.casino-inv-item.selected');
+                        if (selDiv) selDiv.classList.add('burning-anim');
                         resultText.innerText = `😢 ПРОВАЛ... Номер сгорел.`;
                         resultText.style.color = "#dc3545";
                         getEl('casino-controls').style.display = 'none';
 
                         setTimeout(() => {
-                            state.inventory.splice(selectedCasinoItemIndex, 1);
-                            selectedCasinoItemIndex = null;
+                            const i2 = state.inventory.indexOf(item);
+                            if (i2 !== -1) state.inventory.splice(i2, 1);
+                            casinoBusy = false;
                             updateUI();
                             renderInventory();
-                            openCasino();
+                            // Раньше openCasино() сразу стирал сообщение о результате
+                            openCasino(`😢 ПРОВАЛ... Номер сгорел.`, "#dc3545");
                         }, 600);
                     }
                 }, 1000);
             }
 
-            document.addEventListener('click', function(e) {
+            // ───────────── Облако: загрузка при старте ─────────────
+            async function loadCloud() {
+                if (!dbReady()) return true; // без облака играем локально
+                try {
+                    const snap = await Promise.race([window.fbGet(window.fbRef(window.db, 'players/' + myId)), timeout(10000)]);
+                    const data = snap.val();
+                    if (data) applyCloudData(data);
+                    return true;
+                } catch (e) {
+                    console.log("Облако недоступно", e);
+                    return false;
+                }
+            }
+
+            async function bootCloud() {
+                const ok = await loadCloud();
+                SIM_WALL.init();
+                if (!ok) {
+                    showToast("⚠️ Нет связи с облаком. Прогресс пока сохраняется только на устройстве.");
+                    setTimeout(bootCloud, 15000);
+                    return;
+                }
+                cloudReady = true;
+                subscribePayouts();
+                updateUI();
+            }
+
+            // ───────────── Обработчики ─────────────
+            document.addEventListener('click', function (e) {
+                // закрытие бокового меню по клику вне его
+                if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) getEl('side-menu').classList.remove('open');
+
                 if (e.target.closest('.info-icon')) { openInfo(); return; }
-                let target = e.target.closest('button, .menu-item');
+                const target = e.target.closest('button, .menu-item');
                 if (!target) return;
 
                 if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
@@ -1443,12 +1599,12 @@
 
                 if (target.id === 'btn-close-simwall') getEl('simwall-screen').style.display = 'none';
                 if (target.id === 'btn-close-simwall-select') getEl('simwall-select-screen').style.display = 'none';
-                if (target.id === 'btn-close-global-market') getEl('global-market-screen').style.display = 'none';
+                if (target.id === 'btn-close-global-market') closeGlobalMarket();
                 if (target.id === 'btn-close-settings') getEl('settings-screen').style.display = 'none';
                 if (target.id === 'btn-close-bag') getEl('inventory-screen').style.display = 'none';
                 if (target.id === 'btn-close-profile') getEl('profile-screen').style.display = 'none';
                 if (target.id === 'btn-close-info') getEl('info-screen').style.display = 'none';
-                if (target.id === 'btn-close-casino') getEl('casino-screen').style.display = 'none';
+                if (target.id === 'btn-close-casino') { if (!casinoBusy) getEl('casino-screen').style.display = 'none'; }
                 if (target.id === 'btn-close-leaderboard') getEl('leaderboard-screen').style.display = 'none';
 
                 if (target.id === 'btn-open-bag-float') { getEl('inventory-screen').style.display = 'flex'; renderInventory(); }
@@ -1458,39 +1614,46 @@
                 if (target.hasAttribute('data-remove')) SIM_WALL.removeItem(parseInt(target.getAttribute('data-remove')));
                 if (target.hasAttribute('data-select-phone')) SIM_WALL.assignItem(target.getAttribute('data-select-phone'));
 
+                if (target.classList.contains('btn-buy-market')) buyMarketItem(target.getAttribute('data-key'));
+                if (target.classList.contains('btn-close-market-item')) takeBackMyLot(target.getAttribute('data-key'));
+
                 if (['btn-market-gen', 'btn-shop-gen', 'btn-jewelry-gen'].includes(target.id)) {
-                    let type = target.id === 'btn-market-gen' ? 1 : target.id === 'btn-shop-gen' ? 5 : 20;
-                    let cost = type * 1000;
-                    
+                    if (state.currentGen) return; // предыдущий номер ещё не продан/сохранён
+                    const type = target.id === 'btn-market-gen' ? 1 : target.id === 'btn-shop-gen' ? 5 : 20;
+                    const cost = type * 1000;
+
                     if (type === 1 && state.freeSpins > 0) state.freeSpins--;
                     else {
                         if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
                         state.balance -= cost;
                     }
 
-                    let opData = getRandomOperator();
+                    const opData = getRandomOperator();
                     state.currentOperator = opData.op;
-                    
-                    let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-                    let phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
-                    
-                    let evalData = calculatePrice(fullNum, type);
-                    let rarity = getRarity(evalData.category);
-                    
+
+                    const fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+                    const phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
+
+                    const evalData = calculatePrice(fullNum, type);
+                    const rarity = getRarity(evalData.category);
+
                     state.currentGen = { phone, price: evalData.price, category: evalData.category, chance: evalData.chance, reasons: evalData.reasons };
-                    let earnedXP = Math.floor(rarity.xp * opData.xpMultiplier * BOOST.getMultiplier());
+                    const earnedXP = Math.floor(rarity.xp * opData.xpMultiplier * BOOST.getMultiplier());
 
                     state.totalGenerated++;
-                    if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = state.currentGen;
+                    // копия, чтобы апгрейд номера в рюкзаке не менял «лучший номер» по ссылке
+                    if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = { ...state.currentGen };
 
                     startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP, evalData.chance, evalData.reasons);
                 }
 
                 if (target.id === 'btn-sell-now') {
+                    if (!state.currentGen) return;
                     if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
-                        if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
+                        if (!confirm(`Продать за ${fmt(state.currentGen.price)} ₽?`)) return;
                     }
                     state.balance += state.currentGen.price; state.totalSold++;
+                    state.currentGen = null;
                     updateUI();
                     getEl('custom-gen-result').classList.remove('force-show');
                     getEl('custom-gen-result').innerHTML = '';
@@ -1499,7 +1662,9 @@
                 }
 
                 if (target.id === 'btn-keep') {
-                    state.inventory.push(state.currentGen);
+                    if (!state.currentGen) return;
+                    state.inventory.push({ ...state.currentGen });
+                    state.currentGen = null;
                     updateUI();
                     getEl('custom-gen-result').classList.remove('force-show');
                     getEl('custom-gen-result').innerHTML = '';
@@ -1508,137 +1673,135 @@
                 }
 
                 if (target.classList.contains('btn-sell-item')) {
-                    let idx = parseInt(target.getAttribute('data-index'));
-                    let item = state.inventory[idx];
+                    const idx = parseInt(target.getAttribute('data-index'));
+                    const item = state.inventory[idx];
+                    if (!item) return;
                     if (state.useSellWarning && item.price >= state.warnThreshold) {
-                        if (!confirm(`Продать за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
+                        if (!confirm(`Продать за ${fmt(item.price)} ₽?`)) return;
                     }
                     state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
                     updateUI(); renderInventory();
                 }
 
                 if (target.classList.contains('btn-list-item')) {
-                    let idx = parseInt(target.getAttribute('data-index'));
-                    let item = state.inventory[idx];
-                    
-                    let inputPrice = prompt(`За сколько хотите продать номер ${item.phone}? (Вы получите 95%)`, Math.floor(item.price * 1.5));
-                    if (!inputPrice || isNaN(inputPrice)) return;
-                    
-                    let listingPrice = parseInt(inputPrice);
-                    if (listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
+                    const idx = parseInt(target.getAttribute('data-index'));
+                    const item = state.inventory[idx];
+                    if (!item) return;
 
-                    if (window.db && window.fbRef && window.fbSet) {
-                        let itemDiv = target.closest('.inv-item');
+                    const inputPrice = prompt(`За сколько хотите продать номер ${item.phone}? (Вы получите 95%)`, Math.floor(item.price * 1.5));
+                    if (inputPrice === null) return;
+                    const listingPrice = parseInt(inputPrice);
+                    if (!Number.isFinite(listingPrice) || listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
+                    if (listingPrice > 10000000000) { showToast("Слишком большая цена."); return; }
+
+                    if (dbReady()) {
+                        const itemDiv = target.closest('.inv-item');
                         if (itemDiv) itemDiv.classList.add('selling-anim');
                         target.disabled = true;
                         target.innerText = "Продажа...";
 
                         setTimeout(() => {
-                            state.inventory.splice(idx, 1);
+                            // ищем по ссылке, а не по индексу — за 500 мс рюкзак мог измениться
+                            const i = state.inventory.indexOf(item);
+                            if (i === -1) { renderInventory(); return; }
+                            state.inventory.splice(i, 1);
                             updateUI();
                             renderInventory();
 
-                            let newRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
-                            window.fbSet(newRef, {
-                                phone: item.phone,
-                                price: listingPrice,
-                                category: item.category,
-                                chance: item.chance,
-                                reasons: item.reasons || [],
-                                sellerId: myId,
-                                sellerName: myName,
-                                timestamp: Date.now()
+                            // plain() убирает undefined — раньше из-за chance: undefined set() падал, а номер уже был удалён из рюкзака
+                            const lotRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
+                            window.fbSet(lotRef, plain({
+                                phone: item.phone, price: listingPrice, category: item.category,
+                                chance: item.chance || '', reasons: item.reasons || [],
+                                sellerId: myId, sellerName: myName, timestamp: Date.now()
+                            })).then(() => {
+                                showToast(`✅ Лот выставлен на рынок!`);
+                            }).catch(err => {
+                                console.log(err);
+                                state.inventory.push(item); // не получилось — возвращаем номер
+                                updateUI(); renderInventory();
+                                showToast("❌ Не удалось выставить лот, номер возвращён.");
                             });
-                            showToast(`✅ Лот выставлен на рынок!`);
                         }, 500);
                     } else { showToast("❌ Ошибка подключения."); }
                 }
 
                 if (target.id === 'btn-sell-all') {
                     if (state.inventory.length === 0) return;
-                    let total = state.inventory.reduce((sum, item) => sum + item.price, 0);
+                    const total = state.inventory.reduce((sum, item) => sum + item.price, 0);
                     if (state.useSellWarning && total >= state.warnThreshold) {
-                        if (!confirm(`Продать ВСЕ на ${total.toLocaleString('ru-RU')} ₽?`)) return;
+                        if (!confirm(`Продать ВСЕ на ${fmt(total)} ₽?`)) return;
                     }
                     state.balance += total; state.totalSold += state.inventory.length; state.inventory = [];
-                    updateUI(); renderInventory(); showToast(`✅ Вы получили ${total.toLocaleString('ru-RU')} ₽`);
+                    updateUI(); renderInventory(); showToast(`✅ Вы получили ${fmt(total)} ₽`);
                 }
 
                 if (target.id === 'btn-do-upgrade') doUpgrade();
             });
 
-            document.getElementById('btn-sync-email').addEventListener('click', () => {
-                let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
-                if (!email || !email.includes('@')) { showToast("❌ Неверный Email!"); return; }
-                myId = "email_" + email;
-                myName = email.split('@')[0];
-                localStorage.setItem('blum_email_id', myId);
-                localStorage.setItem('blum_user_name', myName);
+            getEl('btn-sync-email').addEventListener('click', async () => {
+                const email = getEl('sync-email-input').value.trim().toLowerCase();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("❌ Неверный Email!"); return; }
+                if (!dbReady()) { showToast("❌ Нет подключения к базе."); return; }
 
+                // Email содержит «.», а он запрещён в ключах Firebase — кодируем
+                const newId = keySafe("email_" + email);
                 showToast("🔄 Синхронизация...");
-                if (window.db && window.fbOnValue && window.fbRef) {
-                    window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                        const data = snapshot.val();
-                        if (data) {
-                            state.balance = data.balance || 0; state.level = data.level || 1; state.points = data.points || 0;
-                            state.inventory = data.inventory || []; state.bestNumber = data.bestNumber || null;
-                            state.totalGenerated = data.totalGenerated || 0; state.totalSold = data.totalSold || 0;
-                            state.maxBalance = data.maxBalance || 0;
-                            if (data.simwall) state.simwall = data.simwall;
-                            showToast("✅ Прогресс загружен!");
-                        } else {
-                            state.balance = 0; state.level = 1; state.points = 0; state.inventory = []; state.bestNumber = null;
-                            showToast("✨ Создан новый аккаунт!");
-                        }
-                        document.getElementById('user-name-display').innerText = myName;
-                        getEl('settings-screen').style.display = 'none';
-                        updateUI(); saveData();
-                    });
+                try {
+                    const snap = await Promise.race([window.fbGet(window.fbRef(window.db, 'players/' + newId)), timeout(10000)]);
+                    const data = snap.val();
+
+                    myId = newId;
+                    myName = email.split('@')[0];
+                    localStorage.setItem('blum_email_id', myId);
+                    localStorage.setItem('blum_user_name', myName);
+
+                    if (data) {
+                        applyCloudData(data);
+                        showToast("✅ Прогресс загружен!");
+                    } else {
+                        // новый аккаунт: привязываем к нему текущий прогресс, а не обнуляем его
+                        showToast("✨ Аккаунт создан, прогресс привязан!");
+                    }
+                    cloudReady = true;
+                    subscribePayouts();
+                    getEl('settings-screen').style.display = 'none';
+                    updateUI();
+                } catch (err) {
+                    showToast("❌ Не удалось связаться с облаком.");
                 }
             });
 
-            document.getElementById('btn-reset-progress').addEventListener('click', () => {
-                if (confirm("Удалить прогресс?")) {
-                    localStorage.clear();
-                    LEVEL_BONUS.reset();
-                    localStorage.removeItem('blum_starter_granted');
-                    if (window.db && window.fbSet && window.fbRef && myId) window.fbSet(window.fbRef(window.db, 'players/' + myId), null);
-                    location.reload();
-                }
+            getEl('btn-reset-progress').addEventListener('click', async () => {
+                if (!confirm("Удалить прогресс?")) return;
+                resetting = true;
+                cloudReady = false;
+                try {
+                    if (dbReady() && myId) {
+                        await Promise.race([window.fbSet(window.fbRef(window.db, 'players/' + myId), null), new Promise(r => setTimeout(r, 3000))]);
+                    }
+                } catch (e) { console.log(e); }
+                localStorage.clear();
+                LEVEL_BONUS.reset();
+                localStorage.removeItem('blum_starter_granted');
+                location.reload();
             });
 
-            document.addEventListener('change', function(e) {
+            document.addEventListener('change', function (e) {
                 if (e.target.id === 'toggle-theme') { state.isDarkTheme = e.target.checked; document.body.classList.toggle('dark-theme', state.isDarkTheme); saveData(); }
                 if (e.target.id === 'toggle-animation') { state.isAnimationEnabled = e.target.checked; saveData(); }
                 if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
                 if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
-                if (e.target.id === 'casino-target-price') calculateChance();
             });
+            // шанс апгрейдера пересчитывается сразу при вводе, а не только после потери фокуса
+            getEl('casino-target-price').addEventListener('input', updateChanceDisplay);
 
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) getEl('side-menu').classList.remove('open');
-            });
-
-            // СТАРТ
-            document.getElementById('user-name-display').innerText = myName;
+            // ───────────── Старт ─────────────
+            getEl('user-name-display').innerText = myName;
             if (state.isDarkTheme) document.body.classList.add('dark-theme');
             BOOST.init(state);
-            SIM_WALL.init(); // Запуск СИМ-СТЕНЫ
-            updateUI();
-
-            if (window.db && window.fbOnValue && window.fbRef) {
-                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        state.balance = data.balance || 0; state.level = data.level || 1; state.points = data.points || 0;
-                        state.inventory = data.inventory || []; state.bestNumber = data.bestNumber || null;
-                        state.totalGenerated = data.totalGenerated || 0; state.totalSold = data.totalSold || 0;
-                        state.maxBalance = data.maxBalance || 0;
-                        if (data.simwall) state.simwall = data.simwall;
-                        updateUI();
-                    }
-                });
-            }
+            updateUI();      // рисуем локальное состояние (в облако пока не пишем)
+            bootCloud();     // загружаем облако, затем включаем запись, СИМ-стену и выплаты
         });
     </script>
 </body>
