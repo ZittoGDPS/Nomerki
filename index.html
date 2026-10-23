@@ -880,6 +880,9 @@
         // 5 СЕКУНД НА ЗАГРУЗКУ
         let loadTimeout = setTimeout(() => {
             showToast("⚠️ Сервер не отвечает. Загружены локальные данные.");
+            // Принудительно показываем игру с локальными данными
+            document.getElementById('user-name-display').innerText = myName;
+            updateUI();
         }, 5000);
 
         if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
