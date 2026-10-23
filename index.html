@@ -73,6 +73,16 @@
         #btn-shop { background: #fd7e14; }
         #btn-jewelry { background: #dc3545; }
 
+        /* Кнопка Рюкзака в левом нижнем углу */
+        #btn-open-bag-float { 
+            position: fixed; bottom: 100px; left: 20px; 
+            background: #0088cc; color: white; border: none; 
+            padding: 15px; border-radius: 50%; font-size: 24px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 150; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; width: 60px; height: 60px;
+        }
+        #btn-open-bag-float:active { transform: scale(0.9); }
+
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; }
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
@@ -197,6 +207,9 @@
             <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
         
+        <!-- Кнопка Рюкзака в левом нижнем углу -->
+        <button id="btn-open-bag-float">🎒</button>
+
         <div id="bottom-action-area">
             <div class="shop-buttons-row" id="gen-buttons-row">
                 <button class="shop-btn" id="btn-market">Рынок<span>1 000 ₽</span></button>
@@ -211,10 +224,9 @@
         </div>
     </div>
 
-    <!-- БОКОВОЕ МЕНЮ -->
+    <!-- БОКОВОЕ МЕНЮ (БЕЗ РЮКЗАКА) -->
     <div id="side-menu">
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
-        <div class="menu-item" id="menu-bag"><span>🎒</span> Рюкзак</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
         <div class="menu-item" id="menu-profile"><span>👤</span> Статистика</div>
         <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
@@ -877,17 +889,12 @@
         // Инициализация
         document.getElementById('user-name-display').innerText = myName;
 
-        // 5 СЕКУНД НА ЗАГРУЗКУ
-        let loadTimeout = setTimeout(() => {
-            showToast("⚠️ Сервер не отвечает. Загружены локальные данные.");
-            // Принудительно показываем игру с локальными данными
-            document.getElementById('user-name-display').innerText = myName;
-            updateUI();
-        }, 5000);
+        // МГНОВЕННЫЙ ЗАПУСК
+        updateUI();
 
+        // Асинхронная загрузка из Firebase (без блокировки интерфейса)
         if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
             window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                clearTimeout(loadTimeout); // Если данные пришли, отменяем таймер
                 const data = snapshot.val();
                 if (data) {
                     state.balance = data.balance || 0;
@@ -899,14 +906,8 @@
                     state.totalSold = data.totalSold || 0;
                     state.maxBalance = data.maxBalance || 0;
                     updateUI();
-                } else {
-                    updateUI();
                 }
             });
-        } else {
-            // Если Firebase не загрузился, просто показываем локальные данные
-            clearTimeout(loadTimeout);
-            updateUI();
         }
 
         // Обработчики кликов
@@ -919,10 +920,12 @@
                 getEl('side-menu').classList.toggle('open');
             }
             if (target.id === 'menu-settings') { getEl('side-menu').classList.remove('open'); getEl('settings-screen').style.display = 'flex'; getEl('toggle-theme').checked = state.isDarkTheme; getEl('toggle-warning').checked = state.useSellWarning; getEl('input-warn-threshold').value = state.warnThreshold; }
-            if (target.id === 'menu-bag') { getEl('side-menu').classList.remove('open'); getEl('inventory-screen').style.display = 'flex'; updateUI(); renderInventory(); }
             if (target.id === 'menu-casino') { getEl('side-menu').classList.remove('open'); openCasino(); }
             if (target.id === 'menu-profile') { getEl('side-menu').classList.remove('open'); getEl('profile-screen').style.display = 'flex'; renderProfile(); }
             if (target.id === 'menu-leaderboard') { getEl('side-menu').classList.remove('open'); window.location.href = 'leaderboard.html'; }
+
+            // Кнопка Рюкзака на главном экране
+            if (target.id === 'btn-open-bag-float') { getEl('inventory-screen').style.display = 'flex'; updateUI(); renderInventory(); }
 
             // Закрытия экранов
             if (target.id === 'btn-close-settings') { getEl('settings-screen').style.display = 'none'; }
@@ -1035,7 +1038,6 @@
         });
 
         if (state.isDarkTheme) document.body.classList.add('dark-theme');
-        updateUI();
 
         // Просмотр чужого профиля
         if (viewPlayerId) {
@@ -1058,6 +1060,7 @@
                         
                         getEl('gen-buttons-row').style.display = 'none'; 
                         getEl('btn-menu').style.display = 'none'; 
+                        getEl('btn-open-bag-float').style.display = 'none';
                         
                         getEl('profile-screen').style.display = 'flex';
                         renderProfile();
