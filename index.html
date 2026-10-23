@@ -52,85 +52,48 @@
         /* Кнопка меню */
         #btn-menu { border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 20px; }
 
-        /* ⚡ ИНДИКАТОР БУСТА — постоянная иконка (не popup) */
+        /* ⚡ ИНДИКАТОР БУСТА */
         #boost-indicator {
-            display: none;
-            position: fixed;
-            top: 70px;
-            right: 15px;
+            display: none; position: fixed; top: 70px; right: 15px;
             background: linear-gradient(135deg, #ff007f, #ff6b00);
-            color: white;
-            padding: 10px 14px 10px 10px;
-            border-radius: 30px;
-            font-weight: bold;
-            z-index: 500;
-            align-items: center;
-            gap: 10px;
-            user-select: none;
-            pointer-events: none;
-            box-shadow: 0 4px 20px rgba(255, 0, 127, 0.6),
-                        0 0 0 3px rgba(255, 255, 255, 0.15) inset;
-            animation: boostGlow 1s infinite alternate;
-            font-family: sans-serif;
+            color: white; padding: 10px 14px 10px 10px; border-radius: 30px;
+            font-weight: bold; z-index: 500; align-items: center; gap: 10px;
+            user-select: none; pointer-events: none;
+            box-shadow: 0 4px 20px rgba(255, 0, 127, 0.6), 0 0 0 3px rgba(255, 255, 255, 0.15) inset;
+            animation: boostGlow 1s infinite alternate; font-family: sans-serif;
         }
         #boost-indicator.show { display: flex; }
-
-        .boost-bolt {
-            font-size: 24px;
-            line-height: 1;
-            filter: drop-shadow(0 0 4px rgba(255, 255, 0, 0.9));
-            animation: boltShake 0.6s infinite alternate;
-        }
-
-        .boost-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-
-        .boost-mult {
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.35);
-        }
-
-        .boost-timer {
-            font-size: 11px;
-            opacity: 0.95;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
+        .boost-bolt { font-size: 24px; line-height: 1; filter: drop-shadow(0 0 4px rgba(255, 255, 0, 0.9)); animation: boltShake 0.6s infinite alternate; }
+        .boost-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .boost-mult { font-size: 16px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+        .boost-timer { font-size: 11px; opacity: 0.95; font-weight: 700; letter-spacing: 0.3px; }
         @keyframes boostGlow {
-            from {
-                box-shadow: 0 4px 20px rgba(255, 0, 127, 0.5),
-                            0 0 0 3px rgba(255, 255, 255, 0.1) inset;
-                transform: scale(1);
-            }
-            to {
-                box-shadow: 0 6px 28px rgba(255, 0, 127, 0.95),
-                            0 0 0 3px rgba(255, 255, 255, 0.35) inset;
-                transform: scale(1.04);
-            }
+            from { box-shadow: 0 4px 20px rgba(255, 0, 127, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.1) inset; transform: scale(1); }
+            to { box-shadow: 0 6px 28px rgba(255, 0, 127, 0.95), 0 0 0 3px rgba(255, 255, 255, 0.35) inset; transform: scale(1.04); }
         }
-
-        @keyframes boltShake {
-            from { transform: rotate(-10deg); }
-            to   { transform: rotate(10deg); }
-        }
+        @keyframes boltShake { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
         /* Главный экран */
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
-        .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 2; }
+        
+        /* Исправленная иконка info */
+        .info-icon { 
+            position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; 
+            background: #0088cc; color: white; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-weight: bold; font-family: serif; font-style: italic; 
+            cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+            z-index: 10; pointer-events: auto;
+        }
         .info-icon:active { transform: scale(0.9); }
 
         .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; letter-spacing: 2px;}
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
         .category-text { font-size: 14px; margin-bottom: 0; color: var(--text-sub); }
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
+        .chance-text { font-size: 12px; color: #888; margin-top: 5px; display: block; }
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
@@ -200,26 +163,14 @@
         input:checked + .slider:before { transform: translateX(22px); }
 
         /* Профиль и Инфо */
-        #profile-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        #profile-content, #info-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; flex: 1; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         .profile-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .profile-row span:last-child { font-weight: bold; }
         .best-num { font-family: monospace; font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: rgba(0,136,204,0.1); margin-bottom: 5px; }
-
-        /* ℹ️ ИНФО-ОКНО */
-        #info-content {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        #info-current-number {
-            font-size: 18px;
-            padding: 12px;
-        }
+        
+        #info-current-number { font-size: 18px; padding: 12px; }
 
         /* КАЗИНО */
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
@@ -401,6 +352,7 @@
                 <div class="profile-row"><span>Категория:</span> <span id="info-current-category">—</span></div>
                 <div class="profile-row"><span>Стоимость:</span> <span id="info-current-price">—</span></div>
                 <div class="profile-row"><span>Получено XP:</span> <span id="info-current-xp">—</span></div>
+                <div class="profile-row"><span>Шанс выпадения:</span> <span id="info-current-chance">—</span></div>
             </div>
 
             <div class="profile-section">
@@ -431,12 +383,14 @@
             </div>
 
             <div class="profile-section">
-                <h3>🏆 Редкости</h3>
-                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>1 000 000 000 ₽</span></div>
-                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>1 000 000 ₽+</span></div>
-                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>100 000 ₽+</span></div>
-                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>50 000 ₽+</span></div>
-                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>150 ₽+</span></div>
+                <h3>🎲 Шансы выпадения</h3>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>0.00001% - 0.1%</span></div>
+                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>0.03% - 5%</span></div>
+                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>5% - 10%</span></div>
+                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>~1%</span></div>
+                <div class="profile-row"><span class="rarity-common">Зеркальный:</span> <span>0.001%</span></div>
+                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>Остальное</span></div>
+                <div style="font-size:11px; color:#888; margin-top:10px; text-align:center;">* Точный шанс зависит от кнопки генерации</div>
             </div>
         </div>
     </div>
@@ -739,32 +693,32 @@
             }
 
             function calculatePrice(fullNum, type) {
-                let price = 150, category = "Обычный";
+                let price = 150, category = "Обычный", chance = "100%";
                 let rand = Math.random() * 100;
                 
                 if (type === 1) {
-                    if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
-                    else if (rand < 5) { price = 100000; category = "СЕРЕБРЯНЫЙ"; }
+                    if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.00001%"; }
+                    else if (rand < 5) { price = 100000; category = "СЕРЕБРЯНЫЙ"; chance = "5%"; }
                 } else if (type === 5) {
-                    if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
-                    else if (rand < 10) { price = 100000; category = "СЕРЕБРЯНЫЙ"; }
+                    if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.0001%"; }
+                    else if (rand < 10) { price = 100000; category = "СЕРЕБРЯНЫЙ"; chance = "10%"; }
                 } else if (type === 20) {
-                    if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; }
-                    else if (rand < 5) { price = 1000000; category = "ЗОЛОТОЙ"; }
+                    if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.1%"; }
+                    else if (rand < 5) { price = 1000000; category = "ЗОЛОТОЙ"; chance = "5%"; }
                 }
 
                 if (category === "Обычный") {
                     let last4 = fullNum.slice(-4);
-                    if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; }
-                    else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; }
-                    else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; }
-                    else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; }
-                    else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; }
-                    else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; }
+                    if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; chance = "0.03%"; }
+                    else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; chance = "0.1%"; }
+                    else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; chance = "0.001%"; }
+                    else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; chance = "1%"; }
+                    else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; chance = "0.5%"; }
+                    else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; chance = "10%"; }
                     
                     if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
                 }
-                return { price, category };
+                return { price, category, chance };
             }
 
             function getRandomOperator() {
@@ -896,12 +850,14 @@
                     getEl('info-current-category').innerText = cg.category;
                     getEl('info-current-price').innerText = cg.price.toLocaleString('ru-RU') + ' ₽';
                     getEl('info-current-xp').innerText = '+' + cgRarity.xp + ' XP';
+                    getEl('info-current-chance').innerText = cg.chance || '—';
                 } else {
                     getEl('info-current-number').innerText = '—';
                     getEl('info-current-number').className = 'best-num';
                     getEl('info-current-category').innerText = '—';
                     getEl('info-current-price').innerText = '—';
                     getEl('info-current-xp').innerText = '—';
+                    getEl('info-current-chance').innerText = '—';
                 }
 
                 const ptsNeeded = state.level * 100;
@@ -950,7 +906,7 @@
             }
 
             // 6. АНИМАЦИЯ ГЕНЕРАЦИИ
-            function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP) {
+            function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP, chance) {
                 let resDiv = getEl('custom-gen-result');
                 let btnRow = getEl('gen-buttons-row');
                 btnRow.style.display = 'none';
@@ -962,6 +918,7 @@
                         <div class="phone-number ${rarityClass}">${targetPhone}</div>
                         <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
                         <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
+                        <div class="chance-text">🎲 Шанс выпадения: ${chance}</div>
                     `;
                     if (price >= 500000) {
                         resDiv.classList.add('shake-effect', 'flash-effect');
@@ -979,11 +936,13 @@
                     <div class="phone-number rarity-common" id="anim-phone">+7-XXX-XXX-XX-XX</div>
                     <div class="price-tag" id="anim-price" style="opacity: 0.5;">Генерация...</div>
                     <div class="category-text" id="anim-category" style="opacity: 0.5;">Поиск номера...</div>
+                    <div class="chance-text" id="anim-chance" style="opacity: 0.5;">🎲 Шанс: ???</div>
                 `;
 
                 let animPhone = getEl('anim-phone');
                 let animPrice = getEl('anim-price');
                 let animCategory = getEl('anim-category');
+                let animChance = getEl('anim-chance');
                 let targetChars = targetPhone.split('');
                 let currentStr = "+7-XXX-XXX-XX-XX".split('');
                 let iterations = 0;
@@ -1004,6 +963,8 @@
                         animPrice.style.opacity = '1';
                         animCategory.innerHTML = `${category} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
                         animCategory.style.opacity = '1';
+                        animChance.innerText = `🎲 Шанс выпадения: ${chance}`;
+                        animChance.style.opacity = '1';
                         
                         if (price >= 500000) {
                             resDiv.classList.add('shake-effect', 'flash-effect');
@@ -1136,7 +1097,7 @@
                     
                     window.fbRemove(window.fbRef(window.db, 'market/' + key));
                     state.balance -= price;
-                    state.inventory.push({ phone: item.phone, price: item.price, category: item.category });
+                    state.inventory.push({ phone: item.phone, price: item.price, category: item.category, chance: item.chance });
                     updateUI(); saveData();
                     showToast(`✅ Вы купили номер ${item.phone}!`);
 
@@ -1242,13 +1203,13 @@
 
             // 10. ОБРАБОТЧИКИ
             document.addEventListener('click', function(e) {
-                // ℹ️ Иконка «i» — обрабатываем ПЕРВОЙ (до closest button)
-                if (e.target.classList && e.target.classList.contains('info-icon')) {
+                // ℹ️ Иконка «i» — ловим клик надежно
+                if (e.target.closest('.info-icon')) {
                     openInfo();
                     return;
                 }
 
-                let target = e.target.closest('button, .info-icon, .menu-item');
+                let target = e.target.closest('button, .menu-item');
                 if (!target) return;
 
                 if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
@@ -1287,13 +1248,13 @@
                     let evalData = calculatePrice(fullNum, type);
                     let rarity = getRarity(evalData.category);
                     
-                    state.currentGen = { phone, price: evalData.price, category: evalData.category };
+                    state.currentGen = { phone, price: evalData.price, category: evalData.category, chance: evalData.chance };
                     let earnedXP = Math.floor(rarity.xp * opData.xpMultiplier * BOOST.getMultiplier());
 
                     state.totalGenerated++;
                     if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = state.currentGen;
 
-                    startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
+                    startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP, evalData.chance);
                 }
 
                 if (target.id === 'btn-sell-now') {
@@ -1347,6 +1308,7 @@
                             phone: item.phone,
                             price: listingPrice,
                             category: item.category,
+                            chance: item.chance,
                             sellerId: myId,
                             sellerName: myName,
                             timestamp: Date.now()
