@@ -124,7 +124,8 @@
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
-        .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .info-icon { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #0088cc; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: serif; font-style: italic; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 2; }
+        .info-icon:active { transform: scale(0.9); }
 
         .phone-number { font-size: 24px; font-weight: bold; margin-bottom: 5px; font-family: monospace; letter-spacing: 2px;}
         .price-tag { font-size: 20px; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
@@ -198,13 +199,27 @@
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Профиль */
+        /* Профиль и Инфо */
         #profile-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         .profile-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .profile-row span:last-child { font-weight: bold; }
         .best-num { font-family: monospace; font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: rgba(0,136,204,0.1); margin-bottom: 5px; }
+
+        /* ℹ️ ИНФО-ОКНО */
+        #info-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        #info-current-number {
+            font-size: 18px;
+            padding: 12px;
+        }
 
         /* КАЗИНО */
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
@@ -373,6 +388,59 @@
         </div>
     </div>
 
+    <!-- ℹ️ ИНФО-ОКНО -->
+    <div id="info-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">ℹ️ Информация</span>
+            <button class="btn-close" id="btn-close-info">Закрыть</button>
+        </div>
+        <div id="info-content">
+            <div class="profile-section">
+                <h3>📱 Текущий номер</h3>
+                <div id="info-current-number" class="best-num">—</div>
+                <div class="profile-row"><span>Категория:</span> <span id="info-current-category">—</span></div>
+                <div class="profile-row"><span>Стоимость:</span> <span id="info-current-price">—</span></div>
+                <div class="profile-row"><span>Получено XP:</span> <span id="info-current-xp">—</span></div>
+            </div>
+
+            <div class="profile-section">
+                <h3>📈 Прогресс</h3>
+                <div class="profile-row"><span>Уровень:</span> <span id="info-level">1</span></div>
+                <div class="profile-row"><span>Поинты:</span> <span id="info-points">0 / 100</span></div>
+                <div class="profile-row"><span>Следующий бонус:</span> <span id="info-next-bonus">10 ур. → 10 000 ₽</span></div>
+                <div class="profile-row"><span>Активный буст:</span> <span id="info-boost">Нет</span></div>
+                <div class="profile-row"><span>Бесплатных спинов:</span> <span id="info-free-spins">0</span></div>
+            </div>
+
+            <div class="profile-section">
+                <h3>💰 Баланс</h3>
+                <div class="profile-row"><span>Текущий:</span> <span id="info-balance">0 ₽</span></div>
+                <div class="profile-row"><span>Максимальный:</span> <span id="info-max-balance">0 ₽</span></div>
+                <div class="profile-row"><span>В рюкзаке:</span> <span id="info-inventory-value">0 ₽</span></div>
+                <div class="profile-row"><span>Общий капитал:</span> <span id="info-total-worth">0 ₽</span></div>
+            </div>
+
+            <div class="profile-section">
+                <h3>📊 Статистика</h3>
+                <div class="profile-row"><span>Всего сгенерировано:</span> <span id="info-total-generated">0</span></div>
+                <div class="profile-row"><span>Всего продано:</span> <span id="info-total-sold">0</span></div>
+                <div class="profile-row"><span>Номеров в рюкзаке:</span> <span id="info-inventory-count">0</span></div>
+                <div class="profile-row"><span>Лучший номер:</span> <span id="info-best-number">—</span></div>
+                <div class="profile-row"><span>Стоимость лучшего:</span> <span id="info-best-price">—</span></div>
+                <div class="profile-row"><span>Оператор:</span> <span id="info-operator">—</span></div>
+            </div>
+
+            <div class="profile-section">
+                <h3>🏆 Редкости</h3>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>1 000 000 000 ₽</span></div>
+                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>1 000 000 ₽+</span></div>
+                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>100 000 ₽+</span></div>
+                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>50 000 ₽+</span></div>
+                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>150 ₽+</span></div>
+            </div>
+        </div>
+    </div>
+
     <!-- РЮКЗАК -->
     <div id="inventory-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">🎒 Мой Рюкзак</span><button class="btn-close" id="btn-close-bag">Закрыть</button></div>
@@ -451,11 +519,8 @@
                 isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false'
             };
 
-            // ═══════════════════════════════════════════════════════════
-            // 💰 СТАРТОВЫЙ НАБОР — 100 000 ₽ (только при первом запуске)
-            // ═══════════════════════════════════════════════════════════
+            // 💰 СТАРТОВЫЙ НАБОР
             const STARTER_KEY = 'blum_starter_granted';
-
             if (!localStorage.getItem(STARTER_KEY)) {
                 state.balance += 100000;
                 state.maxBalance = Math.max(state.maxBalance, state.balance);
@@ -470,10 +535,7 @@
                 }, 300);
             }
 
-            // ═══════════════════════════════════════════════════════════
-            // 🎁 МОДУЛЬ НАГРАД ЗА УРОВНИ
-            // Каждый 10-й уровень → (уровень / 10) × 10 000 ₽
-            // ═══════════════════════════════════════════════════════════
+            // 🎁 LEVEL_BONUS
             const LEVEL_BONUS = (() => {
                 const STORAGE_KEY = 'blum_last_bonus_level';
                 const STEP = 10;
@@ -553,9 +615,7 @@
                 };
             })();
 
-            // ═══════════════════════════════════════════════════════════
-            // ⚡ МОДУЛЬ БУСТА (постоянный индикатор)
-            // ═══════════════════════════════════════════════════════════
+            // ⚡ BOOST
             const BOOST = {
                 DURATION_MS: 30000,
                 multiplier: 1,
@@ -728,9 +788,7 @@
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
             }
 
-            // ═══════════════════════════════════════════════════════════
             // 5. ОБНОВЛЕНИЕ UI
-            // ═══════════════════════════════════════════════════════════
             function updateUI() {
                 getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
                 getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
@@ -739,7 +797,6 @@
 
                 if (state.balance > state.maxBalance) state.maxBalance = state.balance;
 
-                // ─── Повышение уровня (бесконечно) ───
                 let ptsNeeded = state.level * 100;
                 while (state.points >= ptsNeeded) {
                     state.points -= ptsNeeded;
@@ -748,10 +805,8 @@
                     ptsNeeded = state.level * 100;
                 }
 
-                // ─── 🎁 Бонус за уровни ───
                 LEVEL_BONUS.apply(state);
 
-                // ─── Прогресс-бар ───
                 getEl('pts-text').innerText = `Поинты: ${state.points} / ${ptsNeeded}`;
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
 
@@ -827,6 +882,71 @@
                 getEl('stat-sold').innerText = state.totalSold;
                 getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
                 getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
+            }
+
+            // ℹ️ ИНФО-ОКНО
+            function openInfo() {
+                getEl('info-screen').style.display = 'flex';
+
+                if (state.currentGen) {
+                    const cg = state.currentGen;
+                    const cgRarity = getRarity(cg.category);
+                    getEl('info-current-number').innerText = cg.phone;
+                    getEl('info-current-number').className = `best-num ${cgRarity.cls}`;
+                    getEl('info-current-category').innerText = cg.category;
+                    getEl('info-current-price').innerText = cg.price.toLocaleString('ru-RU') + ' ₽';
+                    getEl('info-current-xp').innerText = '+' + cgRarity.xp + ' XP';
+                } else {
+                    getEl('info-current-number').innerText = '—';
+                    getEl('info-current-number').className = 'best-num';
+                    getEl('info-current-category').innerText = '—';
+                    getEl('info-current-price').innerText = '—';
+                    getEl('info-current-xp').innerText = '—';
+                }
+
+                const ptsNeeded = state.level * 100;
+                getEl('info-level').innerText = state.level;
+                getEl('info-points').innerText = `${state.points} / ${ptsNeeded}`;
+
+                const nextBonusLevel = (Math.floor(state.level / 10) + 1) * 10;
+                const nextBonusAmount = (nextBonusLevel / 10) * 10000;
+                getEl('info-next-bonus').innerText =
+                    `${nextBonusLevel} ур. → ${nextBonusAmount.toLocaleString('ru-RU')} ₽`;
+
+                const boostLeft = Math.max(0, Math.ceil((state.boostEndTime - Date.now()) / 1000));
+                if (boostLeft > 0) {
+                    getEl('info-boost').innerText = `⚡ x${state.boostMultiplier} (${boostLeft}с)`;
+                } else {
+                    getEl('info-boost').innerText = 'Нет';
+                }
+
+                getEl('info-free-spins').innerText = state.freeSpins;
+
+                const invValue = state.inventory.reduce((s, it) => s + it.price, 0);
+                getEl('info-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
+                getEl('info-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
+                getEl('info-inventory-value').innerText = invValue.toLocaleString('ru-RU') + ' ₽';
+                getEl('info-total-worth').innerText =
+                    (state.balance + invValue).toLocaleString('ru-RU') + ' ₽';
+
+                getEl('info-total-generated').innerText = state.totalGenerated;
+                getEl('info-total-sold').innerText = state.totalSold;
+                getEl('info-inventory-count').innerText = state.inventory.length;
+
+                if (state.bestNumber) {
+                    const best = state.bestNumber;
+                    const bestRarity = getRarity(best.category);
+                    const bestEl = getEl('info-best-number');
+                    bestEl.innerText = best.phone;
+                    bestEl.className = bestRarity.cls;
+                    getEl('info-best-price').innerText = best.price.toLocaleString('ru-RU') + ' ₽';
+                } else {
+                    getEl('info-best-number').innerText = '—';
+                    getEl('info-best-number').className = '';
+                    getEl('info-best-price').innerText = '—';
+                }
+
+                getEl('info-operator').innerText = state.currentOperator || '—';
             }
 
             // 6. АНИМАЦИЯ ГЕНЕРАЦИИ
@@ -1122,6 +1242,12 @@
 
             // 10. ОБРАБОТЧИКИ
             document.addEventListener('click', function(e) {
+                // ℹ️ Иконка «i» — обрабатываем ПЕРВОЙ (до closest button)
+                if (e.target.classList && e.target.classList.contains('info-icon')) {
+                    openInfo();
+                    return;
+                }
+
                 let target = e.target.closest('button, .info-icon, .menu-item');
                 if (!target) return;
 
@@ -1136,6 +1262,7 @@
                 if (target.id === 'btn-close-settings') getEl('settings-screen').style.display = 'none';
                 if (target.id === 'btn-close-bag') getEl('inventory-screen').style.display = 'none';
                 if (target.id === 'btn-close-profile') getEl('profile-screen').style.display = 'none';
+                if (target.id === 'btn-close-info') getEl('info-screen').style.display = 'none';
                 if (target.id === 'btn-close-casino') getEl('casino-screen').style.display = 'none';
                 if (target.id === 'btn-close-leaderboard') getEl('leaderboard-screen').style.display = 'none';
 
