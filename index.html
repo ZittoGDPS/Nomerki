@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
 
-    <!-- Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, remove, runTransaction } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -36,7 +34,6 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
 
-        /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; width: 70%; }
         #user-name-display { font-size: 12px; color: #ffcc00; font-weight: bold; margin-bottom: 2px; }
@@ -46,10 +43,8 @@
         #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
         #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
 
-        /* Кнопка меню */
         #btn-menu { border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 20px; }
 
-        /* ⚡ ИНДИКАТОР БУСТА */
         #boost-indicator {
             display: none; position: fixed; top: 70px; right: 15px;
             background: linear-gradient(135deg, #ff007f, #ff6b00);
@@ -70,7 +65,6 @@
         }
         @keyframes boltShake { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
-        /* Главный экран */
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
@@ -91,7 +85,6 @@
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
         .chance-text { font-size: 12px; color: #888; margin-top: 5px; display: block; }
 
-        /* БЛОК ПРИЧИН ЦЕНЫ */
         .reasons-block {
             margin-top: 12px; padding: 10px 12px; background: rgba(0,136,204,0.06);
             border-left: 3px solid #0088cc; border-radius: 6px; font-size: 12px; text-align: left;
@@ -102,7 +95,6 @@
 
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
-        /* Нижние кнопки */
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         .shop-buttons-row { display: flex; gap: 10px; width: 100%; }
         .shop-btn { color: white; border: none; padding: 15px 5px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
@@ -112,7 +104,6 @@
         #btn-shop-gen { background: #fd7e14; }
         #btn-jewelry-gen { background: #dc3545; }
 
-        /* Кнопка Рюкзака */
         #btn-open-bag-float {
             position: fixed; bottom: 100px; left: 20px;
             background: #0088cc; color: white; border: none;
@@ -126,19 +117,16 @@
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Всплывающее меню */
         #side-menu { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #1e1e1e; z-index: 999999; transition: right 0.3s ease; display: flex; flex-direction: column; padding-top: 60px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
         #side-menu.open { right: 0; }
         .menu-item { padding: 15px 20px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #333; transition: background 0.2s; }
         .menu-item:active { background: #333; }
         .menu-item span { font-size: 20px; }
 
-        /* Модальные окна */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
-        /* Рынок и Рюкзак */
         #inv-balance-box, #market-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
@@ -151,7 +139,6 @@
 
         .btn-sell-item { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-list-item { background: #ffc107; color: #1e1e1e; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
         @keyframes sellAnim {
             0% { transform: scale(1); opacity: 1; }
@@ -258,7 +245,6 @@
         #toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #28a745, #1e7e34); color: white; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 999999999; text-align: center; width: 85%; box-sizing: border-box; animation: slideDown 0.4s forwards; }
         @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
-        /* СИМ-СТЕНА */
         #simwall-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; overflow-y: auto; flex: 1; align-content: start; }
         .sim-slot { background: var(--card-bg); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.3s; position: relative; }
         .sim-slot.locked { opacity: 0.75; border-color: #555; background: rgba(0,0,0,0.05); }
@@ -275,7 +261,6 @@
         .s-btn-remove { background: #dc3545; color: white; }
         .empty-icon { font-size: 24px; color: #0088cc; opacity: 0.7; margin-bottom: 5px; }
 
-        /* СИМ-СТЕНА: улучшения */
         .sim-slot.active { min-height: 175px; }
         .sim-slot .s-stars { font-size: 13px; color: #ffb300; letter-spacing: 1px; margin-bottom: 4px; }
         .sim-slot .slot-btns { display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: auto; }
@@ -284,7 +269,6 @@
         .s-btn-max { background: #6c757d; color: white; cursor: default !important; }
         .lvl-badge { color: #ffb300; font-size: 12px; font-weight: bold; margin-left: 6px; }
 
-        /* ДРУЗЬЯ И ПРОФИЛИ */
         .mini-btn { background: #0088cc; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; min-height: 42px; }
         .mini-btn.danger { background: #dc3545; }
         .mini-btn:active { transform: scale(0.96); }
@@ -352,7 +336,6 @@
         <div class="menu-item" id="menu-friends"><span>👥</span> Друзья</div>
     </div>
 
-    <!-- СИМ-СТЕНА -->
     <div id="simwall-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">📱 СИМ-СТЕНА</span>
@@ -369,7 +352,6 @@
         <div id="simwall-grid"></div>
     </div>
 
-    <!-- ВЫБОР НОМЕРА ДЛЯ СИМ-СТЕНЫ -->
     <div id="simwall-select-screen" class="full-screen" style="z-index: 99999999;">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">Выберите номер</span>
@@ -444,13 +426,10 @@
                 <div class="profile-row"><span>Получено XP:</span> <span id="info-current-xp">—</span></div>
                 <div class="profile-row"><span>Шанс выпадения:</span> <span id="info-current-chance">—</span></div>
             </div>
-
             <div class="profile-section" id="info-reasons-section" style="display:none;">
                 <h3>💡 Почему такая цена</h3>
-                <ul id="info-reasons-list" style="margin:0; padding-left:18px; font-size:13px; line-height: 1.6; color: var(--text-main);">
-                </ul>
+                <ul id="info-reasons-list" style="margin:0; padding-left:18px; font-size:13px; line-height: 1.6; color: var(--text-main);"></ul>
             </div>
-
             <div class="profile-section">
                 <h3>📈 Прогресс</h3>
                 <div class="profile-row"><span>Уровень:</span> <span id="info-level">1</span></div>
@@ -459,7 +438,6 @@
                 <div class="profile-row"><span>Активный буст:</span> <span id="info-boost">Нет</span></div>
                 <div class="profile-row"><span>Бесплатных спинов:</span> <span id="info-free-spins">0</span></div>
             </div>
-
             <div class="profile-section">
                 <h3>💰 Баланс</h3>
                 <div class="profile-row"><span>Текущий:</span> <span id="info-balance">0 ₽</span></div>
@@ -467,7 +445,6 @@
                 <div class="profile-row"><span>В рюкзаке:</span> <span id="info-inventory-value">0 ₽</span></div>
                 <div class="profile-row"><span>Общий капитал:</span> <span id="info-total-worth">0 ₽</span></div>
             </div>
-
             <div class="profile-section">
                 <h3>📊 Статистика</h3>
                 <div class="profile-row"><span>Всего сгенерировано:</span> <span id="info-total-generated">0</span></div>
@@ -477,7 +454,6 @@
                 <div class="profile-row"><span>Стоимость лучшего:</span> <span id="info-best-price">—</span></div>
                 <div class="profile-row"><span>Оператор:</span> <span id="info-operator">—</span></div>
             </div>
-
             <div class="profile-section">
                 <h3>🎲 Шансы выпадения</h3>
                 <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>&lt; 0.001%</span></div>
@@ -521,7 +497,6 @@
         </div>
     </div>
 
-    <!-- ДРУЗЬЯ -->
     <div id="friends-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">👥 Друзья</span><button class="btn-close" id="btn-close-friends">Закрыть</button></div>
         <div class="friend-add-row">
@@ -535,13 +510,11 @@
         <div id="friends-list" style="flex: 1; overflow-y: auto; padding: 15px;"></div>
     </div>
 
-    <!-- ПРОФИЛЬ ДРУГОГО ИГРОКА -->
     <div id="player-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">👤 Профиль игрока</span><button class="btn-close" id="btn-close-player">Закрыть</button></div>
         <div id="player-content"></div>
     </div>
 
-    <!-- ВЫБОР НОМЕРА ДЛЯ ПРОФИЛЯ -->
     <div id="number-select-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">Номер для друзей</span><button class="btn-close" id="btn-close-number-select">Назад</button></div>
         <div style="padding: 12px 15px 0 15px; font-size: 12px; color: var(--text-sub);">Можно выбрать только номер из рюкзака. Если он уйдёт из рюкзака (продан, на рынке, на СИМ-стене, сгорел) — из профиля он уберётся.</div>
@@ -553,20 +526,16 @@
             const tg = window.Telegram ? window.Telegram.WebApp : null;
             if (tg) { tg.ready(); tg.expand(); }
 
-            // ───────────── Хелперы ─────────────
             const getEl = (id) => document.getElementById(id);
             const esc = (s) => String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             const num = (v) => { v = Number(v); return Number.isFinite(v) ? v : 0; };
             const fmt = (n) => num(n).toLocaleString('ru-RU');
-            // Firebase запрещает в ключах . # $ [ ] /
             const keySafe = (s) => String(s).replace(/[.#$\[\]\/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
-            // Firebase не принимает undefined — чистим объект
             const plain = (o) => JSON.parse(JSON.stringify(o));
             const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return (v === null || v === undefined) ? fb : v; } catch (e) { return fb; } };
             const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
             const dbReady = () => !!(window.db && window.fbRef && window.fbSet && window.fbGet);
             const digitsOf = (v) => String(v || '').replace(/\D/g, '');
-            // Ключ номера в индексе: 10 цифр без +7 / 8
             const normPhoneKey = (v) => { let d = digitsOf(v); if (d.length === 11 && (d[0] === '7' || d[0] === '8')) d = d.slice(1); return d.length === 10 ? d : null; };
             const USERNAME_RE = /^(?=.*[a-z])[a-z0-9_]{3,32}$/;
             const lvlBadge = (it) => (it && it.lvl > 0) ? `<span class="lvl-badge">⭐${esc(it.lvl)}</span>` : '';
@@ -581,7 +550,6 @@
                     lvl: Math.max(0, Math.min(5, parseInt(it.lvl) || 0))
                 };
             }
-            // Firebase превращает массивы в объекты/выкидывает пустые — нормализуем
             function normInventory(v) {
                 const arr = Array.isArray(v) ? v : Object.values(v || {});
                 return arr.filter(x => x && x.phone).map(toInvItem);
@@ -597,18 +565,15 @@
                 const unlocked = Math.max(1, Math.min(10, parseInt(sw && sw.slotsUnlocked) || 1));
                 return { slotsUnlocked: unlocked, items, lastTick: num(sw && sw.lastTick) || Date.now() };
             }
-
             function normFriends(v) {
                 const arr = Array.isArray(v) ? v : Object.keys(v || {});
                 return [...new Set(arr.map(String).filter(Boolean))];
             }
-            // Номер, который сгенерирован, но ещё не продан/сохранён (раньше при перезагрузке он пропадал вместе с деньгами)
             function normGen(g) {
                 if (!g || !g.phone) return null;
                 return { ...toInvItem(g), xp: Math.max(0, Math.floor(num(g.xp))), xpPending: Math.max(0, Math.floor(num(g.xpPending))) };
             }
 
-            // ───────────── Идентификатор игрока ─────────────
             let myName = localStorage.getItem('blum_user_name') || "Игрок";
             let myId = null;
             const urlParams = new URLSearchParams(window.location.search);
@@ -630,8 +595,7 @@
             if (savedEmailId) { myId = savedEmailId; myName = localStorage.getItem('blum_user_name') || "Игрок"; }
             myId = keySafe(myId);
 
-            // ───────────── Состояние ─────────────
-            let cloudReady = false;   // пока облако не загружено — в Firebase ничего не пишем
+            let cloudReady = false;
             let resetting = false;
 
             const savedFreeSpins = localStorage.getItem('blum_free_spins');
@@ -652,7 +616,6 @@
                 totalGenerated: parseInt(localStorage.getItem('blum_total_generated')) || 0,
                 totalSold: parseInt(localStorage.getItem('blum_total_sold')) || 0,
                 maxBalance: parseInt(localStorage.getItem('blum_max_balance')) || 0,
-                // ВАЖНО: 0 — валидное значение (раньше `|| 10` сбрасывал спины при каждой перезагрузке)
                 freeSpins: savedFreeSpins === null ? 10 : (parseInt(savedFreeSpins) || 0),
                 currentOperator: (savedOperator && savedOperator !== 'null') ? savedOperator : null,
                 isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false',
@@ -662,7 +625,6 @@
                 friends: normFriends(readJSON('blum_friends', []))
             };
 
-            // 💰 СТАРТОВЫЙ НАБОР
             const STARTER_KEY = 'blum_starter_granted';
             if (!localStorage.getItem(STARTER_KEY)) {
                 state.balance += 100000;
@@ -673,7 +635,6 @@
                 setTimeout(() => showToast('🎁 Стартовый набор: +100 000 ₽!'), 300);
             }
 
-            // 🎁 LEVEL_BONUS
             const LEVEL_BONUS = (() => {
                 const STORAGE_KEY = 'blum_last_bonus_level', STEP = 10, BASE_AMOUNT = 10000;
                 const _amountForLevel = (level) => {
@@ -716,7 +677,6 @@
                 return { STORAGE_KEY, STEP, BASE_AMOUNT, apply: _apply, reset: _reset, amountForLevel: _amountForLevel, getLastBonusLevel: _getLastBonusLevel, setLastBonusLevel: _setLastBonusLevel };
             })();
 
-            // ⚡ BOOST
             const BOOST = {
                 DURATION_MS: 30000, multiplier: 1, endTime: 0, _state: null,
                 init(stateObj) {
@@ -763,7 +723,6 @@
                 getMultiplier() { return (Date.now() < this.endTime) ? this.multiplier : 1; }
             };
 
-            // 📱 СИМ-СТЕНА
             let simwallSelectedSlotIndex = null;
             const SIM_WALL = {
                 MAX_SLOTS: 10, MAX_UPGRADES: 5, UPGRADE_BONUS: 0.3, BASE_PRICE: 25000, MINUTE_MS: 60000, OFFLINE_CAP_MIN: 1440, _started: false,
@@ -780,7 +739,6 @@
                     const lvl = lvlOverride !== undefined ? lvlOverride : (item.lvl || 0);
                     return Math.floor(base * mult * (1 + this.UPGRADE_BONUS * lvl));
                 },
-                // Стоимость следующего улучшения номера (максимум MAX_UPGRADES раз)
                 getUpgradeCost(item) {
                     const lvl = item.lvl || 0;
                     return Math.max(1000, Math.round(item.price * 0.2 * (lvl + 1)));
@@ -794,7 +752,6 @@
                     if (state.balance < cost) { showToast('❌ Недостаточно средств!'); return; }
                     const gain = this.calculateIncome(item, lvl + 1) - this.calculateIncome(item, lvl);
                     if (!confirm(`Улучшить номер до ${lvl + 1}/${this.MAX_UPGRADES} за ${fmt(cost)} ₽?\nДоход вырастет на ${fmt(gain)} ₽/мин`)) return;
-                    // пока висел confirm, состояние могло измениться
                     if (state.simwall.items[slotIndex] !== item || (item.lvl || 0) !== lvl || state.balance < cost) return;
                     state.balance -= cost;
                     item.lvl = lvl + 1;
@@ -808,12 +765,10 @@
                 },
                 tick() {
                     const now = Date.now();
-                    if (state.simwall.lastTick > now) state.simwall.lastTick = now; // защита от сдвига часов
+                    if (state.simwall.lastTick > now) state.simwall.lastTick = now;
                     const diff = now - state.simwall.lastTick;
                     const minutesPassed = Math.floor(diff / this.MINUTE_MS);
                     if (minutesPassed > 0) {
-                        // Платим максимум за OFFLINE_CAP_MIN, но таймер двигаем на ВСЁ прошедшее время
-                        // (раньше остаток копился и выплачивался повторно каждую секунду)
                         const paidMinutes = Math.min(minutesPassed, this.OFFLINE_CAP_MIN);
                         const income = this.getTotalIncome() * paidMinutes;
                         state.simwall.lastTick += minutesPassed * this.MINUTE_MS;
@@ -840,10 +795,8 @@
                         const item = state.simwall.items[i];
                         const cost = this.getSlotCost(i);
                         const div = document.createElement('div');
-
                         if (!isUnlocked) {
                             div.className = `sim-slot locked`;
-                            // Покупать можно только следующий по порядку слот
                             const canBuy = i === state.simwall.slotsUnlocked;
                             div.innerHTML = `
                                 <div class="slot-label">Слот ${i + 1}</div>
@@ -924,7 +877,6 @@
                     this.render(); updateUI(); showToast(`Номер возвращён в рюкзак.`);
                 },
                 buySlot(slotIndex) {
-                    // Можно купить только следующий слот (раньше можно было заплатить за любой, а открывался следующий)
                     if (slotIndex !== state.simwall.slotsUnlocked) return;
                     const cost = this.getSlotCost(slotIndex);
                     if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
@@ -941,7 +893,6 @@
                 }
             };
 
-            // ───────────── Сохранение ─────────────
             function saveData() {
                 if (resetting) return;
                 localStorage.setItem('blum_balance', state.balance);
@@ -982,14 +933,12 @@
                             friends: Object.fromEntries(state.friends.map(f => [f, true])),
                             currentGen: state.currentGen
                         })).catch(e => console.log("Ошибка БД", e));
-                        // публичная витрина игрока: её читают лидерборд, друзья и просмотр профилей
                         window.fbSet(window.fbRef(window.db, 'profiles/' + myId), plain(buildPublicProfile()))
                             .catch(e => console.log("Ошибка профиля", e));
                     } catch (e) { console.log("Ошибка БД", e); }
                 }
             }
 
-            // Применить данные, пришедшие из облака
             function applyCloudData(data) {
                 state.balance = Math.floor(num(data.balance));
                 state.level = Math.max(1, parseInt(data.level) || 1);
@@ -1005,12 +954,10 @@
                 state.profileNumber = data.profileNumber ? String(data.profileNumber) : null;
                 state.friends = normFriends(data.friends);
                 state.currentGen = normGen(data.currentGen);
-                // Чтобы бонусы за уровни не выдавались повторно на другом устройстве
                 const lb = (data.lastBonusLevel !== undefined && data.lastBonusLevel !== null) ? parseInt(data.lastBonusLevel) : state.level;
                 LEVEL_BONUS.setLastBonusLevel(Number.isFinite(lb) ? lb : state.level);
             }
 
-            // ───────────── Рендер ─────────────
             const CATEGORY_THRESHOLDS = [
                 [1000000000, "БРИЛЛИАНТОВЫЙ"], [1000000, "ЗОЛОТОЙ"], [100000, "СЕРЕБРЯНЫЙ"],
                 [10000, "БРОНЗОВЫЙ"], [1000, "КРАСИВОЕ ОКОНЧАНИЕ"]
@@ -1108,7 +1055,6 @@
             }
 
             function updateUI() {
-                // 1. Сначала логика уровней/бонусов, потом отрисовка (раньше бонус появлялся в UI только со следующим обновлением)
                 let ptsNeeded = state.level * 100;
                 while (state.points >= ptsNeeded) {
                     state.points -= ptsNeeded;
@@ -1120,7 +1066,6 @@
                 enforceProfileNumber();
                 if (state.balance > state.maxBalance) state.maxBalance = state.balance;
 
-                // 2. Отрисовка
                 getEl('balance-display').innerText = fmt(state.balance) + ' ₽';
                 getEl('inv-balance-amount').innerText = fmt(state.balance) + ' ₽';
                 getEl('bag-count').innerText = state.inventory.length;
@@ -1140,7 +1085,6 @@
                 getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
                 getEl('user-name-display').innerText = myName;
 
-                // Настройки отражают реальное состояние (раньше после перезагрузки тумблеры показывали значения по умолчанию)
                 document.body.classList.toggle('dark-theme', state.isDarkTheme);
                 getEl('toggle-theme').checked = state.isDarkTheme;
                 getEl('toggle-animation').checked = state.isAnimationEnabled;
@@ -1306,7 +1250,6 @@
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
-            // Показать/скрыть карточку несохранённого номера (после перезагрузки или загрузки облака)
             function syncGenUI() {
                 if (genAnimating) return;
                 const cg = state.currentGen;
@@ -1400,11 +1343,9 @@
                 }, 50);
             }
 
-            // ───────────── Публичные профили ─────────────
             function toList(v) { return Array.isArray(v) ? v.filter(Boolean) : Object.values(v || {}); }
             function pubNum(it) { return { phone: it.phone, price: it.price, category: it.category, lvl: it.lvl || 0 }; }
 
-            // Одна и та же «витрина» игрока — и из локального состояния, и из сырых данных облака
             function profileFromData(d) {
                 const inv = normInventory(d.inventory).sort((a, b) => b.price - a.price);
                 const sw = normSimwall(d.simwall);
@@ -1434,7 +1375,6 @@
                 });
             }
 
-            // Профиль игрока: сначала публичная витрина, если её нет (старый игрок) — собираем из players/
             async function fetchProfile(id) {
                 try {
                     const s = await Promise.race([window.fbGet(window.fbRef(window.db, 'profiles/' + id)), timeout(10000)]);
@@ -1448,7 +1388,6 @@
                 return null;
             }
 
-            // ───────────── Юзернейм и номер для друзей ─────────────
             async function claimIndex(path) {
                 const r = await window.fbRunTransaction(window.fbRef(window.db, path), (cur) => (cur === null || cur === myId) ? myId : undefined);
                 return !!(r && r.committed);
@@ -1488,7 +1427,6 @@
                 showToast(`✅ Юзернейм сохранён: @${esc(raw)}`);
             }
 
-            // Юзернейм из Telegram подставляем автоматически (если не занят и игрок его не убирал)
             async function autoClaimTgUsername() {
                 if (state.username || localStorage.getItem('blum_username_optout') || localStorage.getItem('blum_email_id')) return;
                 if (!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user || !tg.initDataUnsafe.user.username) return;
@@ -1531,7 +1469,6 @@
                     const ok = await claimIndex('phoneIndex/' + key);
                     if (!ok) { showToast('❌ Этот номер уже закреплён за другим игроком.'); return; }
                 } catch (e) { showToast('❌ Не удалось сохранить номер.'); return; }
-                // пока шёл запрос, номер могли продать
                 if (!state.inventory.some(it => it.phone === phone)) { releaseIndex('phoneIndex/' + key); showToast('❌ Номер уже не в рюкзаке.'); return; }
                 const oldKey = state.profileNumber ? normPhoneKey(state.profileNumber) : null;
                 state.profileNumber = phone;
@@ -1549,7 +1486,6 @@
                 saveData(); renderProfile();
             }
 
-            // Номер, которого больше нет в рюкзаке, из профиля убираем
             function enforceProfileNumber() {
                 if (!state.profileNumber) return;
                 if (state.inventory.some(it => it.phone === state.profileNumber)) return;
@@ -1559,7 +1495,6 @@
                 showToast('ℹ️ Номер для друзей ушёл из рюкзака — он убран из профиля.');
             }
 
-            // ───────────── Лидерборд ─────────────
             function makeLeaderRow(i, id, p) {
                 const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
                 const nm = String(p.name || 'Игрок');
@@ -1596,7 +1531,6 @@
                     if (data) {
                         for (const id in data) if (data[id]) rows.push({ id, p: data[id] });
                     } else {
-                        // витрин ещё нет — собираем из players/
                         const s = await Promise.race([window.fbGet(window.fbRef(window.db, 'players')), timeout(15000)]);
                         const raw = s.val();
                         if (raw) for (const id in raw) rows.push({ id, p: profileFromData(raw[id] || {}) });
@@ -1619,7 +1553,6 @@
                 }
             }
 
-            // ───────────── Просмотр профиля игрока ─────────────
             let viewedId = null, viewedProfile = null, viewToken = 0;
 
             async function openPlayerProfile(id) {
@@ -1682,7 +1615,6 @@
                 `;
             }
 
-            // ───────────── Друзья ─────────────
             const MAX_FRIENDS = 100;
             let friendsTab = 'board', friendsCache = [], friendsLoadToken = 0;
 
@@ -1746,7 +1678,6 @@
                 });
             }
 
-            // Поиск по @юзернейму или по номеру из профиля. Индексы проверяем по самому профилю — на случай устаревшей записи
             async function findPlayer(q) {
                 q = String(q || '').trim();
                 const isName = /^@/.test(q) || /[^\d\s+\-().]/.test(q);
@@ -1814,7 +1745,6 @@
                 if (friendsScreenOpen()) loadFriends();
             }
 
-            // ───────────── Глобальный рынок ─────────────
             let unsubMarket = null;
             let marketBusy = false;
 
@@ -1831,7 +1761,6 @@
                 if (!dbReady() || !window.fbOnValue) { list.innerHTML = 'Ошибка подключения к базе.'; return; }
                 if (unsubMarket) { unsubMarket(); unsubMarket = null; }
 
-                // Подписка одна и отписывается при закрытии (раньше слушатели копились при каждом открытии)
                 unsubMarket = window.fbOnValue(window.fbRef(window.db, 'market'), (snapshot) => {
                     const data = snapshot.val();
                     const items = [];
@@ -1870,7 +1799,6 @@
                 }, () => { list.innerHTML = 'Ошибка загрузки рынка.'; });
             }
 
-            // Атомарно забрать лот с рынка: победит только один покупатель
             async function claimLot(key) {
                 let claimed = null;
                 await window.fbRunTransaction(window.fbRef(window.db, 'market/' + key), (cur) => { claimed = cur; return null; });
@@ -1895,18 +1823,18 @@
 
                     const price = Math.floor(num(lot.price));
                     if (state.balance < price) {
-                        // цена/баланс изменились — возвращаем лот
                         await window.fbSet(window.fbRef(window.db, 'market/' + key), plain(lot));
                         showToast("❌ Недостаточно средств!");
                         return;
                     }
 
                     state.balance -= price;
-                    state.inventory.push(toInvItem(lot));
+                    const bought = toInvItem(lot);
+                    bought.category = categoryByPrice(bought.price);
+                    state.inventory.push(bought);
                     updateUI();
                     showToast(`✅ Вы купили номер ${esc(lot.phone)}!`);
 
-                    // Деньги продавцу — через очередь выплат (прямая перезапись его профиля затирала его прогресс)
                     if (lot.sellerId) {
                         const payKey = Date.now() + '_' + Math.floor(Math.random() * 1000000);
                         window.fbSet(window.fbRef(window.db, 'payouts/' + keySafe(lot.sellerId) + '/' + payKey),
@@ -1932,8 +1860,12 @@
                     if (preview.sellerId !== myId) return;
                     const lot = await claimLot(key);
                     if (!lot) { showToast("Лот уже продан!"); return; }
-                    // Раньше номер при снятии лота просто пропадал — теперь возвращается в рюкзак
-                    state.inventory.push(toInvItem(lot));
+                    // Возвращаем номер с ИСХОДНОЙ ценой (а не с ценой лота)
+                    const restored = toInvItem({
+                        ...lot,
+                        price: (lot.originalPrice !== undefined && lot.originalPrice !== null) ? lot.originalPrice : lot.price
+                    });
+                    state.inventory.push(restored);
                     updateUI();
                     showToast("Лот снят, номер вернулся в рюкзак.");
                 } catch (e) {
@@ -1943,7 +1875,6 @@
                 }
             }
 
-            // Выплаты продавцу
             let unsubPayouts = null;
             const payoutInFlight = new Set();
             function subscribePayouts() {
@@ -1974,14 +1905,12 @@
                 });
             }
 
-            // ───────────── Апгрейдер ─────────────
             let selectedCasinoItemIndex = null;
             let casinoBusy = false;
             const MAX_PRICE = 1000000000;
 
             function calcChance(currentPrice, targetPrice) {
                 if (!(targetPrice > currentPrice)) return null;
-                // честная вероятность с небольшим преимуществом казино; без нижнего «пола» в 1% (он давал бесконечные деньги)
                 return Math.min(95, (currentPrice / targetPrice) * 100 * 0.95);
             }
             function formatChance(c) { return c < 0.01 ? '<0.01' : (Math.round(c * 100) / 100).toString(); }
@@ -2084,16 +2013,14 @@
                             casinoBusy = false;
                             updateUI();
                             renderInventory();
-                            // Раньше openCasино() сразу стирал сообщение о результате
                             openCasino(`😢 ПРОВАЛ... Номер сгорел.`, "#dc3545");
                         }, 600);
                     }
                 }, 1000);
             }
 
-            // ───────────── Облако: загрузка при старте ─────────────
             async function loadCloud() {
-                if (!dbReady()) return true; // без облака играем локально
+                if (!dbReady()) return true;
                 try {
                     const snap = await Promise.race([window.fbGet(window.fbRef(window.db, 'players/' + myId)), timeout(10000)]);
                     const data = snap.val();
@@ -2120,13 +2047,10 @@
                 autoClaimTgUsername();
             }
 
-            // ───────────── Обработчики ─────────────
             document.addEventListener('click', function (e) {
-                // закрытие бокового меню по клику вне его
                 if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) getEl('side-menu').classList.remove('open');
 
                 if (e.target.closest('.info-icon')) { openInfo(); return; }
-                // тап по строке игрока (лидерборд / друзья) открывает его профиль
                 const pidRow = e.target.closest('[data-pid]');
                 if (pidRow && !e.target.closest('button')) { openPlayerProfile(pidRow.getAttribute('data-pid')); return; }
                 const target = e.target.closest('button, .menu-item');
@@ -2176,7 +2100,7 @@
                 if (target.classList.contains('btn-close-market-item')) takeBackMyLot(target.getAttribute('data-key'));
 
                 if (['btn-market-gen', 'btn-shop-gen', 'btn-jewelry-gen'].includes(target.id)) {
-                    if (state.currentGen) return; // предыдущий номер ещё не продан/сохранён
+                    if (state.currentGen) return;
                     const type = target.id === 'btn-market-gen' ? 1 : target.id === 'btn-shop-gen' ? 5 : 20;
                     const cost = type * 1000;
 
@@ -2196,11 +2120,9 @@
                     const rarity = getRarity(evalData.category);
                     const earnedXP = Math.floor(rarity.xp * opData.xpMultiplier * BOOST.getMultiplier());
 
-                    // XP начисляется в конце анимации (xpPending), номер хранится сразу — перезагрузка его не теряет
                     state.currentGen = { phone, price: evalData.price, category: evalData.category, chance: evalData.chance, reasons: evalData.reasons, lvl: 0, xp: earnedXP, xpPending: earnedXP };
 
                     state.totalGenerated++;
-                    // копия, чтобы апгрейд номера в рюкзаке не менял «лучший номер» по ссылке
                     if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = toInvItem(state.currentGen);
 
                     saveData();
@@ -2255,24 +2177,24 @@
                         target.innerText = "Продажа...";
 
                         setTimeout(() => {
-                            // ищем по ссылке, а не по индексу — за 500 мс рюкзак мог измениться
                             const i = state.inventory.indexOf(item);
                             if (i === -1) { renderInventory(); return; }
                             state.inventory.splice(i, 1);
                             updateUI();
                             renderInventory();
 
-                            // plain() убирает undefined — раньше из-за chance: undefined set() падал, а номер уже был удалён из рюкзака
+                            // Сохраняем ИСХОДНУЮ цену номера в originalPrice,
+                            // чтобы при снятии лота вернуть её обратно, а не цену лота.
                             const lotRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
                             window.fbSet(lotRef, plain({
-                                phone: item.phone, price: listingPrice, category: item.category,
-                                chance: item.chance || '', reasons: item.reasons || [], lvl: item.lvl || 0,
-                                sellerId: myId, sellerName: myName, timestamp: Date.now()
+                                phone: item.phone, price: listingPrice, originalPrice: item.price,
+                                category: item.category, chance: item.chance || '', reasons: item.reasons || [],
+                                lvl: item.lvl || 0, sellerId: myId, sellerName: myName, timestamp: Date.now()
                             })).then(() => {
                                 showToast(`✅ Лот выставлен на рынок!`);
                             }).catch(err => {
                                 console.log(err);
-                                state.inventory.push(item); // не получилось — возвращаем номер
+                                state.inventory.push(item);
                                 updateUI(); renderInventory();
                                 showToast("❌ Не удалось выставить лот, номер возвращён.");
                             });
@@ -2298,7 +2220,6 @@
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("❌ Неверный Email!"); return; }
                 if (!dbReady()) { showToast("❌ Нет подключения к базе."); return; }
 
-                // Email содержит «.», а он запрещён в ключах Firebase — кодируем
                 const newId = keySafe("email_" + email);
                 showToast("🔄 Синхронизация...");
                 try {
@@ -2314,8 +2235,7 @@
                         applyCloudData(data);
                         showToast("✅ Прогресс загружен!");
                     } else {
-                        // новый аккаунт: привязываем к нему текущий прогресс, а не обнуляем его
-                        state.username = ''; state.profileNumber = null; // юз и номер для друзей принадлежат прежнему аккаунту
+                        state.username = ''; state.profileNumber = null;
                         showToast("✨ Аккаунт создан, прогресс привязан!");
                     }
                     cloudReady = true;
@@ -2356,18 +2276,16 @@
                 if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
                 if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
             });
-            // шанс апгрейдера пересчитывается сразу при вводе, а не только после потери фокуса
             getEl('casino-target-price').addEventListener('input', updateChanceDisplay);
             getEl('friend-add-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') addFriendFromInput(); });
             getEl('username-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveUsername(); });
 
-            // ───────────── Старт ─────────────
             getEl('user-name-display').innerText = myName;
             if (state.isDarkTheme) document.body.classList.add('dark-theme');
             BOOST.init(state);
-            updateUI();      // рисуем локальное состояние (в облако пока не пишем)
-            syncGenUI();     // несохранённый номер после перезагрузки возвращается на экран
-            bootCloud();     // загружаем облако, затем включаем запись, СИМ-стену и выплаты
+            updateUI();
+            syncGenUI();
+            bootCloud();
         });
     </script>
 </body>
