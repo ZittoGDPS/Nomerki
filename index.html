@@ -11,7 +11,7 @@
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI",
@@ -27,9 +27,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
+        // Экспортируем функции в глобальную область
         window.fbRef = ref; 
         window.fbSet = set; 
         window.fbOnValue = onValue; 
+        window.fbRemove = remove;
         window.db = db;
     </script>
 
@@ -108,8 +110,15 @@
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
         #inv-list, #market-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
-        .inv-item, .market-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
-        .btn-sell-item, .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .inv-item, .market-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); flex-wrap: wrap; gap: 10px;}
+        
+        .item-info { flex: 1; min-width: 150px;}
+        .item-actions { display: flex; gap: 5px; }
+
+        .btn-sell-item { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-list-item { background: #ffc107; color: #1e1e1e; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
         /* Настройки */
         #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
@@ -242,24 +251,20 @@
 
     <!-- БОКОВОЕ МЕНЮ -->
     <div id="side-menu">
-        <div class="menu-item" id="menu-market"><span>🏪</span> Рынок (Продажа)</div>
+        <div class="menu-item" id="menu-global-market"><span>🌍</span> Глобальный Рынок</div>
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
         <div class="menu-item" id="menu-profile"><span>👤</span> Статистика</div>
         <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
     </div>
 
-    <!-- РЫНОК (ПРОДАЖА) -->
-    <div id="market-screen" class="full-screen">
+    <!-- ГЛОБАЛЬНЫЙ РЫНОК (ПОКУПКА) -->
+    <div id="global-market-screen" class="full-screen">
         <div class="screen-header">
-            <span style="font-weight:bold; font-size:18px;">🏪 Рынок (Продажа)</span>
-            <button class="btn-close" id="btn-close-market">Закрыть</button>
+            <span style="font-weight:bold; font-size:18px;">🌍 Рынок Игроков</span>
+            <button class="btn-close" id="btn-close-global-market">Закрыть</button>
         </div>
-        <div id="market-balance-box">
-            <div style="font-size:14px; margin-bottom:5px;">Ваш баланс</div>
-            <div id="market-balance-amount" style="font-size:28px; font-weight:bold; color:#28a745;">0 ₽</div>
-        </div>
-        <div id="market-list"></div>
+        <div id="global-market-list"></div>
     </div>
 
     <!-- ЛИДЕРБОРД -->
@@ -547,7 +552,6 @@
         function updateUI() {
             getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-            getEl('market-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('bag-count').innerText = state.inventory.length;
             getEl('lvl-text').innerText = `Уровень: ${state.level}`;
             
@@ -600,138 +604,127 @@
                 let div = document.createElement('div');
                 div.className = 'inv-item';
                 div.innerHTML = `
-                    <div>
+                    <div class="item-info">
                         <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
                         <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
                     </div>
-                    <button class="btn-sell-item" data-index="${realIndex}">Продать</button>
+                    <div class="item-actions">
+                        <button class="btn-sell-item" data-index="${realIndex}">Продать</button>
+                        <button class="btn-list-item" data-index="${realIndex}">На рынок</button>
+                    </div>
                 `;
                 list.appendChild(div);
             });
         }
 
-        // --- РЫНОК ---
-        function renderMarket() {
-            let list = getEl('market-list');
-            list.innerHTML = '';
-            if (state.inventory.length === 0) {
-                list.innerHTML = '<div style="text-align:center; margin-top:20px;">На рынке нет ваших номеров.</div>';
-                return;
-            }
-            [...state.inventory].reverse().forEach((item, index) => {
-                let realIndex = state.inventory.length - 1 - index;
-                let rarity = getRarity(item.category);
-                let div = document.createElement('div');
-                div.className = 'market-item';
-                div.innerHTML = `
-                    <div>
-                        <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
-                        <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
-                    </div>
-                    <button class="btn-sell-market" data-index="${realIndex}">Продать</button>
-                `;
-                list.appendChild(div);
-            });
-        }
+        // --- ГЛОБАЛЬНЫЙ РЫНОК ---
+        function openGlobalMarket() {
+            getEl('global-market-screen').style.display = 'flex';
+            let list = getEl('global-market-list');
+            list.innerHTML = 'Загрузка...';
 
-        function renderProfile() {
-            if (state.bestNumber) {
-                getEl('best-number-display').innerText = state.bestNumber.phone;
-                getEl('best-number-display').className = `best-num ${getRarity(state.bestNumber.category).cls}`;
-                getEl('best-number-price').innerText = state.bestNumber.price.toLocaleString('ru-RU') + ' ₽';
-            } else {
-                getEl('best-number-display').innerText = "Пока нет";
-                getEl('best-number-price').innerText = "0 ₽";
-            }
-
-            let top3Container = getEl('top3-inventory');
-            if (state.inventory.length === 0) {
-                top3Container.innerHTML = "Рюкзак пуст";
-            } else {
-                let sortedInv = [...state.inventory].sort((a, b) => b.price - a.price).slice(0, 3);
-                top3Container.innerHTML = sortedInv.map((item, i) => `
-                    <div class="profile-row">
-                        <span class="${getRarity(item.category).cls}" style="font-family: monospace;">${i+1}. ${item.phone}</span>
-                        <span style="color:#28a745;">${item.price.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                `).join('');
-            }
-
-            getEl('stat-generated').innerText = state.totalGenerated;
-            getEl('stat-sold').innerText = state.totalSold;
-            getEl('stat-current-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-            getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
-        }
-
-        function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP) {
-            let resDiv = getEl('custom-gen-result');
-            let btnRow = getEl('gen-buttons-row');
-            btnRow.style.display = 'none';
-            resDiv.classList.add('force-show');
-            
-            if (!state.isAnimationEnabled) {
-                resDiv.innerHTML = `
-                    <div class="info-icon" id="btn-show-info">i</div>
-                    <div class="phone-number ${rarityClass}">${targetPhone}</div>
-                    <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
-                    <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
-                `;
-                if (price >= 500000) {
-                    resDiv.classList.add('shake-effect'); resDiv.classList.add('flash-effect');
-                    setTimeout(() => { resDiv.classList.remove('shake-effect'); resDiv.classList.remove('flash-effect'); }, 1000);
-                    showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
-                }
-                getEl('action-btns-wrapper').style.display = 'flex';
-                state.points += earnedXP;
-                updateUI();
+            if (!window.db || !window.fbRef || !window.fbOnValue) {
+                list.innerHTML = 'Ошибка подключения к базе.';
                 return;
             }
 
-            resDiv.innerHTML = `
-                <div class="info-icon" id="btn-show-info" style="opacity:0;">i</div>
-                <div class="phone-number rarity-common" id="anim-phone">+7-XXX-XXX-XX-XX</div>
-                <div class="price-tag" id="anim-price" style="opacity: 0.5;">Генерация...</div>
-                <div class="category-text" id="anim-category" style="opacity: 0.5;">Поиск номера...</div>
-            `;
-
-            let animPhone = getEl('anim-phone');
-            let animPrice = getEl('anim-price');
-            let animCategory = getEl('anim-category');
-            let targetChars = targetPhone.split('');
-            let currentStr = "+7-XXX-XXX-XX-XX".split('');
-            let iterations = 0;
-            
-            let interval = setInterval(() => {
-                for (let i = 0; i < targetChars.length; i++) {
-                    if (targetChars[i] === '-' || targetChars[i] === '+') currentStr[i] = targetChars[i];
-                    else currentStr[i] = (i < iterations) ? targetChars[i] : Math.floor(Math.random() * 10).toString();
-                }
-                animPhone.innerText = currentStr.join('');
-                iterations += 1;
-                
-                if (iterations > targetChars.length) {
-                    clearInterval(interval);
-                    animPhone.innerText = targetPhone;
-                    animPhone.className = `phone-number ${rarityClass}`;
-                    animPrice.innerText = price.toLocaleString('ru-RU') + ' ₽';
-                    animPrice.style.opacity = '1';
-                    animCategory.innerHTML = `${category} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
-                    animCategory.style.opacity = '1';
-                    
-                    if (price >= 500000) {
-                        resDiv.classList.add('shake-effect'); resDiv.classList.add('flash-effect');
-                        setTimeout(() => { resDiv.classList.remove('shake-effect'); resDiv.classList.remove('flash-effect'); }, 1000);
-                        showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
+            window.fbOnValue(window.fbRef(window.db, 'market'), (snapshot) => {
+                let data = snapshot.val();
+                let items = [];
+                if (data) {
+                    for (let id in data) {
+                        let item = data[id];
+                        items.push({ ...item, key: id });
                     }
-
-                    getEl('action-btns-wrapper').style.display = 'flex';
-                    state.points += earnedXP;
-                    updateUI();
                 }
-            }, 50);
+                items.sort((a, b) => b.price - a.price);
+
+                list.innerHTML = '';
+                if (items.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; margin-top:20px;">Рынок пуст. Выставите свой номер!</div>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    let rarity = getRarity(item.category);
+                    let isMyItem = item.sellerId === myId;
+                    let div = document.createElement('div');
+                    div.className = 'market-item';
+                    div.innerHTML = `
+                        <div class="item-info">
+                            <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
+                            <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
+                            <div style="font-size:11px; color:#aaa;">Продавец: ${item.sellerName} ${isMyItem ? '(Вы)' : ''}</div>
+                        </div>
+                        ${isMyItem 
+                            ? `<button class="btn-close-market-item" style="background:#dc3545;color:white;border:none;padding:8px;border-radius:5px;cursor:pointer;" data-key="${item.key}">Снять</button>` 
+                            : `<button class="btn-buy-market" style="background:#28a745;color:white;border:none;padding:8px 12px;border-radius:5px;cursor:pointer;font-weight:bold;" data-key="${item.key}" data-price="${item.price}" data-seller="${item.sellerId}">Купить</button>`
+                        }
+                    `;
+                    list.appendChild(div);
+                });
+
+                // Обработчики для кнопок внутри списка
+                document.querySelectorAll('.btn-buy-market').forEach(btn => {
+                    btn.onclick = () => buyMarketItem(btn.getAttribute('data-key'), parseInt(btn.getAttribute('data-price')), btn.getAttribute('data-seller'));
+                });
+                document.querySelectorAll('.btn-close-market-item').forEach(btn => {
+                    btn.onclick = () => {
+                        if(confirm("Снять лот с продажи?")) {
+                            window.fbRemove(window.fbRef(window.db, 'market/' + btn.getAttribute('data-key')));
+                            showToast("Лот снят с рынка.");
+                        }
+                    };
+                });
+            });
         }
 
-        // 5. КАЗИНО
+        function buyMarketItem(key, price, sellerId) {
+            if (state.balance < price) {
+                showToast("❌ Недостаточно средств для покупки!");
+                return;
+            }
+
+            if (!confirm(`Купить номер за ${price.toLocaleString('ru-RU')} ₽?`)) return;
+
+            // Забираем лот из Firebase
+            window.fbOnValue(window.fbRef(window.db, 'market/' + key), (snapshot) => {
+                let item = snapshot.val();
+                if (!item) { showToast("Лот уже продан!"); openGlobalMarket(); return; }
+                
+                // Удаляем с рынка
+                window.fbRemove(window.fbRef(window.db, 'market/' + key));
+
+                // Списываем деньги у покупателя
+                state.balance -= price;
+                state.inventory.push({
+                    phone: item.phone,
+                    price: item.price,
+                    category: item.category
+                });
+                
+                updateUI();
+                saveData();
+                showToast(`✅ Вы купили номер ${item.phone}!`);
+
+                // Начисляем деньги продавцу (с комиссией 5%)
+                if (window.db && window.fbRef && window.fbOnValue && window.fbSet) {
+                    window.fbOnValue(window.fbRef(window.db, 'players/' + sellerId), (sSnap) => {
+                        let seller = sSnap.val();
+                        if (seller) {
+                            let commission = item.price * 0.05;
+                            let sellerProfit = item.price - commission;
+                            seller.balance = (seller.balance || 0) + sellerProfit;
+                            window.fbSet(window.fbRef(window.db, 'players/' + sellerId), seller);
+                        }
+                    }, { onlyOnce: true });
+                }
+
+                openGlobalMarket(); // Обновляем список
+            }, { onlyOnce: true });
+        }
+
+        // --- АПГРЕЙДЕР ---
         function openCasino() {
             getEl('casino-screen').style.display = 'flex';
             selectedCasinoItemIndex = null;
@@ -816,7 +809,7 @@
             }, 1000);
         }
 
-        // 6. ЛИДЕРБОРД
+        // --- ЛИДЕРБОРД ---
         function openLeaderboard() {
             getEl('leaderboard-screen').style.display = 'flex';
             let list = getEl('leaderboard-list');
@@ -870,14 +863,14 @@
 
             // Меню
             if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
-            if (target.id === 'menu-market') { getEl('side-menu').classList.remove('open'); getEl('market-screen').style.display = 'flex'; renderMarket(); }
+            if (target.id === 'menu-global-market') { getEl('side-menu').classList.remove('open'); openGlobalMarket(); }
             if (target.id === 'menu-settings') { getEl('side-menu').classList.remove('open'); getEl('settings-screen').style.display = 'flex'; }
             if (target.id === 'menu-casino') { getEl('side-menu').classList.remove('open'); openCasino(); }
             if (target.id === 'menu-profile') { getEl('side-menu').classList.remove('open'); getEl('profile-screen').style.display = 'flex'; renderProfile(); }
             if (target.id === 'menu-leaderboard') { getEl('side-menu').classList.remove('open'); openLeaderboard(); }
 
             // Закрытия
-            if (target.id === 'btn-close-market') getEl('market-screen').style.display = 'none';
+            if (target.id === 'btn-close-global-market') getEl('global-market-screen').style.display = 'none';
             if (target.id === 'btn-close-settings') getEl('settings-screen').style.display = 'none';
             if (target.id === 'btn-close-bag') getEl('inventory-screen').style.display = 'none';
             if (target.id === 'btn-close-profile') getEl('profile-screen').style.display = 'none';
@@ -914,7 +907,7 @@
                 startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
             }
 
-            // ПРОДАТЬ с главного экрана
+            // ПРОДАТЬ с главного
             if (target.id === 'btn-sell-now') {
                 if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
@@ -929,7 +922,7 @@
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
-            // ОСТАВИТЬ с главного экрана
+            // ОСТАВИТЬ с главного
             if (target.id === 'btn-keep') {
                 state.inventory.push(state.currentGen);
                 updateUI();
@@ -940,19 +933,7 @@
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
-            // Продажа из Рынка
-            if (target.classList.contains('btn-sell-market')) {
-                let idx = parseInt(target.getAttribute('data-index'));
-                let item = state.inventory[idx];
-                if (state.useSellWarning && item.price >= state.warnThreshold) {
-                    if (!confirm(`Продать за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
-                }
-                state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
-                updateUI(); renderMarket();
-                showToast(`✅ Продан номер за ${item.price.toLocaleString('ru-RU')} ₽`);
-            }
-
-            // Продажа из Рюкзака
+            // ПРОДАТЬ ИЗ РЮКЗАКА
             if (target.classList.contains('btn-sell-item')) {
                 let idx = parseInt(target.getAttribute('data-index'));
                 let item = state.inventory[idx];
@@ -961,6 +942,39 @@
                 }
                 state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
                 updateUI(); renderInventory();
+            }
+
+            // ВЫСТАВИТЬ НА РЫНОК
+            if (target.classList.contains('btn-list-item')) {
+                let idx = parseInt(target.getAttribute('data-index'));
+                let item = state.inventory[idx];
+                
+                let inputPrice = prompt(`За сколько хотите продать номер ${item.phone}? (Вы получите 95% от суммы, 5% комиссия)`, Math.floor(item.price * 1.5));
+                if (!inputPrice || isNaN(inputPrice)) return;
+                
+                let listingPrice = parseInt(inputPrice);
+                if (listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
+
+                if (window.db && window.fbRef && window.fbSet) {
+                    // Удаляем из локального рюкзака
+                    state.inventory.splice(idx, 1);
+                    updateUI();
+                    renderInventory();
+
+                    // Отправляем на глобальный рынок
+                    let newRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
+                    window.fbSet(newRef, {
+                        phone: item.phone,
+                        price: listingPrice,
+                        category: item.category,
+                        sellerId: myId,
+                        sellerName: myName,
+                        timestamp: Date.now()
+                    });
+                    showToast(`✅ Лот выставлен на рынок за ${listingPrice.toLocaleString('ru-RU')} ₽`);
+                } else {
+                    showToast("❌ Ошибка подключения к рынку.");
+                }
             }
 
             // Продать всё из Рюкзака
