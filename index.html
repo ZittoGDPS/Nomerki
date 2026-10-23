@@ -20,26 +20,30 @@
     </script>
     <style>
         :root { 
-            --bg: #121212; --card: #ffffff; --text: #ffffff; --text-sub: #888; 
-            --blue: #3b82f6; --green: #22c55e; --yellow: #eab308; --red: #ef4444; --dark-card: #1e1e1e;
+            --bg: #f0f0f0; --card: #ffffff; --text: #1e1e1e; --text-sub: #666; --dark-card: #ffffff;
+            --blue: #3b82f6; --green: #22c55e; --yellow: #eab308; --red: #ef4444;
+        }
+        body.dark-theme { 
+            --bg: #121212; --card: #ffffff; --text: #ffffff; --text-sub: #888; --dark-card: #1e1e1e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
         
         /* Верхняя панель */
         #top-bar { padding: 15px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; gap: 2px; max-width: 60%; }
         #user-name-display { font-size: 13px; color: var(--text-sub); }
         #balance-display { font-size: 28px; font-weight: 800; line-height: 1.1; word-break: break-word; }
-        #xp-bar-container { width: 100px; height: 4px; background: #333; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        #xp-bar-container { width: 100px; height: 4px; background: #ccc; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        body.dark-theme #xp-bar-container { background: #333; }
         #xp-bar-fill { height: 100%; background: #8b5cf6; width: 0%; transition: 0.3s; }
         
         .stats-box { display: flex; gap: 6px; align-items: center; }
-        .pill { background: var(--dark-card); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        #lvl-text { color: #fff; flex-direction: column; line-height: 1; font-size: 10px; padding: 4px 10px; } 
+        .pill { background: var(--dark-card); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #lvl-text { color: var(--text); flex-direction: column; line-height: 1; font-size: 10px; padding: 4px 10px; } 
         #lvl-text span { font-size: 13px; margin-top: 2px; }
-        #pts-text { color: #4ade80; } #spins-display { color: #f87171; }
-        #btn-menu { background: var(--dark-card); border: none; color: white; padding: 8px 12px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        #pts-text { color: #22c55e; } #spins-display { color: #ef4444; }
+        #btn-menu { background: var(--dark-card); border: none; color: var(--text); padding: 8px 12px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         /* Область скролла */
         #scroll-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
@@ -47,7 +51,7 @@
         /* Основной экран (Сим-карта) */
         #main-screen { width: 100%; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 20px; position: relative; }
         
-        #sim-card { background: var(--card); border-radius: 28px; padding: 25px; color: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; width: 100%; max-width: 350px; min-height: 230px; transition: transform 0.3s; position: relative; }
+        #sim-card { background: var(--card); border-radius: 28px; padding: 25px; color: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; width: 100%; max-width: 350px; min-height: 230px; transition: transform 0.3s; position: relative; }
         
         .sim-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .sim-op { display: flex; flex-direction: column; gap: 4px; }
@@ -66,6 +70,9 @@
         #reasons-box { display: none; font-size: 12px; color: #555; line-height: 1.4; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         #reasons-box.show { display: block; }
 
+        .info-icon { position: absolute; top: 25px; right: 95px; width: 26px; height: 26px; background: #e5e7eb; color: #374151; border-radius: 50%; display: none; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; font-size: 16px; z-index: 10; }
+        .info-icon.show { display: flex; }
+
         /* Кнопки действий (Продать / Оставить) */
         #action-btns-wrapper { display: none; gap: 10px; width: 100%; max-width: 350px; margin-top: 15px; }
         .btn-sell { color: white; border: none; padding: 16px; border-radius: 16px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: var(--green); }
@@ -74,36 +81,22 @@
         /* Нижние кнопки (Оригинал) */
         #bottom-action-area { padding: 10px 15px 20px 15px; display: flex; justify-content: center; flex-shrink: 0; width: 100%; }
         .shop-buttons-row { display: flex; gap: 10px; width: 100%; max-width: 400px; }
-        
         .shop-btn { color: white; border: none; padding: 14px 5px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .shop-btn:active { transform: scale(0.95); }
         .shop-btn span { font-size: 11px; font-weight: 600; background: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 10px; margin-top: 6px; }
-        
         #btn-market-gen { background: #22c55e; }
         #btn-shop-gen { background: #f59e0b; }
         #btn-jewelry-gen { background: #ef4444; }
 
-        /* Новая секция статистики */
-        #info-section { width: 100%; max-width: 400px; padding: 0 15px; display: flex; flex-direction: column; gap: 12px; }
-        .stat-card { background: var(--dark-card); border-radius: 16px; padding: 16px; }
-        .stat-title { font-size: 13px; color: var(--text-sub); margin-bottom: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;}
-        .stat-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
-        .stat-row:last-child { margin-bottom: 0; }
-        .stat-val { font-weight: 700; color: #fff; }
-        .stat-val.green { color: var(--green); }
-        .stat-val.yellow { color: var(--yellow); }
-        
-        .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 5px rgba(0,255,255,0.5); }
-        .rarity-gold { color: #ffd700 !important; }
-        .rarity-silver { color: #e0e0e0 !important; }
-        .rarity-bronze { color: #cd7f32 !important; }
-        .rarity-common { color: #ccc !important; }
+        /* Плавающая кнопка рюкзака */
+        #btn-open-bag-float { position: fixed; bottom: 100px; left: 20px; background: var(--blue); color: white; border: none; padding: 15px; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 150; cursor: pointer; display: flex; justify-content: center; align-items: center; width: 60px; height: 60px; }
+        #btn-open-bag-float:active { transform: scale(0.9); }
 
         /* Меню */
         #side-menu { position: fixed; top: 0; right: -260px; width: 260px; height: 100%; background: var(--dark-card); z-index: 1000; transition: right 0.3s; display: flex; flex-direction: column; padding-top: 60px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         #side-menu.open { right: 0; }
-        .menu-item { padding: 16px 20px; font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2a2a35; cursor: pointer; }
-        .menu-item:active { background: #2a2a35; }
+        .menu-item { padding: 16px 20px; font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(128,128,128,0.2); cursor: pointer; }
+        .menu-item:active { background: rgba(128,128,128,0.1); }
 
         /* Модальные окна */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; display: none; flex-direction: column; background: var(--bg); }
@@ -114,7 +107,7 @@
         .scroll-area { flex: 1; overflow-y: auto; padding: 15px 20px; }
 
         /* Списки */
-        .list-item { background: var(--dark-card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .list-item { background: var(--dark-card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .item-info { display: flex; flex-direction: column; gap: 4px; }
         .item-num { font-family: monospace; font-size: 16px; font-weight: bold; }
         .item-price { color: var(--green); font-weight: bold; font-size: 14px; }
@@ -122,19 +115,25 @@
         .btn-sm.red { background: var(--red); }
         .btn-sm.green { background: var(--green); }
 
+        /* Профиль и статистика */
+        .profile-section { background: var(--dark-card); padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 10px; }
+        .profile-section h3 { margin-top: 0; color: var(--blue); font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid rgba(128,128,128,0.2); padding-bottom: 5px; }
+        .profile-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .profile-row span:last-child { font-weight: bold; }
+
         /* Казино */
-        .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; background: #1a1a1a; }
+        .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; background: var(--bg); }
         .casino-inv-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .casino-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; border: 2px solid transparent; cursor: pointer; }
-        .casino-item.selected { border-color: var(--yellow); background: #333; }
+        .casino-item { background: var(--dark-card); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; border: 2px solid transparent; cursor: pointer; }
+        .casino-item.selected { border-color: var(--yellow); }
         .casino-controls { display: none; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; }
-        .casino-input { padding: 15px; border-radius: 10px; border: 2px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; width: 100%; }
+        .casino-input { padding: 15px; border-radius: 10px; border: 2px solid #444; background: var(--dark-card); color: var(--text); font-size: 18px; text-align: center; outline: none; width: 100%; }
         .chance-display { font-size: 24px; font-weight: bold; text-align: center; color: var(--yellow); }
         .btn-spin { background: var(--red); color: white; border: none; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; }
         .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; min-height: 30px; }
 
         /* СИМ-стена */
-        .sim-slot { background: var(--dark-card); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #333; }
+        .sim-slot { background: var(--dark-card); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(128,128,128,0.2); }
         .sim-slot .phone { font-family: monospace; font-size: 18px; font-weight: bold; }
         .sim-slot .income { color: var(--green); font-size: 13px; }
         .btn-row { display: flex; gap: 8px; margin-top: 5px; }
@@ -142,17 +141,25 @@
 
         /* Настройки */
         .setting-item { background: var(--dark-card); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        input[type="text"], input[type="email"], input[type="number"] { width: 100%; background: #2a2a35; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-size: 16px; outline: none; margin-top: 8px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        input[type="text"], input[type="email"], input[type="number"] { width: 100%; background: var(--bg); border: 1px solid rgba(128,128,128,0.3); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; outline: none; margin-top: 8px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        body.dark-theme .slider { background-color: #444; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--green); }
         input:checked + .slider:before { transform: translateX(22px); }
 
         /* Тост */
-        .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--dark-card); border: 1px solid #333; color: white; padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 5000; text-align: center; width: 90%; max-width: 400px; transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--dark-card); border: 1px solid rgba(128,128,128,0.3); color: var(--text); padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 5000; text-align: center; width: 90%; max-width: 400px; transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { top: 20px; }
+        
+        /* Редкости */
+        .rarity-diamond { color: #00ffff !important; }
+        .rarity-gold { color: #ffd700 !important; }
+        .rarity-silver { color: #b0b0b0 !important; }
+        .rarity-bronze { color: #cd7f32 !important; }
+        .rarity-common { color: var(--text) !important; }
     </style>
 </head>
 <body>
@@ -170,7 +177,6 @@
         </div>
     </div>
 
-    <!-- Область с прокруткой -->
     <div id="scroll-area">
         <div id="main-screen">
             <div id="sim-card">
@@ -179,6 +185,7 @@
                         <div class="sim-op-name" id="ui-op-name">Могофон</div>
                         <div class="sim-op-country">🇷🇺 Россия</div>
                     </div>
+                    <div class="info-icon" id="btn-show-info">i</div>
                     <div id="sim-gradient-box"></div>
                 </div>
                 <div class="sim-number" id="ui-phone">+7 000 000-00-00</div>
@@ -200,73 +207,105 @@
                 <button class="shop-btn" id="btn-jewelry-gen">Ювелирный<span>20 000 ₽</span></button>
             </div>
         </div>
-
-        <!-- Секция статистики и шансов -->
-        <div id="info-section">
-            <div class="stat-card">
-                <div class="stat-title">💰 Баланс</div>
-                <div class="stat-row"><span>Текущий:</span> <span class="stat-val" id="stat-balance">0 ₽</span></div>
-                <div class="stat-row"><span>Максимальный:</span> <span class="stat-val" id="stat-max-balance">0 ₽</span></div>
-                <div class="stat-row"><span>В рюкзаке:</span> <span class="stat-val" id="stat-inv-val">0 ₽</span></div>
-                <div class="stat-row"><span>Общий капитал:</span> <span class="stat-val green" id="stat-total-worth">0 ₽</span></div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-title">📊 Статистика</div>
-                <div class="stat-row"><span>Всего сгенерировано:</span> <span class="stat-val" id="stat-generated">0</span></div>
-                <div class="stat-row"><span>Всего продано:</span> <span class="stat-val" id="stat-sold">0</span></div>
-                <div class="stat-row"><span>Номеров в рюкзаке:</span> <span class="stat-val" id="stat-inv-count">0</span></div>
-                <div class="stat-row"><span>Лучший номер:</span> <span class="stat-val" id="stat-best">—</span></div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-title">🎲 Шансы выпадения</div>
-                <div class="stat-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>&lt; 0.001%</span></div>
-                <div class="stat-row"><span class="rarity-gold">Золотой:</span> <span>~1%</span></div>
-                <div class="stat-row"><span class="rarity-silver">Серебряный:</span> <span>~5%</span></div>
-                <div class="stat-row"><span class="rarity-bronze">Бронзовый:</span> <span>~15%</span></div>
-                <div class="stat-row"><span class="rarity-common">Красивое окончание:</span> <span>~30%</span></div>
-                <div class="stat-row"><span class="rarity-common">Обычный:</span> <span>~50%</span></div>
-            </div>
-        </div>
     </div>
 
+    <!-- Плавающая кнопка рюкзака -->
+    <button id="btn-open-bag-float">🎒 <span id="bag-count" style="font-size:14px; margin-left:5px;">0</span></button>
+
     <div id="side-menu">
-        <div class="menu-item" id="menu-inv"><span>🎒</span> Мой Рюкзак</div>
         <div class="menu-item" id="menu-simwall"><span>📱</span> СИМ-СТЕНА</div>
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
+        <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Топ 50</div>
+        <div class="menu-item" id="menu-friends"><span>👥</span> Друзья</div>
     </div>
 
     <!-- Экраны -->
     <div id="inventory-screen" class="full-screen">
         <div class="header"><h2>🎒 Рюкзак</h2><button class="btn-close" data-close="inventory-screen">Закрыть</button></div>
         <div class="scroll-area" id="inv-list"></div>
-        <div style="padding:20px; background:var(--bg); border-top:1px solid #333;">
+        <div style="padding:20px; border-top:1px solid rgba(128,128,128,0.2);">
             <button class="btn-sell" style="width:100%" id="btn-sell-all">Продать всё</button>
+        </div>
+    </div>
+
+    <!-- Информация (Статистика и шансы) -->
+    <div id="info-screen" class="full-screen">
+        <div class="header"><h2>ℹ️ Информация</h2><button class="btn-close" data-close="info-screen">Закрыть</button></div>
+        <div class="scroll-area">
+            <div class="profile-section">
+                <h3>📱 Текущий номер</h3>
+                <div id="info-current-number" style="font-family:monospace; font-size:18px; font-weight:bold; margin-bottom:10px;">—</div>
+                <div class="profile-row"><span>Категория:</span> <span id="info-current-category">—</span></div>
+                <div class="profile-row"><span>Стоимость:</span> <span id="info-current-price">—</span></div>
+                <div class="profile-row"><span>Шанс выпадения:</span> <span id="info-current-chance">—</span></div>
+            </div>
+            <div class="profile-section">
+                <h3>📈 Прогресс</h3>
+                <div class="profile-row"><span>Уровень:</span> <span id="info-level">1</span></div>
+                <div class="profile-row"><span>Поинты:</span> <span id="info-points">0 / 100</span></div>
+                <div class="profile-row"><span>Бесплатных спинов:</span> <span id="info-free-spins">0</span></div>
+            </div>
+            <div class="profile-section">
+                <h3>💰 Баланс</h3>
+                <div class="profile-row"><span>Текущий:</span> <span id="info-balance">0 ₽</span></div>
+                <div class="profile-row"><span>Максимальный:</span> <span id="info-max-balance">0 ₽</span></div>
+                <div class="profile-row"><span>В рюкзаке:</span> <span id="info-inventory-value">0 ₽</span></div>
+                <div class="profile-row"><span>Общий капитал:</span> <span id="info-total-worth">0 ₽</span></div>
+            </div>
+            <div class="profile-section">
+                <h3>📊 Статистика</h3>
+                <div class="profile-row"><span>Всего сгенерировано:</span> <span id="info-total-generated">0</span></div>
+                <div class="profile-row"><span>Всего продано:</span> <span id="info-total-sold">0</span></div>
+                <div class="profile-row"><span>Номеров в рюкзаке:</span> <span id="info-inventory-count">0</span></div>
+            </div>
+            <div class="profile-section">
+                <h3>🎲 Шансы выпадения</h3>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>&lt; 0.001%</span></div>
+                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>~1%</span></div>
+                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>~5%</span></div>
+                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>~15%</span></div>
+                <div class="profile-row"><span class="rarity-common">Красивое окончание:</span> <span>~30%</span></div>
+                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>~50%</span></div>
+            </div>
         </div>
     </div>
 
     <div id="settings-screen" class="full-screen">
         <div class="header"><h2>⚙️ Настройки</h2><button class="btn-close" data-close="settings-screen">Закрыть</button></div>
         <div class="scroll-area">
+            <div class="setting-item"><span>Тёмная тема</span><label class="switch"><input type="checkbox" id="toggle-theme"><span class="slider"></span></label></div>
             <div class="setting-item"><span>Звуки</span><label class="switch"><input type="checkbox" id="toggle-sound"><span class="slider"></span></label></div>
-            <div class="setting-item" style="flex-direction:column; align-items:flex-start;">
-                <span>Синхронизация (Email)</span>
-                <input type="email" id="sync-email" placeholder="your@mail.com">
-                <button class="btn-sm" style="margin-top:10px; width:100%; padding:12px;" id="btn-sync">Войти</button>
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; align-items: center;">
+                    <span>Предупреждение при продаже</span><label class="switch"><input type="checkbox" id="toggle-warning"><span class="slider"></span></label>
+                </div>
+                <input type="number" id="input-warn-threshold" placeholder="Порог (100000)" style="margin-top: 5px;">
             </div>
             <button class="btn-sm red" style="width:100%; padding:15px; margin-top:20px;" id="btn-reset">Сбросить прогресс</button>
         </div>
     </div>
 
+    <!-- СИМ-стена -->
+    <div id="simwall-screen" class="full-screen">
+        <div class="header"><h2>📱 СИМ-СТЕНА</h2><button class="btn-close" data-close="simwall-screen">Закрыть</button></div>
+        <div class="scroll-area" id="simwall-list"></div>
+    </div>
+
+    <!-- Выбор номера для сим-стены -->
+    <div id="simwall-select-screen" class="full-screen" style="z-index: 2100;">
+        <div class="header"><h2>Выберите номер</h2><button class="btn-close" data-close="simwall-select-screen">Назад</button></div>
+        <div class="scroll-area" id="simwall-select-list"></div>
+    </div>
+
+    <!-- Апгрейдер -->
     <div id="casino-screen" class="full-screen">
         <div class="header"><h2>🎰 Апгрейдер</h2><button class="btn-close" data-close="casino-screen">Закрыть</button></div>
         <div class="casino-body">
-            <h3 style="margin-top:0; color:#aaa; align-self:flex-start;">1. Выберите номер из рюкзака</h3>
+            <h3 style="margin-top:0; color:var(--text-sub); align-self:flex-start;">1. Выберите номер из рюкзака</h3>
             <div class="casino-inv-list" id="casino-list"></div>
             <div class="casino-controls" id="casino-controls">
-                <h3 style="margin: 0; color:#aaa; text-align:center;">2. Выберите желаемую сумму</h3>
+                <h3 style="margin: 0; color:var(--text-sub); text-align:center;">2. Выберите желаемую сумму</h3>
                 <input type="number" id="casino-target" class="casino-input" placeholder="Желаемая цена">
                 <div class="chance-display" id="casino-chance">Шанс: 0%</div>
                 <button class="btn-spin" id="btn-do-upgrade">Апгрейд!</button>
@@ -275,9 +314,20 @@
         </div>
     </div>
 
-    <div id="simwall-screen" class="full-screen">
-        <div class="header"><h2>📱 СИМ-СТЕНА</h2><button class="btn-close" data-close="simwall-screen">Закрыть</button></div>
-        <div class="scroll-area" id="simwall-list"></div>
+    <!-- Лидерборд -->
+    <div id="leaderboard-screen" class="full-screen">
+        <div class="header"><h2>🏆 Топ 50</h2><button class="btn-close" data-close="leaderboard-screen">Закрыть</button></div>
+        <div class="scroll-area" id="leaderboard-list"></div>
+    </div>
+
+    <!-- Друзья -->
+    <div id="friends-screen" class="full-screen">
+        <div class="header"><h2>👥 Друзья</h2><button class="btn-close" data-close="friends-screen">Закрыть</button></div>
+        <div style="display:flex; gap:8px; padding:15px 20px 0 20px;">
+            <input type="text" id="friend-add-input" placeholder="@юзернейм" style="margin:0;">
+            <button class="btn-sm" id="btn-add-friend">Добавить</button>
+        </div>
+        <div class="scroll-area" id="friends-list"></div>
     </div>
 
     <script>
@@ -286,8 +336,11 @@
             if (tg) { tg.ready(); tg.expand(); }
             
             const $ = id => document.getElementById(id);
+            const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             const fmt = n => Number(n||0).toLocaleString('ru-RU');
             const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fb : v; } catch { return fb; } };
+            const kSafe = s => String(s).replace(/[.#$\[\]\/]/g,'_');
+            const timeout = ms => new Promise((_, r) => setTimeout(() => r(new Error('timeout')), ms));
 
             const SOUND = (() => {
                 let ctx, enabled = localStorage.getItem('blum_sound') !== 'false';
@@ -319,7 +372,7 @@
 
             let myId = tg?.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('blum_email_id') || 'browser_'+Math.floor(Math.random()*999999));
             let myName = tg?.initDataUnsafe?.user?.first_name || 'Игрок';
-            myId = myId.replace(/[.#$\[\]\/]/g,'_');
+            myId = kSafe(myId);
 
             let state = {
                 balance: parseInt(localStorage.getItem('blum_balance')) || 100000,
@@ -335,23 +388,39 @@
                 boostEnd: parseInt(localStorage.getItem('blum_boost_end')) || 0,
                 boostMult: parseFloat(localStorage.getItem('blum_boost_mult')) || 1,
                 simwall: readJSON('blum_simwall', {slotsUnlocked:1, items:Array(10).fill(null), lastTick: Date.now()}),
-                currentOperator: localStorage.getItem('blum_operator') || 'Могофон'
+                currentOperator: localStorage.getItem('blum_operator') || 'Могофон',
+                username: localStorage.getItem('blum_username') || '',
+                friends: readJSON('blum_friends', []),
+                isDarkTheme: localStorage.getItem('blum_theme') === 'dark',
+                useSellWarning: localStorage.getItem('blum_use_warning') === 'true',
+                warnThreshold: parseInt(localStorage.getItem('blum_warn_threshold')) || 100000
             };
             if(!localStorage.getItem('blum_starter')) { localStorage.setItem('blum_starter','1'); localStorage.setItem('blum_balance', 100000); }
 
             let cloudReady = false;
             let genAnimating = false;
+            let cSel = null;
+            let simwallSelectedSlotIndex = null;
 
             const save = () => {
-                const keys = ['balance','points','level','totalGenerated','totalSold','maxBalance','freeSpins','boostEnd','boostMult','operator'];
-                keys.forEach(k => localStorage.setItem('blum_'+k, state[k]));
-                ['inventory','currentGen','bestNumber','simwall'].forEach(k => localStorage.setItem('blum_'+k, JSON.stringify(state[k])));
+                const keys = ['balance','points','level','totalGenerated','totalSold','maxBalance','freeSpins','boostEnd','boostMult','operator','username','theme','use_warning','warn_threshold'];
+                keys.forEach(k => {
+                    let val = state[k];
+                    if (k === 'theme') val = state.isDarkTheme ? 'dark' : 'light';
+                    if (k === 'use_warning') val = state.useSellWarning;
+                    if (k === 'warn_threshold') val = state.warnThreshold;
+                    localStorage.setItem('blum_'+k, val);
+                });
+                ['inventory','currentGen','bestNumber','simwall','friends'].forEach(k => localStorage.setItem('blum_'+k, JSON.stringify(state[k])));
+                
                 if (cloudReady && window.db) {
                     window.fbSet(window.fbRef(window.db, 'players/'+myId), JSON.parse(JSON.stringify({
                         name: myName, balance: state.balance, level: state.level, points: state.points,
                         inventory: state.inventory, bestNumber: state.bestNumber, totalGenerated: state.totalGenerated, totalSold: state.totalSold,
-                        maxBalance: state.maxBalance, freeSpins: state.freeSpins, simwall: state.simwall, lastSeen: Date.now()
+                        maxBalance: state.maxBalance, freeSpins: state.freeSpins, simwall: state.simwall, 
+                        username: state.username, lastSeen: Date.now()
                     }))).catch(console.log);
+                    window.fbSet(window.fbRef(window.db, 'profiles/'+myId), JSON.parse(JSON.stringify(buildPublicProfile()))).catch(console.log);
                 }
             };
 
@@ -363,12 +432,14 @@
                 }
                 if (state.balance > state.maxBalance) state.maxBalance = state.balance;
                 
-                // Верхняя панель
+                document.body.classList.toggle('dark-theme', state.isDarkTheme);
+                
                 $('balance-display').innerText = fmt(state.balance) + ' ₽';
                 $('lvl-text').innerHTML = `Ур.<br><span>${state.level}</span>`;
                 $('pts-text').innerText = '🍀 ' + state.points + 'ч';
                 $('spins-display').innerText = '🔥 ' + state.freeSpins;
                 $('xp-bar-fill').style.width = (state.points / needed * 100) + '%';
+                $('bag-count').innerText = state.inventory.length;
                 
                 if(state.currentOperator) $('ui-op-name').innerText = state.currentOperator;
 
@@ -380,18 +451,10 @@
                     $('btn-market-gen').style.background = '#22c55e';
                 }
 
-                // Статистика
-                let invVal = state.inventory.reduce((s,i)=>s+i.price,0);
-                $('stat-balance').innerText = fmt(state.balance) + ' ₽';
-                $('stat-max-balance').innerText = fmt(state.maxBalance) + ' ₽';
-                $('stat-inv-val').innerText = fmt(invVal) + ' ₽';
-                $('stat-total-worth').innerText = fmt(state.balance + invVal) + ' ₽';
-                
-                $('stat-generated').innerText = state.totalGenerated;
-                $('stat-sold').innerText = state.totalSold;
-                $('stat-inv-count').innerText = state.inventory.length;
-                $('stat-best').innerText = state.bestNumber ? state.bestNumber.phone : '—';
-                
+                $('toggle-theme').checked = state.isDarkTheme;
+                $('toggle-warning').checked = state.useSellWarning;
+                if(document.activeElement !== $('input-warn-threshold')) $('input-warn-threshold').value = state.warnThreshold;
+
                 save();
             };
 
@@ -459,6 +522,7 @@
                 $('ui-cat').innerText = 'Поиск...';
                 $('price-tag').classList.remove('show');
                 $('reasons-box').classList.remove('show');
+                $('btn-show-info').classList.remove('show');
                 $('sim-gradient-box').style.background = '#f3f4f6';
                 
                 const int = setInterval(() => {
@@ -474,6 +538,7 @@
                         $('price-tag').classList.add('show');
                         $('reasons-box').innerHTML = 'Цена сформирована паттернами номера.';
                         $('reasons-box').classList.add('show');
+                        $('btn-show-info').classList.add('show');
                         setCardGradient(cat);
                         
                         if (price >= 500000) SOUND.mega();
@@ -493,6 +558,9 @@
 
             $('btn-sell-now').onclick = () => {
                 if(!state.currentGen || genAnimating) return;
+                if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
+                    if (!confirm(`Продать за ${fmt(state.currentGen.price)} ₽?`)) return;
+                }
                 state.balance += state.currentGen.price;
                 state.totalSold++;
                 state.currentGen = null;
@@ -513,30 +581,156 @@
                 $('ui-cat').innerText = 'Обычный';
                 $('price-tag').classList.remove('show');
                 $('reasons-box').classList.remove('show');
+                $('btn-show-info').classList.remove('show');
                 $('sim-gradient-box').style.background = '#f3f4f6';
                 $('gen-buttons-row').style.display = 'flex';
                 $('action-btns-wrapper').style.display = 'none';
             };
 
+            // Инфо
+            $('btn-show-info').onclick = () => {
+                if(!state.currentGen) return;
+                $('info-screen').classList.add('show');
+                $('info-current-number').innerText = state.currentGen.phone;
+                $('info-current-category').innerText = state.currentGen.category;
+                $('info-current-price').innerText = fmt(state.currentGen.price) + ' ₽';
+                $('info-current-chance').innerText = state.currentGen.price > 1e6 ? '< 0.001%' : state.currentGen.price > 1e5 ? '~5%' : '~15%';
+                
+                let needed = state.level * 100;
+                $('info-level').innerText = state.level;
+                $('info-points').innerText = `${state.points} / ${needed}`;
+                $('info-free-spins').innerText = state.freeSpins;
+                
+                let invVal = state.inventory.reduce((s,i)=>s+i.price,0);
+                $('info-balance').innerText = fmt(state.balance) + ' ₽';
+                $('info-max-balance').innerText = fmt(state.maxBalance) + ' ₽';
+                $('info-inventory-value').innerText = fmt(invVal) + ' ₽';
+                $('info-total-worth').innerText = fmt(state.balance + invVal) + ' ₽';
+                
+                $('info-total-generated').innerText = state.totalGenerated;
+                $('info-total-sold').innerText = state.totalSold;
+                $('info-inventory-count').innerText = state.inventory.length;
+            };
+
+            // Меню
             $('btn-menu').onclick = () => $('side-menu').classList.add('open');
             document.addEventListener('click', e => {
                 if(!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) $('side-menu').classList.remove('open');
             });
             document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => $(b.dataset.close).classList.remove('show'));
 
-            $('menu-settings').onclick = () => { $('settings-screen').classList.add('show'); $('toggle-sound').checked = SOUND.isEnabled(); };
-            $('menu-simwall').onclick = () => { $('simwall-screen').classList.add('show'); renderWall(); };
-            
-            $('menu-casino').onclick = () => { 
-                $('casino-screen').classList.add('show'); 
-                cSel = null;
-                renderCasino(); 
+            $('menu-settings').onclick = () => { $('side-menu').classList.remove('open'); $('settings-screen').classList.add('show'); $('toggle-sound').checked = SOUND.isEnabled(); };
+            $('menu-simwall').onclick = () => { $('side-menu').classList.remove('open'); $('simwall-screen').classList.add('show'); renderWall(); };
+            $('menu-casino').onclick = () => { $('side-menu').classList.remove('open'); $('casino-screen').classList.add('show'); cSel = null; renderCasino(); };
+            $('menu-leaderboard').onclick = () => { $('side-menu').classList.remove('open'); openLeaderboard(); };
+            $('menu-friends').onclick = () => { $('side-menu').classList.remove('open'); $('friends-screen').classList.add('show'); loadFriends(); };
+
+            // Настройки
+            $('toggle-sound').onchange = (e) => SOUND.toggle(e.target.checked);
+            $('toggle-theme').onchange = (e) => { state.isDarkTheme = e.target.checked; updateUI(); };
+            $('toggle-warning').onchange = (e) => { state.useSellWarning = e.target.checked; save(); };
+            $('input-warn-threshold').onchange = (e) => { state.warnThreshold = parseInt(e.target.value) || 100000; save(); };
+            $('btn-reset').onclick = () => { if(confirm('Удалить прогресс?')) { localStorage.clear(); location.reload(); } };
+
+            // Рюкзак
+            $('btn-open-bag-float').onclick = () => {
+                $('inventory-screen').classList.add('show');
+                let html = '';
+                if(!state.inventory.length) html = '<div style="text-align:center;color:var(--text-sub);margin-top:20px;">Пусто</div>';
+                state.inventory.forEach((it, i) => {
+                    html += `<div class="list-item">
+                        <div class="item-info">
+                            <div class="item-num">${it.phone}</div>
+                            <div class="item-price">${fmt(it.price)} ₽</div>
+                        </div>
+                        <div style="display:flex;gap:5px;">
+                            <button class="btn-sm green" onclick="sellInv(${i})">Продать</button>
+                        </div>
+                    </div>`;
+                });
+                $('inv-list').innerHTML = html;
             };
 
-            let cSel = null;
+            window.sellInv = (i) => {
+                let item = state.inventory[i];
+                if(!item) return;
+                if (state.useSellWarning && item.price >= state.warnThreshold) {
+                    if (!confirm(`Продать за ${fmt(item.price)} ₽?`)) return;
+                }
+                state.balance += item.price; state.totalSold++;
+                state.inventory.splice(i, 1);
+                $('btn-open-bag-float').click();
+                SOUND.sell(); updateUI();
+            };
+
+            $('btn-sell-all').onclick = () => {
+                if(!state.inventory.length) return;
+                let total = state.inventory.reduce((s,i)=>s+i.price,0);
+                if (state.useSellWarning && total >= state.warnThreshold) {
+                    if (!confirm(`Продать всё за ${fmt(total)} ₽?`)) return;
+                }
+                state.balance += total; state.totalSold += state.inventory.length;
+                state.inventory = [];
+                $('inventory-screen').classList.remove('show');
+                SOUND.sell(); updateUI(); showToast(`✅ Продано на ${fmt(total)} ₽`);
+            };
+
+            // СИМ-стена
+            const renderWall = () => {
+                let html = '';
+                for(let i=0; i<state.simwall.slotsUnlocked; i++) {
+                    let it = state.simwall.items[i];
+                    html += `<div class="sim-slot ${it?'active':''}">
+                        <div style="font-size:12px; color:var(--text-sub);">Слот ${i+1}</div>
+                        ${it ? `
+                            <div class="phone">${it.phone}</div>
+                            <div class="income">+${fmt(Math.floor(it.price*0.01))} ₽/мин</div>
+                            <div class="btn-row"><button class="btn-sm red" onclick="rmWall(${i})">Снять</button></div>
+                        ` : `
+                            <div style="text-align:center; color:var(--text-sub); margin: 10px 0;">Пусто</div>
+                            <div class="btn-row"><button class="btn-sm green" onclick="openSimwallSelect(${i})">Установить</button></div>
+                        `}
+                    </div>`;
+                }
+                $('simwall-list').innerHTML = html;
+            };
+
+            window.openSimwallSelect = (i) => {
+                simwallSelectedSlotIndex = i;
+                $('simwall-select-screen').classList.add('show');
+                let html = '';
+                if(!state.inventory.length) html = '<div style="text-align:center;color:var(--text-sub);margin-top:20px;">Нет номеров</div>';
+                state.inventory.forEach(it => {
+                    html += `<div class="list-item">
+                        <div class="item-info">
+                            <div class="item-num">${it.phone}</div>
+                            <div class="item-price">+${fmt(Math.floor(it.price*0.01))} ₽/мин</div>
+                        </div>
+                        <button class="btn-sm" onclick="assignWall('${it.phone}')">Выбрать</button>
+                    </div>`;
+                });
+                $('simwall-select-list').innerHTML = html;
+            };
+
+            window.assignWall = (phone) => {
+                if(simwallSelectedSlotIndex === null) return;
+                let idx = state.inventory.findIndex(i => i.phone === phone);
+                if(idx === -1) return;
+                let it = state.inventory.splice(idx, 1)[0];
+                state.simwall.items[simwallSelectedSlotIndex] = it;
+                $('simwall-select-screen').classList.remove('show');
+                renderWall(); updateUI();
+            };
+
+            window.rmWall = (i) => {
+                let it = state.simwall.items[i];
+                if(it) { state.inventory.push(it); state.simwall.items[i] = null; renderWall(); updateUI(); }
+            };
+
+            // Казино
             const renderCasino = () => {
                 let html = '';
-                if(!state.inventory.length) html = '<div style="text-align:center;color:#888;">Пусто</div>';
+                if(!state.inventory.length) html = '<div style="text-align:center;color:var(--text-sub);">Пусто</div>';
                 state.inventory.forEach((it, i) => {
                     html += `<div class="casino-item ${cSel===i?'selected':''}" onclick="selC(${i})">
                         <span>${it.phone}</span><span style="color:var(--green)">${fmt(it.price)} ₽</span>
@@ -569,7 +763,7 @@
                 let ch = Math.min(95, (it.price / target) * 95);
                 $('btn-do-upgrade').disabled = true;
                 $('casino-res').innerText = 'Крутим...';
-                $('casino-res').style.color = '#fff';
+                $('casino-res').style.color = 'var(--text)';
                 
                 setTimeout(() => {
                     if(Math.random()*100 < ch) {
@@ -586,76 +780,87 @@
                 }, 800);
             };
 
-            $('menu-inv').onclick = () => { $('side-menu').classList.remove('open'); openInv(); };
-            const openInv = () => {
-                $('inventory-screen').classList.add('show');
+            // Друзья и Лидерборд
+            async function openLeaderboard() {
+                $('leaderboard-screen').classList.add('show');
+                const list = $('leaderboard-list');
+                list.innerHTML = 'Загрузка...';
+                if (!window.db) { list.innerHTML = 'Ошибка базы'; return; }
+                try {
+                    const s = await Promise.race([window.fbGet(window.fbRef(window.db, 'profiles')), timeout(10000)]);
+                    const data = s.val();
+                    let rows = [];
+                    if (data) for (const id in data) rows.push({ id, p: data[id] });
+                    if (cloudReady) {
+                        const me = buildPublicProfile();
+                        const mi = rows.findIndex(r => r.id === myId);
+                        if (mi >= 0) rows[mi].p = me; else rows.push({ id: myId, p: me });
+                    }
+                    rows.sort((a, b) => (b.p.balance||0) - (a.p.balance||0));
+                    rows = rows.slice(0, 50);
+                    list.innerHTML = '';
+                    if (!rows.length) { list.innerHTML = 'Пусто'; return; }
+                    rows.forEach((r, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'list-item';
+                        div.innerHTML = `
+                            <div class="item-info">
+                                <div style="font-weight:bold;">#${i+1} ${esc(r.p.name)} ${r.id===myId?'(Вы)':''}</div>
+                                <div style="font-size:12px; color:var(--text-sub);">Ур. ${r.p.level||1} ${r.p.username?' · @'+esc(r.p.username):''}</div>
+                            </div>
+                            <div style="color:var(--green); font-weight:bold;">${fmt(r.p.balance)} ₽</div>
+                        `;
+                        list.appendChild(div);
+                    });
+                } catch(e) { list.innerHTML = 'Ошибка загрузки'; }
+            }
+
+            async function loadFriends() {
+                const list = $('friends-list');
+                list.innerHTML = 'Загрузка...';
+                if (!window.db) { list.innerHTML = 'Ошибка базы'; return; }
                 let html = '';
-                if(!state.inventory.length) html = '<div style="text-align:center;color:#888;margin-top:20px;">Пусто</div>';
-                state.inventory.forEach((it, i) => {
-                    html += `<div class="list-item">
-                        <div class="item-info">
-                            <div class="item-num">${it.phone}</div>
-                            <div class="item-price">${fmt(it.price)} ₽</div>
-                        </div>
-                        <div style="display:flex;gap:5px;">
-                            <button class="btn-sm green" onclick="sellInv(${i})">Продать</button>
-                        </div>
-                    </div>`;
-                });
-                $('inv-list').innerHTML = html;
-            };
-
-            window.sellInv = (i) => {
-                let item = state.inventory[i];
-                if(!item) return;
-                state.balance += item.price; state.totalSold++;
-                state.inventory.splice(i, 1);
-                openInv();
-                SOUND.sell(); updateUI();
-            };
-
-            $('btn-sell-all').onclick = () => {
-                if(!state.inventory.length) return;
-                let total = state.inventory.reduce((s,i)=>s+i.price,0);
-                state.balance += total; state.totalSold += state.inventory.length;
-                state.inventory = [];
-                $('inventory-screen').classList.remove('show');
-                SOUND.sell(); updateUI(); showToast(`✅ Продано на ${fmt(total)} ₽`);
-            };
-
-            const renderWall = () => {
-                let html = '';
-                for(let i=0; i<state.simwall.slotsUnlocked; i++) {
-                    let it = state.simwall.items[i];
-                    html += `<div class="sim-slot ${it?'active':''}">
-                        <div style="font-size:12px; color:#888;">Слот ${i+1}</div>
-                        ${it ? `
-                            <div class="phone">${it.phone}</div>
-                            <div class="income">+${fmt(Math.floor(it.price*0.01))} ₽/мин</div>
-                            <div class="btn-row"><button class="btn-sm red" onclick="rmWall(${i})">Снять</button></div>
-                        ` : `
-                            <div style="text-align:center; color:#666;">Пусто</div>
-                            <div class="btn-row"><button class="btn-sm" onclick="addWall(${i})">Установить</button></div>
-                        `}
-                    </div>`;
+                if(!state.friends.length) html = '<div style="text-align:center;margin-top:20px;color:var(--text-sub);">Нет друзей</div>';
+                for (let fid of state.friends) {
+                    try {
+                        const s = await window.fbGet(window.fbRef(window.db, 'profiles/'+fid));
+                        const p = s.val() || { name: 'Игрок', balance: 0, level: 1 };
+                        html += `<div class="list-item">
+                            <div class="item-info">
+                                <div style="font-weight:bold;">${esc(p.name)}</div>
+                                <div style="font-size:12px; color:var(--text-sub);">Ур. ${p.level||1} ${p.username?' · @'+esc(p.username):''}</div>
+                            </div>
+                            <div style="color:var(--green); font-weight:bold;">${fmt(p.balance)} ₽</div>
+                        </div>`;
+                    } catch(e) {}
                 }
-                $('simwall-list').innerHTML = html;
+                list.innerHTML = html;
+            }
+
+            function buildPublicProfile() {
+                return {
+                    name: myName, balance: state.balance, level: state.level,
+                    username: state.username, lastSeen: Date.now()
+                };
+            }
+
+            $('btn-add-friend').onclick = async () => {
+                let uname = $('friend-add-input').value.trim().replace(/^@/, '').toLowerCase();
+                if(!uname) return;
+                if(!window.db) return;
+                try {
+                    const s = await window.fbGet(window.fbRef(window.db, 'usernames/'+uname));
+                    const fid = s.val();
+                    if(!fid) { showToast('Игрок не найден'); return; }
+                    if(fid === myId) { showToast('Это вы'); return; }
+                    if(state.friends.includes(fid)) { showToast('Уже в друзьях'); return; }
+                    state.friends.push(fid);
+                    save(); loadFriends(); $('friend-add-input').value = '';
+                    showToast('Добавлен!');
+                } catch(e) { showToast('Ошибка'); }
             };
 
-            window.addWall = (i) => {
-                if(!state.inventory.length) return showToast('Рюкзак пуст');
-                let it = state.inventory.pop();
-                state.simwall.items[i] = it;
-                renderWall(); updateUI();
-            };
-            window.rmWall = (i) => {
-                let it = state.simwall.items[i];
-                if(it) { state.inventory.push(it); state.simwall.items[i] = null; renderWall(); updateUI(); }
-            };
-
-            $('toggle-sound').onchange = (e) => SOUND.toggle(e.target.checked);
-            $('btn-reset').onclick = () => { if(confirm('Удалить прогресс?')) { localStorage.clear(); location.reload(); } };
-
+            // Доход сим-стены
             setInterval(() => {
                 let diff = Date.now() - state.simwall.lastTick;
                 if(diff >= 60000) {
@@ -667,11 +872,14 @@
                 }
             }, 1000);
 
+            // Инициализация
+            if(state.isDarkTheme) document.body.classList.add('dark-theme');
             if(state.currentGen) {
                 $('ui-phone').innerText = state.currentGen.phone;
                 $('ui-cat').innerText = state.currentGen.category;
                 $('price-tag').innerText = fmt(state.currentGen.price) + ' ₽';
                 $('price-tag').classList.add('show');
+                $('btn-show-info').classList.add('show');
                 setCardGradient(state.currentGen.category);
                 $('gen-buttons-row').style.display = 'none';
                 $('action-btns-wrapper').style.display = 'flex';
@@ -693,6 +901,8 @@
                         state.totalGenerated = d.totalGenerated || state.totalGenerated;
                         state.totalSold = d.totalSold || state.totalSold;
                         state.simwall = d.simwall || state.simwall;
+                        state.username = d.username || state.username;
+                        state.friends = d.friends ? Object.keys(d.friends) : state.friends;
                         updateUI();
                     }
                     cloudReady = true;
