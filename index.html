@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
+    
+    <!-- Подключаем Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase -->
+    <!-- Подключаем Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -24,15 +26,18 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.db = db;
+        
+        // Экспортируем функции в глобальную область для основного скрипта
+        window.fbRef = ref; 
+        window.fbSet = set; 
+        window.fbOnValue = onValue; 
+        window.db = db;
     </script>
 
     <style>
         :root { --bg-color: #f0f0f0; --card-bg: #ffffff; --text-main: #1e1e1e; --text-sub: #666; }
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
-
-        #game-wrapper { display: flex; flex-direction: column; width: 100%; height: 100%; }
 
         /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
@@ -44,7 +49,7 @@
         #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
         #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
         
-        /* Кнопка меню (3 полоски) */
+        /* Кнопка меню */
         #btn-menu { border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 20px; }
         
         #boost-indicator { display: none; background: #ff007f; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; color: white; animation: pulse 1s infinite alternate; }
@@ -73,7 +78,7 @@
         #btn-shop { background: #fd7e14; }
         #btn-jewelry { background: #dc3545; }
 
-        /* Кнопка Рюкзака в левом нижнем углу */
+        /* Кнопка Рюкзака */
         #btn-open-bag-float { 
             position: fixed; bottom: 100px; left: 20px; 
             background: #0088cc; color: white; border: none; 
@@ -94,7 +99,7 @@
         .menu-item:active { background: #333; }
         .menu-item span { font-size: 20px; }
 
-        /* Модальные окна / Экраны */
+        /* Модальные окна */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
@@ -122,7 +127,7 @@
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Профиль (Статистика) */
+        /* Профиль */
         #profile-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
@@ -134,23 +139,38 @@
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
         .casino-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #333; }
         .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-        
         .casino-inventory-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .casino-inv-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; cursor: pointer; }
         .casino-inv-item.selected { border-color: #ffcc00; background: #333; }
         .casino-inv-item .num { font-family: monospace; font-size: 16px; font-weight: bold; }
         .casino-inv-item .prc { color: #28a745; font-weight: bold; }
-        
         .casino-controls { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; }
         .casino-input-group { display: flex; align-items: center; gap: 10px; }
         .casino-input { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
-        
         .chance-display { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; color: #ffcc00; }
-        
         .btn-spin { background: #dc3545; color: white; border: none; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: background 0.2s; }
         .btn-spin:active { background: #a71d2a; }
-        
         .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; height: 30px; }
+
+        /* ЛИДЕРБОРД */
+        #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
+        .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; }
+        .leader-item:active { transform: scale(0.98); }
+        .leader-rank { font-size: 18px; font-weight: bold; width: 40px; color: var(--text-sub); }
+        .leader-rank.top1 { color: #ffd700; font-size: 22px; }
+        .leader-rank.top2 { color: #c0c0c0; font-size: 20px; }
+        .leader-rank.top3 { color: #cd7f32; font-size: 20px; }
+        .leader-avatar { width: 32px; height: 32px; border-radius: 50%; background: #0088cc; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; margin-right: 10px; }
+        .leader-name { flex: 1; font-weight: bold; }
+        .leader-balance { font-weight: bold; color: #28a745; }
+
+        /* ТОП 3 КРАСКА */
+        .leader-item.top1 { background: linear-gradient(135deg, #fff8e1, #ffd700) !important; color: #1a1a1a !important; border: 2px solid #ffb300; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+        .leader-item.top1 .leader-avatar { background: #d4af37; }
+        .leader-item.top2 { background: linear-gradient(135deg, #f5f5f5, #c0c0c0) !important; color: #1a1a1a !important; border: 2px solid #9e9e9e; box-shadow: 0 0 10px rgba(192, 192, 192, 0.6); }
+        .leader-item.top2 .leader-avatar { background: #9e9e9e; }
+        .leader-item.top3 { background: linear-gradient(135deg, #fbe9e7, #cd7f32) !important; color: #1a1a1a !important; border: 2px solid #a0522d; box-shadow: 0 0 10px rgba(205, 127, 50, 0.6); }
+        .leader-item.top3 .leader-avatar { background: #8b4513; }
 
         /* Анимации */
         @keyframes shakeScreen {
@@ -188,18 +208,16 @@
 </head>
 <body>
 
-    <!-- САМА ИГРА (СРАЗУ ОТКРЫВАЕТСЯ) -->
+    <!-- ИГРА -->
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
-                <!-- Убрали "Загрузка...", теперь имя сразу ставится из локальной памяти -->
-                <div id="user-name-display">Игрок</div>
+                <div id="user-name-display">Загрузка...</div>
                 <div id="lvl-text">Уровень: 1</div>
                 <div id="pts-text">Поинты: 0 / 100</div>
                 <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
                 <div id="balance-display">0 ₽</div>
             </div>
-            <!-- Кнопка меню -->
             <button id="btn-menu">☰</button>
         </div>
         
@@ -208,7 +226,6 @@
             <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
         
-        <!-- Кнопка Рюкзака в левом нижнем углу -->
         <button id="btn-open-bag-float">🎒</button>
 
         <div id="bottom-action-area">
@@ -217,7 +234,6 @@
                 <button class="shop-btn" id="btn-shop">Магазин<span>5 000 ₽</span></button>
                 <button class="shop-btn" id="btn-jewelry">Ювелирный<span>20 000 ₽</span></button>
             </div>
-
             <div id="action-btns-wrapper">
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
                 <button class="btn-keep" id="btn-keep">Оставить</button>
@@ -225,7 +241,7 @@
         </div>
     </div>
 
-    <!-- БОКОВОЕ МЕНЮ (БЕЗ РЮКЗАКА) -->
+    <!-- БОКОВОЕ МЕНЮ -->
     <div id="side-menu">
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
@@ -233,34 +249,40 @@
         <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
     </div>
 
-    <!-- ЭКРАН КАЗИНО (АПГРЕЙДЕР) -->
+    <!-- ЛИДЕРБОРД -->
+    <div id="leaderboard-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">🏆 Топ 50</span>
+            <button class="btn-close" id="btn-close-leaderboard">Закрыть</button>
+        </div>
+        <div id="leaderboard-list"></div>
+    </div>
+
+    <!-- КАЗИНО -->
     <div id="casino-screen">
         <div class="casino-header">
             <span style="font-weight:bold; font-size:18px;">🎰 Апгрейдер</span>
-            <button class="btn-close" onclick="closeCasino()">Закрыть</button>
+            <button class="btn-close" id="btn-close-casino">Закрыть</button>
         </div>
         <div class="casino-body">
             <h3 style="margin-top:0; color:#aaa;">1. Выберите номер из рюкзака</h3>
             <div class="casino-inventory-list" id="casino-inventory-list"></div>
-
             <div class="casino-controls" id="casino-controls" style="display: none;">
                 <h3 style="margin: 0; color:#aaa; text-align:center;">2. Выберите желаемую сумму</h3>
                 <div class="casino-input-group">
                     <input type="number" id="casino-target-price" class="casino-input" placeholder="Желаемая цена">
                 </div>
-                
                 <div class="chance-display" id="casino-chance">Шанс: 0%</div>
-
-                <button class="btn-spin" id="btn-do-upgrade" onclick="doUpgrade()">Апгрейд!</button>
+                <button class="btn-spin" id="btn-do-upgrade">Апгрейд!</button>
                 <div class="casino-result" id="casino-result-text"></div>
             </div>
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ (СТАТИСТИКА) -->
+    <!-- ПРОФИЛЬ -->
     <div id="profile-screen" class="full-screen">
         <div class="screen-header">
-            <span style="font-weight:bold; font-size:18px;" id="profile-title">👤 Статистика</span>
+            <span style="font-weight:bold; font-size:18px;">👤 Статистика</span>
             <button class="btn-close" id="btn-close-profile">Закрыть</button>
         </div>
         <div id="profile-content">
@@ -304,8 +326,6 @@
             <button class="btn-close" id="btn-close-settings">Закрыть</button>
         </div>
         <div id="settings-content">
-            
-            <!-- Блок синхронизации по Email -->
             <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                 <span class="setting-text">Синхронизация по Email</span>
                 <span style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">Введите Email, чтобы сохранить или загрузить прогресс.</span>
@@ -313,25 +333,24 @@
                     <input type="email" id="sync-email-input" class="warn-input" placeholder="your@mail.com" style="margin:0;">
                     <button id="btn-sync-email" style="background:#0088cc; color:white; border:none; padding:0 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Войти</button>
                 </div>
-                <button id="btn-reset-progress" style="background:#dc3545; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top: 15px; width:100%;">Сбросить прогресс (Опасно!)</button>
+                <button id="btn-reset-progress" style="background:#dc3545; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top: 15px; width:100%;">Сбросить прогресс</button>
             </div>
-
             <div class="setting-item">
                 <span class="setting-text">Тёмная тема</span>
                 <label class="switch"><input type="checkbox" id="toggle-theme"><span class="slider"></span></label>
             </div>
             <div class="setting-item">
-                <span class="setting-text">Анимация генерации</span>
+                <span class="setting-text">Анимация</span>
                 <label class="switch"><input type="checkbox" id="toggle-animation" checked><span class="slider"></span></label>
             </div>
             <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                 <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; align-items: center;">
-                    <span class="setting-text">Предупреждение при продаже</span>
+                    <span class="setting-text">Предупреждение</span>
                     <label class="switch"><input type="checkbox" id="toggle-warning"><span class="slider"></span></label>
                 </div>
-                <span style="font-size: 12px; margin-bottom: 10px; color: var(--text-sub);">Если стоимость номера равна или выше этой суммы, при продаже появится окно.</span>
+                <span style="font-size: 12px; margin-bottom: 10px; color: var(--text-sub);">При продаже от этой суммы</span>
                 <div class="warn-input-group">
-                    <span class="warn-label">Сумма от:</span>
+                    <span class="warn-label">От:</span>
                     <input type="number" id="input-warn-threshold" class="warn-input" placeholder="100000">
                 </div>
             </div>
@@ -339,24 +358,20 @@
     </div>
 
     <script>
+        // 1. ИНИЦИАЛИЗАЦИЯ
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        // 1. МГНОВЕННАЯ ИНИЦИАЛИЗАЦИЯ ID (без ожидания)
         let myName = localStorage.getItem('blum_user_name') || "Игрок";
         let myId = null;
-        let isBrowser = false;
 
         const urlParams = new URLSearchParams(window.location.search);
-        const urlUserId = urlParams.get('user_id');
-
-        if (urlUserId) {
-            myId = urlUserId;
+        if (urlParams.get('user_id')) {
+            myId = urlParams.get('user_id');
         } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
         } else {
-            isBrowser = true;
             let savedBrowserId = localStorage.getItem('blum_browser_id');
             if (!savedBrowserId) {
                 savedBrowserId = "browser_" + Math.floor(Math.random() * 1000000);
@@ -365,16 +380,12 @@
             myId = savedBrowserId;
         }
 
-        // Проверяем Email
         let savedEmailId = localStorage.getItem('blum_email_id');
         if (savedEmailId) {
             myId = savedEmailId;
             myName = localStorage.getItem('blum_user_name') || "Игрок (Email)";
         }
 
-        const viewPlayerId = urlParams.get('player');
-
-        // 2. МГНОВЕННАЯ ЗАГРУЗКА ЛОКАЛЬНЫХ ДАННЫХ
         let state = {
             balance: parseInt(localStorage.getItem('blum_balance')) || 0,
             inventory: JSON.parse(localStorage.getItem('blum_inventory')) || [],
@@ -397,6 +408,7 @@
 
         let selectedCasinoItemIndex = null;
 
+        // 2. ФУНКЦИИ СОХРАНЕНИЯ
         function saveData() {
             localStorage.setItem('blum_balance', state.balance);
             localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
@@ -427,6 +439,7 @@
 
         const getEl = (id) => document.getElementById(id);
 
+        // 3. ЛОГИКА РЕДКОСТИ И ЦЕНЫ
         function getRarity(category) {
             if (category.includes("БРИЛЛИАНТОВЫЙ")) return { cls: "rarity-diamond", xp: 1000 };
             if (category.includes("ЗОЛОТОЙ")) return { cls: "rarity-gold", xp: 150 };
@@ -454,13 +467,12 @@
             }
 
             if (category === "Обычный") {
-                let isBeautiful = false;
                 let last4 = fullNum.slice(-4);
-                if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; isBeautiful = true; }
-                else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; isBeautiful = true; }
-                else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; isBeautiful = true; }
-                else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; isBeautiful = true; }
-                else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; isBeautiful = true; }
+                if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; }
+                else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; }
+                else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; }
+                else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; }
+                else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; }
                 else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; }
                 
                 if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
@@ -506,7 +518,6 @@
             }
         }
         setInterval(checkBoost, 1000);
-        checkBoost();
 
         function giveBoost(newLevel) {
             let roll = Math.random() * 100;
@@ -519,6 +530,7 @@
             checkBoost();
         }
 
+        // 4. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
         function updateUI() {
             getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
@@ -552,8 +564,6 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
-            
-            // Устанавливаем имя сразу, без "Загрузка..."
             document.getElementById('user-name-display').innerText = myName;
 
             let btnAll = getEl('btn-sell-all');
@@ -586,12 +596,6 @@
         }
 
         function renderProfile() {
-            if (viewPlayerId) {
-                getEl('profile-title').innerText = "👤 Профиль игрока";
-                getEl('btn-close-profile').innerText = "В игру";
-                getEl('btn-close-profile').onclick = () => { window.location.href = 'index.html'; };
-            }
-
             if (state.bestNumber) {
                 getEl('best-number-display').innerText = state.bestNumber.phone;
                 getEl('best-number-display').className = `best-num ${getRarity(state.bestNumber.category).cls}`;
@@ -633,14 +637,9 @@
                     <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
                     <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
                 `;
-                getEl('btn-show-info').onclick = () => { getEl('info-modal').style.display = 'flex'; };
                 if (price >= 500000) {
-                    resDiv.classList.add('shake-effect');
-                    resDiv.classList.add('flash-effect');
-                    setTimeout(() => {
-                        resDiv.classList.remove('shake-effect');
-                        resDiv.classList.remove('flash-effect');
-                    }, 1000);
+                    resDiv.classList.add('shake-effect'); resDiv.classList.add('flash-effect');
+                    setTimeout(() => { resDiv.classList.remove('shake-effect'); resDiv.classList.remove('flash-effect'); }, 1000);
                     showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
                 }
                 getEl('action-btns-wrapper').style.display = 'flex';
@@ -659,24 +658,15 @@
             let animPhone = getEl('anim-phone');
             let animPrice = getEl('anim-price');
             let animCategory = getEl('anim-category');
-            
             let targetChars = targetPhone.split('');
             let currentStr = "+7-XXX-XXX-XX-XX".split('');
             let iterations = 0;
             
             let interval = setInterval(() => {
                 for (let i = 0; i < targetChars.length; i++) {
-                    if (targetChars[i] === '-' || targetChars[i] === '+') {
-                        currentStr[i] = targetChars[i];
-                    } else {
-                        if (i < iterations) {
-                            currentStr[i] = targetChars[i];
-                        } else {
-                            currentStr[i] = Math.floor(Math.random() * 10).toString();
-                        }
-                    }
+                    if (targetChars[i] === '-' || targetChars[i] === '+') currentStr[i] = targetChars[i];
+                    else currentStr[i] = (i < iterations) ? targetChars[i] : Math.floor(Math.random() * 10).toString();
                 }
-                
                 animPhone.innerText = currentStr.join('');
                 iterations += 1;
                 
@@ -689,16 +679,9 @@
                     animCategory.innerHTML = `${category} <span class="xp-gained-text">(+${earnedXP} XP)</span>`;
                     animCategory.style.opacity = '1';
                     
-                    getEl('btn-show-info').style.opacity = '1';
-                    getEl('btn-show-info').onclick = () => { getEl('info-modal').style.display = 'flex'; };
-
                     if (price >= 500000) {
-                        resDiv.classList.add('shake-effect');
-                        resDiv.classList.add('flash-effect');
-                        setTimeout(() => {
-                            resDiv.classList.remove('shake-effect');
-                            resDiv.classList.remove('flash-effect');
-                        }, 1000);
+                        resDiv.classList.add('shake-effect'); resDiv.classList.add('flash-effect');
+                        setTimeout(() => { resDiv.classList.remove('shake-effect'); resDiv.classList.remove('flash-effect'); }, 1000);
                         showToast(`🔥 МЕГА-НОМЕР!<br>${targetPhone}<br>${price.toLocaleString('ru-RU')} ₽`);
                     }
 
@@ -709,7 +692,7 @@
             }, 50);
         }
 
-        // --- КАЗИНО ЛОГИКА ---
+        // 5. КАЗИНО (АПГРЕЙДЕР)
         function openCasino() {
             getEl('casino-screen').style.display = 'flex';
             selectedCasinoItemIndex = null;
@@ -720,12 +703,10 @@
 
             let list = getEl('casino-inventory-list');
             list.innerHTML = '';
-
             if (state.inventory.length === 0) {
-                list.innerHTML = '<div style="text-align:center; color:#aaa;">Рюкзак пуст. Нечего апгрейдить.</div>';
+                list.innerHTML = '<div style="text-align:center; color:#aaa;">Рюкзак пуст.</div>';
                 return;
             }
-
             state.inventory.forEach((item, index) => {
                 let div = document.createElement('div');
                 div.className = 'casino-inv-item';
@@ -737,10 +718,7 @@
                     getEl('casino-target-price').value = Math.floor(item.price * 2);
                     calculateChance();
                 };
-                div.innerHTML = `
-                    <div class="num">${item.phone}</div>
-                    <div class="prc">${item.price.toLocaleString('ru-RU')} ₽</div>
-                `;
+                div.innerHTML = `<div class="num">${item.phone}</div><div class="prc">${item.price.toLocaleString('ru-RU')} ₽</div>`;
                 list.appendChild(div);
             });
         }
@@ -751,41 +729,31 @@
             let targetPrice = parseInt(getEl('casino-target-price').value);
 
             if (!targetPrice || targetPrice <= currentPrice) {
-                getEl('casino-chance').innerText = "Цена должна быть выше текущей!";
+                getEl('casino-chance').innerText = "Цена должна быть выше!";
                 getEl('casino-chance').style.color = "#dc3545";
                 return;
             }
-
             let multiplier = targetPrice / currentPrice;
             let chance = Math.floor((1 / multiplier) * 100);
-
             if (chance > 95) chance = 95;
             if (chance < 1) chance = 1;
 
             getEl('casino-chance').innerText = `Шанс: ${chance}%`;
             getEl('casino-chance').style.color = chance > 50 ? "#28a745" : chance > 20 ? "#ffcc00" : "#dc3545";
-            
             return chance;
         }
 
         function doUpgrade() {
             if (selectedCasinoItemIndex === null) return;
-            
             let item = state.inventory[selectedCasinoItemIndex];
             let currentPrice = item.price;
             let targetPrice = parseInt(getEl('casino-target-price').value);
             let chance = calculateChance();
 
-            if (!targetPrice || targetPrice <= currentPrice) {
-                showToast("❌ Неверная сумма!");
-                return;
-            }
+            if (!targetPrice || targetPrice <= currentPrice) return;
 
             let resultText = getEl('casino-result-text');
             resultText.innerText = "Крутим...";
-            resultText.style.color = "#fff";
-
-            getEl('btn-do-upgrade').disabled = true;
 
             setTimeout(() => {
                 let roll = Math.random() * 100;
@@ -796,160 +764,100 @@
 
                     resultText.innerText = `🎉 УСПЕХ! Номер улучшен до ${targetPrice.toLocaleString('ru-RU')} ₽`;
                     resultText.style.color = "#00ff00";
-                    showToast(`🎉 Успех! Вы улучшили номер!`);
                 } else {
                     state.inventory.splice(selectedCasinoItemIndex, 1);
                     resultText.innerText = `😢 ПРОВАЛ... Номер сгорел.`;
                     resultText.style.color = "#dc3545";
-                    showToast(`😢 Провал. Номер сгорел.`);
                     getEl('casino-controls').style.display = 'none';
                     selectedCasinoItemIndex = null;
                 }
-
                 updateUI();
                 renderInventory();
-                getEl('btn-do-upgrade').disabled = false;
-                
-                if (selectedCasinoItemIndex !== null) {
-                    openCasino();
-                    setTimeout(() => {
-                        let items = document.querySelectorAll('.casino-inv-item');
-                        if(items[selectedCasinoItemIndex]) items[selectedCasinoItemIndex].click();
-                    }, 50);
-                }
+                if (selectedCasinoItemIndex !== null) openCasino();
             }, 1000);
         }
 
-        function closeCasino() {
-            getEl('casino-screen').style.display = 'none';
-        }
+        // 6. ЛИДЕРБОРД
+        function openLeaderboard() {
+            getEl('leaderboard-screen').style.display = 'flex';
+            let list = getEl('leaderboard-list');
+            list.innerHTML = 'Загрузка...';
 
-        // --- ЛОГИКА ВХОДА ПО EMAIL ---
-        document.getElementById('btn-sync-email').addEventListener('click', () => {
-            let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
-            
-            if (!email || !email.includes('@')) {
-                showToast("❌ Введите корректный Email!");
+            if (!window.db || !window.fbRef || !window.fbOnValue) {
+                list.innerHTML = 'Ошибка подключения к базе.';
                 return;
             }
 
-            myId = "email_" + email;
-            myName = email.split('@')[0];
-            
-            localStorage.setItem('blum_email_id', myId);
-            localStorage.setItem('blum_user_name', myName);
-
-            showToast("🔄 Синхронизация...");
-
-            if (window.db && window.fbOnValue && window.fbRef) {
-                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        state.balance = data.balance || 0;
-                        state.level = data.level || 1;
-                        state.points = data.points || 0;
-                        state.inventory = data.inventory || [];
-                        state.bestNumber = data.bestNumber || null;
-                        state.totalGenerated = data.totalGenerated || 0;
-                        state.totalSold = data.totalSold || 0;
-                        state.maxBalance = data.maxBalance || 0;
-                        
-                        document.getElementById('user-name-display').innerText = myName;
-                        getEl('settings-screen').style.display = 'none';
-                        updateUI();
-                        showToast("✅ Прогресс успешно загружен!");
-                    } else {
-                        state.balance = 0;
-                        state.level = 1;
-                        state.points = 0;
-                        state.inventory = [];
-                        state.bestNumber = null;
-                        state.totalGenerated = 0;
-                        state.totalSold = 0;
-                        state.maxBalance = 0;
-                        
-                        document.getElementById('user-name-display').innerText = myName;
-                        getEl('settings-screen').style.display = 'none';
-                        updateUI();
-                        saveData();
-                        showToast("✨ Создан новый аккаунт!");
-                    }
-                });
-            }
-        });
-
-        // Сброс прогресса
-        document.getElementById('btn-reset-progress').addEventListener('click', () => {
-            if (confirm("Вы уверены? Весь прогресс будет удален!")) {
-                localStorage.clear();
-                if (window.db && window.fbSet && window.fbRef && myId) {
-                    window.fbSet(window.fbRef(window.db, 'players/' + myId), null);
-                }
-                location.reload();
-            }
-        });
-
-        // МГНОВЕННЫЙ ЗАПУСК БЕЗ ОЖИДАНИЯ
-        document.getElementById('user-name-display').innerText = myName;
-        updateUI();
-
-        // АСИНХРОННАЯ ЗАГРУЗКА ИЗ FIREBASE (в фоне)
-        if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
-            window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
-                const data = snapshot.val();
+            window.fbOnValue(window.fbRef(window.db, 'players'), (snapshot) => {
+                let data = snapshot.val();
+                let players = [];
                 if (data) {
-                    state.balance = data.balance || 0;
-                    state.level = data.level || 1;
-                    state.points = data.points || 0;
-                    state.inventory = data.inventory || [];
-                    state.bestNumber = data.bestNumber || null;
-                    state.totalGenerated = data.totalGenerated || 0;
-                    state.totalSold = data.totalSold || 0;
-                    state.maxBalance = data.maxBalance || 0;
-                    updateUI();
+                    for (let id in data) {
+                        let p = data[id];
+                        players.push({
+                            id: id,
+                            name: p.name || "Игрок",
+                            balance: p.balance || 0,
+                            avatar: (p.name || "И").charAt(0).toUpperCase(),
+                            isYou: id === myId
+                        });
+                    }
                 }
+                players.sort((a, b) => b.balance - a.balance);
+                players = players.slice(0, 50); // Топ 50
+
+                list.innerHTML = '';
+                if(players.length === 0) { list.innerHTML = 'Пока нет игроков.'; return; }
+
+                players.forEach((p, i) => {
+                    let rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                    let div = document.createElement('div');
+                    div.className = `leader-item ${rankClass}`;
+                    div.innerHTML = `
+                        <div class="leader-rank">#${i+1}</div>
+                        <div class="leader-avatar">${p.avatar}</div>
+                        <div class="leader-name">${p.name} ${p.isYou ? '(Вы)' : ''}</div>
+                        <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
+                    `;
+                    list.appendChild(div);
+                });
             });
         }
 
-        // Обработчики кликов
+        // 7. ОБРАБОТЧИКИ СОБЫТИЙ (Делегирование)
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon, .menu-item');
             if (!target) return;
 
             // Меню
-            if (target.id === 'btn-menu') {
-                getEl('side-menu').classList.toggle('open');
-            }
-            if (target.id === 'menu-settings') { getEl('side-menu').classList.remove('open'); getEl('settings-screen').style.display = 'flex'; getEl('toggle-theme').checked = state.isDarkTheme; getEl('toggle-warning').checked = state.useSellWarning; getEl('input-warn-threshold').value = state.warnThreshold; }
+            if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
+            if (target.id === 'menu-settings') { getEl('side-menu').classList.remove('open'); getEl('settings-screen').style.display = 'flex'; }
             if (target.id === 'menu-casino') { getEl('side-menu').classList.remove('open'); openCasino(); }
             if (target.id === 'menu-profile') { getEl('side-menu').classList.remove('open'); getEl('profile-screen').style.display = 'flex'; renderProfile(); }
-            if (target.id === 'menu-leaderboard') { getEl('side-menu').classList.remove('open'); window.location.href = 'leaderboard.html'; }
+            if (target.id === 'menu-leaderboard') { getEl('side-menu').classList.remove('open'); openLeaderboard(); }
 
-            // Кнопка Рюкзака на главном экране
-            if (target.id === 'btn-open-bag-float') { getEl('inventory-screen').style.display = 'flex'; updateUI(); renderInventory(); }
+            // Закрытия
+            if (target.id === 'btn-close-settings') getEl('settings-screen').style.display = 'none';
+            if (target.id === 'btn-close-bag') getEl('inventory-screen').style.display = 'none';
+            if (target.id === 'btn-close-profile') getEl('profile-screen').style.display = 'none';
+            if (target.id === 'btn-close-casino') getEl('casino-screen').style.display = 'none';
+            if (target.id === 'btn-close-leaderboard') getEl('leaderboard-screen').style.display = 'none';
 
-            // Закрытия экранов
-            if (target.id === 'btn-close-settings') { getEl('settings-screen').style.display = 'none'; }
-            if (target.id === 'btn-close-bag') { getEl('inventory-screen').style.display = 'none'; }
-            if (target.id === 'btn-close-profile') { getEl('profile-screen').style.display = 'none'; }
+            // Рюкзак
+            if (target.id === 'btn-open-bag-float') { getEl('inventory-screen').style.display = 'flex'; renderInventory(); }
 
             // Генерация
-            if (target.id === 'btn-market' || target.id === 'btn-shop' || target.id === 'btn-jewelry') {
+            if (['btn-market', 'btn-shop', 'btn-jewelry'].includes(target.id)) {
                 let type = target.id === 'btn-market' ? 1 : target.id === 'btn-shop' ? 5 : 20;
                 let cost = type * 1000;
                 
-                if (type === 1 && state.freeSpins > 0) {
-                    state.freeSpins--;
-                } else {
-                    if (state.balance < cost) {
-                        showToast("❌ Недостаточно средств!");
-                        return;
-                    }
+                if (type === 1 && state.freeSpins > 0) state.freeSpins--;
+                else {
+                    if (state.balance < cost) { showToast("❌ Недостаточно средств!"); return; }
                     state.balance -= cost;
                 }
 
                 let opXpMultiplier = getRandomOperator();
-
                 let fullNum = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
                 let phone = `+7-${fullNum.substring(0, 3)}-${fullNum.substring(3, 6)}-${fullNum.substring(6, 8)}-${fullNum.substring(8, 10)}`;
                 
@@ -960,19 +868,17 @@
                 let earnedXP = Math.floor(rarity.xp * opXpMultiplier * state.boostMultiplier);
 
                 state.totalGenerated++;
-                if (!state.bestNumber || evalData.price > state.bestNumber.price) {
-                    state.bestNumber = state.currentGen;
-                }
+                if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = state.currentGen;
 
                 startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
             }
 
+            // Продать/Оставить
             if (target.id === 'btn-sell-now') {
                 if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
                 }
-                state.balance += state.currentGen.price;
-                state.totalSold++;
+                state.balance += state.currentGen.price; state.totalSold++;
                 updateUI();
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('gen-buttons-row').style.display = 'flex';
@@ -984,17 +890,15 @@
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
+            // Продажа из рюкзака
             if (target.classList.contains('btn-sell-item')) {
                 let idx = parseInt(target.getAttribute('data-index'));
                 let item = state.inventory[idx];
                 if (state.useSellWarning && item.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
                 }
-                state.balance += item.price;
-                state.totalSold++;
-                state.inventory.splice(idx, 1);
-                updateUI();
-                renderInventory();
+                state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
+                updateUI(); renderInventory();
             }
 
             if (target.id === 'btn-sell-all') {
@@ -1003,71 +907,85 @@
                 if (state.useSellWarning && total >= state.warnThreshold) {
                     if (!confirm(`Продать ВСЕ на ${total.toLocaleString('ru-RU')} ₽?`)) return;
                 }
-                state.balance += total;
-                state.totalSold += state.inventory.length;
-                state.inventory = [];
-                updateUI();
-                renderInventory();
-                showToast(`✅ Вы получили ${total.toLocaleString('ru-RU')} ₽`);
+                state.balance += total; state.totalSold += state.inventory.length; state.inventory = [];
+                updateUI(); renderInventory(); showToast(`✅ Вы получили ${total.toLocaleString('ru-RU')} ₽`);
+            }
+
+            // Казино апгрейд
+            if (target.id === 'btn-do-upgrade') doUpgrade();
+        });
+
+        // 8. СЛУШАТЕЛИ ИЗМЕНЕНИЙ (Настройки)
+        document.getElementById('btn-sync-email').addEventListener('click', () => {
+            let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
+            if (!email || !email.includes('@')) { showToast("❌ Неверный Email!"); return; }
+            myId = "email_" + email;
+            myName = email.split('@')[0];
+            localStorage.setItem('blum_email_id', myId);
+            localStorage.setItem('blum_user_name', myName);
+
+            showToast("🔄 Синхронизация...");
+            if (window.db && window.fbOnValue && window.fbRef) {
+                window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        state.balance = data.balance || 0; state.level = data.level || 1; state.points = data.points || 0;
+                        state.inventory = data.inventory || []; state.bestNumber = data.bestNumber || null;
+                        state.totalGenerated = data.totalGenerated || 0; state.totalSold = data.totalSold || 0;
+                        state.maxBalance = data.maxBalance || 0;
+                        showToast("✅ Прогресс загружен!");
+                    } else {
+                        state.balance = 0; state.level = 1; state.points = 0; state.inventory = []; state.bestNumber = null;
+                        showToast("✨ Создан новый аккаунт!");
+                    }
+                    document.getElementById('user-name-display').innerText = myName;
+                    getEl('settings-screen').style.display = 'none';
+                    updateUI(); saveData();
+                });
             }
         });
 
-        // Закрытие меню по клику вне его
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) {
-                getEl('side-menu').classList.remove('open');
+        document.getElementById('btn-reset-progress').addEventListener('click', () => {
+            if (confirm("Удалить прогресс?")) {
+                localStorage.clear();
+                if (window.db && window.fbSet && window.fbRef && myId) window.fbSet(window.fbRef(window.db, 'players/' + myId), null);
+                location.reload();
             }
         });
 
         document.addEventListener('change', function(e) {
             if (e.target.id === 'toggle-theme') {
                 state.isDarkTheme = e.target.checked;
-                if (state.isDarkTheme) document.body.classList.add('dark-theme');
-                else document.body.classList.remove('dark-theme');
+                document.body.classList.toggle('dark-theme', state.isDarkTheme);
                 saveData();
             }
-            if (e.target.id === 'toggle-animation') {
-                state.isAnimationEnabled = e.target.checked;
-                saveData();
-            }
+            if (e.target.id === 'toggle-animation') { state.isAnimationEnabled = e.target.checked; saveData(); }
             if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
             if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
-            
-            if (e.target.id === 'casino-target-price') {
-                calculateChance();
-            }
+            if (e.target.id === 'casino-target-price') calculateChance();
         });
 
-        if (state.isDarkTheme) document.body.classList.add('dark-theme');
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) getEl('side-menu').classList.remove('open');
+        });
 
-        // Просмотр чужого профиля
-        if (viewPlayerId) {
-            document.getElementById('user-name-display').innerText = "Профиль игрока";
-            
-            if (window.db && window.fbOnValue && window.fbRef) {
-                window.fbOnValue(window.fbRef(window.db, 'players/' + viewPlayerId), (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        state.balance = data.balance || 0;
-                        state.level = data.level || 1;
-                        state.points = data.points || 0;
-                        state.inventory = data.inventory || [];
-                        state.bestNumber = data.bestNumber || null;
-                        state.totalGenerated = data.totalGenerated || 0;
-                        state.totalSold = data.totalSold || 0;
-                        state.maxBalance = data.maxBalance || 0;
-                        
-                        getEl('user-name-display').innerText = data.name || "Игрок";
-                        
-                        getEl('gen-buttons-row').style.display = 'none'; 
-                        getEl('btn-menu').style.display = 'none'; 
-                        getEl('btn-open-bag-float').style.display = 'none';
-                        
-                        getEl('profile-screen').style.display = 'flex';
-                        renderProfile();
-                    }
-                });
-            }
+        // 9. ЗАПУСК
+        document.getElementById('user-name-display').innerText = myName;
+        if (state.isDarkTheme) document.body.classList.add('dark-theme');
+        updateUI();
+
+        // Фоновое обновление из Firebase
+        if (window.db && window.fbOnValue && window.fbRef) {
+            window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    state.balance = data.balance || 0; state.level = data.level || 1; state.points = data.points || 0;
+                    state.inventory = data.inventory || []; state.bestNumber = data.bestNumber || null;
+                    state.totalGenerated = data.totalGenerated || 0; state.totalSold = data.totalSold || 0;
+                    state.maxBalance = data.maxBalance || 0;
+                    updateUI();
+                }
+            });
         }
     </script>
 </body>
