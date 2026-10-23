@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
     
-    <!-- Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -27,11 +25,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        window.fbRef = ref; 
-        window.fbSet = set; 
-        window.fbOnValue = onValue; 
-        window.fbRemove = remove;
-        window.db = db;
+        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.fbRemove = remove; window.db = db;
     </script>
 
     <style>
@@ -39,7 +33,6 @@
         body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-sub: #aaaaaa; }
         body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.4s, color 0.4s; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Шапка */
         #top-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; flex-shrink: 0; }
         #profile-box { display: flex; flex-direction: column; width: 70%; }
         #user-name-display { font-size: 12px; color: #ffcc00; font-weight: bold; margin-bottom: 2px; }
@@ -49,10 +42,8 @@
         #xp-bar-fill { height: 100%; width: 0%; background: #00ff00; border-radius: 3px; transition: width 0.3s ease-out; }
         #balance-display { font-size: 16px; font-weight: bold; color: #ffcc00; }
         
-        /* Кнопка меню */
         #btn-menu { border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: #444; font-size: 20px; }
 
-        /* ⚡ ИНДИКАТОР БУСТА */
         #boost-indicator {
             display: none; position: fixed; top: 70px; right: 15px;
             background: linear-gradient(135deg, #ff007f, #ff6b00);
@@ -73,12 +64,10 @@
         }
         @keyframes boltShake { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
-        /* Главный экран */
         #main-screen { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         
-        /* Иконка info */
         .info-icon { 
             position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; 
             background: #0088cc; color: white; border-radius: 50%; 
@@ -95,9 +84,22 @@
         .xp-gained-text { font-size: 13px; color: #00ff00; font-weight: bold; margin-top: 5px; display: block; }
         .chance-text { font-size: 12px; color: #888; margin-top: 5px; display: block; }
 
+        /* БЛОК ПРИЧИН ЦЕНЫ */
+        .reasons-block {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: rgba(0,136,204,0.06);
+            border-left: 3px solid #0088cc;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: left;
+        }
+        .reasons-title { font-weight: bold; color: #0088cc; margin-bottom: 6px; font-size: 12px; }
+        .reasons-list { margin: 0; padding-left: 18px; color: var(--text-sub); }
+        .reasons-list li { margin-bottom: 2px; line-height: 1.4; }
+
         #operator-indicator { text-align: center; font-size: 14px; color: #0088cc; margin-top: 10px; font-weight: bold; padding: 10px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 
-        /* Нижние кнопки */
         #bottom-action-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; box-sizing: border-box; background: var(--bg-color); z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         .shop-buttons-row { display: flex; gap: 10px; width: 100%; }
         .shop-btn { color: white; border: none; padding: 15px 5px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
@@ -107,7 +109,6 @@
         #btn-shop-gen { background: #fd7e14; }
         #btn-jewelry-gen { background: #dc3545; }
 
-        /* Кнопка Рюкзака */
         #btn-open-bag-float { 
             position: fixed; bottom: 100px; left: 20px; 
             background: #0088cc; color: white; border: none; 
@@ -121,19 +122,16 @@
         .btn-sell { color: white; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; background: #28a745; }
         .btn-keep { background: #ffc107; color: #1e1e1e; border: none; padding: 15px; border-radius: 10px; flex: 1; cursor: pointer; font-size: 16px; font-weight: bold; }
 
-        /* Всплывающее меню */
         #side-menu { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #1e1e1e; z-index: 999999; transition: right 0.3s ease; display: flex; flex-direction: column; padding-top: 60px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
         #side-menu.open { right: 0; }
         .menu-item { padding: 15px 20px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #333; transition: background 0.2s; }
         .menu-item:active { background: #333; }
         .menu-item span { font-size: 20px; }
 
-        /* Модальные окна */
         .full-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999999; display: none; flex-direction: column; background-color: var(--bg-color); }
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
-        /* Рынок и Рюкзак */
         #inv-balance-box, #market-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
@@ -147,18 +145,13 @@
         .btn-list-item { background: #ffc107; color: #1e1e1e; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* АНИМАЦИЯ ПРОДАЖИ НА РЫНКЕ */
         @keyframes sellAnim {
             0% { transform: scale(1); opacity: 1; }
             40% { transform: scale(0.95) rotate(-2deg); background-color: rgba(40, 167, 69, 0.2); }
             100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
         }
-        .selling-anim {
-            animation: sellAnim 0.5s forwards;
-            pointer-events: none;
-        }
+        .selling-anim { animation: sellAnim 0.5s forwards; pointer-events: none; }
 
-        /* Настройки */
         #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; background: var(--card-bg); }
         .setting-text { font-size: 16px; font-weight: bold; }
@@ -173,7 +166,6 @@
         input:checked + .slider { background-color: #28a745; }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Профиль и Инфо */
         #profile-content, #info-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; flex: 1; }
         .profile-section { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .profile-section h3 { margin-top: 0; color: #0088cc; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
@@ -183,7 +175,6 @@
         
         #info-current-number { font-size: 18px; padding: 12px; }
 
-        /* КАЗИНО */
         #casino-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999999; display: none; flex-direction: column; background-color: #1a1a1a; color: white; }
         .casino-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #333; }
         .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
@@ -193,16 +184,12 @@
         .casino-inv-item .num { font-family: monospace; font-size: 16px; font-weight: bold; }
         .casino-inv-item .prc { color: #28a745; font-weight: bold; }
         
-        /* АНИМАЦИЯ СГОРАНИЯ В АПГРЕЙДЕРЕ */
         @keyframes burnAnim {
             0% { transform: scale(1); opacity: 1; filter: none; border-color: #ffcc00; background: #333; }
             30% { transform: scale(1.05) rotate(2deg); filter: sepia(1) hue-rotate(-50deg) saturate(5); border-color: #ff0000; background: #3a0000; color: #ff0000; }
             100% { transform: scale(0.8); opacity: 0; }
         }
-        .burning-anim {
-            animation: burnAnim 0.6s forwards;
-            pointer-events: none;
-        }
+        .burning-anim { animation: burnAnim 0.6s forwards; pointer-events: none; }
 
         .casino-controls { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; }
         .casino-input-group { display: flex; align-items: center; gap: 10px; }
@@ -212,7 +199,6 @@
         .btn-spin:active { background: #a71d2a; }
         .casino-result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; height: 30px; }
 
-        /* ЛИДЕРБОРД */
         #leaderboard-list { flex: 1; overflow-y: auto; padding: 15px; }
         .leader-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; border-radius: 10px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; }
         .leader-item:active { transform: scale(0.98); }
@@ -224,7 +210,6 @@
         .leader-name { flex: 1; font-weight: bold; }
         .leader-balance { font-weight: bold; color: #28a745; }
 
-        /* ТОП 3 КРАСКА */
         .leader-item.top1 { background: linear-gradient(135deg, #fff8e1, #ffd700) !important; color: #1a1a1a !important; border: 2px solid #ffb300; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
         .leader-item.top1 .leader-avatar { background: #d4af37; }
         .leader-item.top2 { background: linear-gradient(135deg, #f5f5f5, #c0c0c0) !important; color: #1a1a1a !important; border: 2px solid #9e9e9e; box-shadow: 0 0 10px rgba(192, 192, 192, 0.6); }
@@ -232,7 +217,6 @@
         .leader-item.top3 { background: linear-gradient(135deg, #fbe9e7, #cd7f32) !important; color: #1a1a1a !important; border: 2px solid #a0522d; box-shadow: 0 0 10px rgba(205, 127, 50, 0.6); }
         .leader-item.top3 .leader-avatar { background: #8b4513; }
 
-        /* Анимации карточек */
         @keyframes shakeScreen {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -268,7 +252,6 @@
 </head>
 <body>
 
-    <!-- ⚡ БУСТ-ИНДИКАТОР -->
     <div id="boost-indicator">
         <div class="boost-bolt">⚡</div>
         <div class="boost-text">
@@ -277,7 +260,6 @@
         </div>
     </div>
 
-    <!-- ИГРА -->
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
@@ -310,7 +292,6 @@
         </div>
     </div>
 
-    <!-- БОКОВОЕ МЕНЮ -->
     <div id="side-menu">
         <div class="menu-item" id="menu-global-market"><span>🌍</span> Глобальный Рынок</div>
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
@@ -319,19 +300,16 @@
         <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
     </div>
 
-    <!-- ГЛОБАЛЬНЫЙ РЫНОК -->
     <div id="global-market-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">🌍 Рынок Игроков</span><button class="btn-close" id="btn-close-global-market">Закрыть</button></div>
         <div id="global-market-list"></div>
     </div>
 
-    <!-- ЛИДЕРБОРД -->
     <div id="leaderboard-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">🏆 Топ 50</span><button class="btn-close" id="btn-close-leaderboard">Закрыть</button></div>
         <div id="leaderboard-list"></div>
     </div>
 
-    <!-- КАЗИНО -->
     <div id="casino-screen">
         <div class="casino-header"><span style="font-weight:bold; font-size:18px;">🎰 Апгрейдер</span><button class="btn-close" id="btn-close-casino">Закрыть</button></div>
         <div class="casino-body">
@@ -347,7 +325,6 @@
         </div>
     </div>
 
-    <!-- ПРОФИЛЬ -->
     <div id="profile-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">👤 Статистика</span><button class="btn-close" id="btn-close-profile">Закрыть</button></div>
         <div id="profile-content">
@@ -362,7 +339,6 @@
         </div>
     </div>
 
-    <!-- ℹ️ ИНФО-ОКНО -->
     <div id="info-screen" class="full-screen">
         <div class="screen-header">
             <span style="font-weight:bold; font-size:18px;">ℹ️ Информация</span>
@@ -376,6 +352,12 @@
                 <div class="profile-row"><span>Стоимость:</span> <span id="info-current-price">—</span></div>
                 <div class="profile-row"><span>Получено XP:</span> <span id="info-current-xp">—</span></div>
                 <div class="profile-row"><span>Шанс выпадения:</span> <span id="info-current-chance">—</span></div>
+            </div>
+
+            <div class="profile-section" id="info-reasons-section" style="display:none;">
+                <h3>💡 Почему такая цена</h3>
+                <ul id="info-reasons-list" style="margin:0; padding-left:18px; font-size:13px; line-height: 1.6; color: var(--text-main);">
+                </ul>
             </div>
 
             <div class="profile-section">
@@ -407,17 +389,17 @@
 
             <div class="profile-section">
                 <h3>🎲 Шансы выпадения</h3>
-                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>до 0.1%</span></div>
-                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>до 10%</span></div>
-                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>до 20%</span></div>
-                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>до 30%</span></div>
-                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>Остальное</span></div>
-                <div style="font-size:11px; color:#888; margin-top:10px; text-align:center;">* Шансы зависят от режима:<br>Рынок (от 150 ₽) / Магазин (от 1 250 ₽) / Ювелирный (от 10 000 ₽)</div>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>< 0.001%</span></div>
+                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>~1%</span></div>
+                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>~5%</span></div>
+                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>~15%</span></div>
+                <div class="profile-row"><span class="rarity-common">Красивое окончание:</span> <span>~30%</span></div>
+                <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>~50%</span></div>
+                <div style="font-size:11px; color:#888; margin-top:10px; text-align:center;">* Цена зависит от паттернов в номере</div>
             </div>
         </div>
     </div>
 
-    <!-- РЮКЗАК -->
     <div id="inventory-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">🎒 Мой Рюкзак</span><button class="btn-close" id="btn-close-bag">Закрыть</button></div>
         <div id="inv-balance-box"><div style="font-size:14px; margin-bottom:5px;">Ваш баланс</div><div id="inv-balance-amount" style="font-size:28px; font-weight:bold; color:#28a745;">0 ₽</div></div>
@@ -425,7 +407,6 @@
         <div id="inv-list"></div>
     </div>
 
-    <!-- НАСТРОЙКИ -->
     <div id="settings-screen" class="full-screen">
         <div class="screen-header"><span style="font-weight:bold; font-size:18px;">⚙️ Настройки</span><button class="btn-close" id="btn-close-settings">Закрыть</button></div>
         <div id="settings-content">
@@ -454,7 +435,6 @@
             const tg = window.Telegram ? window.Telegram.WebApp : null;
             if (tg) { tg.ready(); tg.expand(); }
 
-            // 1. ИНИЦИАЛИЗАЦИЯ ИГРОКА
             let myName = localStorage.getItem('blum_user_name') || "Игрок";
             let myId = null;
             const urlParams = new URLSearchParams(window.location.search);
@@ -495,7 +475,6 @@
                 isAnimationEnabled: localStorage.getItem('blum_animation') !== 'false'
             };
 
-            // 💰 СТАРТОВЫЙ НАБОР
             const STARTER_KEY = 'blum_starter_granted';
             if (!localStorage.getItem(STARTER_KEY)) {
                 state.balance += 100000;
@@ -503,26 +482,16 @@
                 localStorage.setItem(STARTER_KEY, 'true');
                 localStorage.setItem('blum_balance', state.balance);
                 localStorage.setItem('blum_max_balance', state.maxBalance);
-
-                setTimeout(() => {
-                    if (typeof showToast === 'function') {
-                        showToast('🎁 Стартовый набор: +100 000 ₽!');
-                    }
-                }, 300);
+                setTimeout(() => { if (typeof showToast === 'function') showToast('🎁 Стартовый набор: +100 000 ₽!'); }, 300);
             }
 
-            // 🎁 LEVEL_BONUS
             const LEVEL_BONUS = (() => {
-                const STORAGE_KEY = 'blum_last_bonus_level';
-                const STEP = 10;
-                const BASE_AMOUNT = 10000;
-
+                const STORAGE_KEY = 'blum_last_bonus_level', STEP = 10, BASE_AMOUNT = 10000;
                 const _amountForLevel = (level) => {
                     if (!Number.isFinite(level) || level <= 0) return 0;
                     if (level % STEP !== 0) return 0;
                     return (level / STEP) * BASE_AMOUNT;
                 };
-
                 const _getLastBonusLevel = (currentLevel) => {
                     const raw = localStorage.getItem(STORAGE_KEY);
                     if (raw === null) {
@@ -533,143 +502,80 @@
                     const num = parseInt(raw, 10);
                     return Number.isFinite(num) ? num : 0;
                 };
-
-                const _setLastBonusLevel = (level) => {
-                    localStorage.setItem(STORAGE_KEY, String(level));
-                };
-
-                const _reset = () => {
-                    localStorage.removeItem(STORAGE_KEY);
-                };
-
+                const _setLastBonusLevel = (level) => localStorage.setItem(STORAGE_KEY, String(level));
+                const _reset = () => localStorage.removeItem(STORAGE_KEY);
                 const _apply = (stateObj) => {
                     const result = { totalBonus: 0, levels: [], newLevel: 0 };
                     if (!stateObj || typeof stateObj.level !== 'number') return result;
-
                     result.newLevel = stateObj.level;
                     const last = _getLastBonusLevel(stateObj.level);
-
-                    if (stateObj.level < last) {
-                        _setLastBonusLevel(stateObj.level);
-                        return result;
-                    }
-
+                    if (stateObj.level < last) { _setLastBonusLevel(stateObj.level); return result; }
                     for (let lvl = last + 1; lvl <= stateObj.level; lvl++) {
                         if (lvl % STEP === 0) {
                             const bonus = _amountForLevel(lvl);
-                            if (bonus > 0) {
-                                result.totalBonus += bonus;
-                                result.levels.push(lvl);
-                            }
+                            if (bonus > 0) { result.totalBonus += bonus; result.levels.push(lvl); }
                         }
                     }
-
                     if (result.totalBonus > 0) {
                         stateObj.balance += result.totalBonus;
-                        if (stateObj.maxBalance !== undefined && stateObj.balance > stateObj.maxBalance) {
-                            stateObj.maxBalance = stateObj.balance;
-                        }
-                        if (typeof showToast === 'function') {
-                            showToast(
-                                `🎉 Уровень ${result.levels.join(', ')}!<br>` +
-                                `🎁 Бонус: +${result.totalBonus.toLocaleString('ru-RU')} ₽`
-                            );
-                        }
+                        if (stateObj.maxBalance !== undefined && stateObj.balance > stateObj.maxBalance) stateObj.maxBalance = stateObj.balance;
+                        if (typeof showToast === 'function') showToast(`🎉 Уровень ${result.levels.join(', ')}!<br>🎁 Бонус: +${result.totalBonus.toLocaleString('ru-RU')} ₽`);
                     }
-
                     _setLastBonusLevel(stateObj.level);
                     return result;
                 };
-
-                return {
-                    STORAGE_KEY, STEP, BASE_AMOUNT,
-                    apply: _apply,
-                    reset: _reset,
-                    amountForLevel: _amountForLevel,
-                    getLastBonusLevel: _getLastBonusLevel,
-                    setLastBonusLevel: _setLastBonusLevel
-                };
+                return { STORAGE_KEY, STEP, BASE_AMOUNT, apply: _apply, reset: _reset, amountForLevel: _amountForLevel, getLastBonusLevel: _getLastBonusLevel, setLastBonusLevel: _setLastBonusLevel };
             })();
 
-            // ⚡ BOOST
             const BOOST = {
-                DURATION_MS: 30000,
-                multiplier: 1,
-                endTime: 0,
-                _state: null,
-
+                DURATION_MS: 30000, multiplier: 1, endTime: 0, _state: null,
                 init(stateObj) {
                     this._state = stateObj;
                     this.endTime = stateObj.boostEndTime || 0;
-
-                    if (Date.now() < this.endTime) {
-                        this.multiplier = stateObj.boostMultiplier || 1;
-                    } else {
-                        this.multiplier = 1;
-                        this.endTime = 0;
-                    }
-
+                    if (Date.now() < this.endTime) this.multiplier = stateObj.boostMultiplier || 1;
+                    else { this.multiplier = 1; this.endTime = 0; }
                     this.tick();
                     setInterval(() => this.tick(), 1000);
                 },
-
                 give(level) {
                     const roll = Math.random() * 100;
-
-                    if (level > 50 && roll < 10)      this.multiplier = 5;
+                    if (level > 50 && roll < 10) this.multiplier = 5;
                     else if (level > 20 && roll < 25) this.multiplier = 3;
-                    else if (roll < 50)               this.multiplier = 2;
-                    else                              this.multiplier = 1.5;
-
+                    else if (roll < 50) this.multiplier = 2;
+                    else this.multiplier = 1.5;
                     this.endTime = Date.now() + this.DURATION_MS;
-
                     if (this._state) {
                         this._state.boostMultiplier = this.multiplier;
                         this._state.boostEndTime = this.endTime;
                         if (typeof saveData === 'function') saveData();
                     }
-
-                    if (typeof showToast === 'function') {
-                        showToast(`🚀 БУСТ! Множитель x${this.multiplier} на ${this.DURATION_MS / 1000} секунд!`);
-                    }
+                    if (typeof showToast === 'function') showToast(`🚀 БУСТ! Множитель x${this.multiplier} на ${this.DURATION_MS / 1000} секунд!`);
                     this.tick();
                 },
-
                 tick() {
                     const el = document.getElementById('boost-indicator');
                     if (!el) return;
-
                     const now = Date.now();
-
                     if (now < this.endTime) {
                         const timeLeft = Math.max(0, Math.ceil((this.endTime - now) / 1000));
                         el.classList.add('show');
-
                         const multEl = document.getElementById('boost-mult');
                         const timerEl = document.getElementById('boost-timer');
                         if (multEl) multEl.innerText = `x${this.multiplier}`;
                         if (timerEl) timerEl.innerText = `${timeLeft}с`;
                     } else {
                         if (el.classList.contains('show')) el.classList.remove('show');
-
                         if (this.multiplier !== 1) {
                             this.multiplier = 1;
-                            if (this._state) {
-                                this._state.boostMultiplier = 1;
-                                if (typeof saveData === 'function') saveData();
-                            }
+                            if (this._state) { this._state.boostMultiplier = 1; if (typeof saveData === 'function') saveData(); }
                         }
                     }
                 },
-
-                getMultiplier() {
-                    return (Date.now() < this.endTime) ? this.multiplier : 1;
-                }
+                getMultiplier() { return (Date.now() < this.endTime) ? this.multiplier : 1; }
             };
 
             let selectedCasinoItemIndex = null;
 
-            // 2. СОХРАНЕНИЕ
             function saveData() {
                 localStorage.setItem('blum_balance', state.balance);
                 localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
@@ -702,7 +608,6 @@
 
             const getEl = (id) => document.getElementById(id);
 
-            // 3. ЛОГИКА
             function getRarity(category) {
                 if (category.includes("БРИЛЛИАНТОВЫЙ")) return { cls: "rarity-diamond", xp: 1000 };
                 if (category.includes("ЗОЛОТОЙ")) return { cls: "rarity-gold", xp: 150 };
@@ -714,80 +619,148 @@
                 return { cls: "rarity-common", xp: 5 };
             }
 
-            // --- НОВАЯ ЛОГИКА ГЕНЕРАЦИИ ЦЕН ---
+            // ═══════════════════════════════════════════════════════════
+            // НОВАЯ ЛОГИКА ОЦЕНКИ — КАК В РЕАЛЬНОСТИ
+            // Базовая цена × множитель за каждый найденный паттерн
+            // ═══════════════════════════════════════════════════════════
             function calculatePrice(fullNum, type) {
-                let minPrice = 150;
-                if (type === 5) minPrice = 1250;
-                if (type === 20) minPrice = 10000;
+                const BASE_PRICES = { 1: 150, 5: 1250, 20: 10000 };
+                const basePrice = BASE_PRICES[type] || 150;
 
-                let price = minPrice;
-                let category = "Обычный";
-                let chance = "Высокий";
+                let multiplier = 1;
+                let reasons = [];
 
-                let last4 = fullNum.slice(-4);
-                let isMirror = fullNum === fullNum.split('').reverse().join('');
-                let isSeq = fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876");
-                let isTriple = /(\d)\1{2}/.test(fullNum);
-                let isDoubleDouble = last4[0] === last4[1] && last4[2] === last4[3];
-                let isJackpot = last4 === "7777" || last4 === "8888" || last4 === "0000";
-                let isNiceEnd = fullNum.slice(-2)[0] === fullNum.slice(-2)[1];
+                const last2 = fullNum.slice(-2);
+                const last3 = fullNum.slice(-3);
+                const last4 = fullNum.slice(-4);
+                const last5 = fullNum.slice(-5);
+                const last6 = fullNum.slice(-6);
 
-                // 1. ПРОВЕРКА ПАТТЕРНОВ (накладываются поверх базовой цены)
-                if (isJackpot) {
-                    category = "ЗОЛОТОЙ";
-                    price = 5000000 + Math.floor(Math.random() * 5000000);
-                    chance = "0.03%";
-                } else if (isTriple) {
-                    category = "СЕРЕБРЯНЫЙ";
-                    price = 150000 + Math.floor(Math.random() * 100000);
-                    chance = "0.1%";
-                } else if (isMirror) {
-                    category = "ЗЕРКАЛЬНЫЙ";
-                    price = 300000 + Math.floor(Math.random() * 200000);
-                    chance = "0.001%";
-                } else if (isDoubleDouble) {
-                    category = "БРОНЗОВЫЙ";
-                    price = 50000 + Math.floor(Math.random() * 30000);
-                    chance = "1%";
-                } else if (isSeq) {
-                    category = "ПОСЛЕДОВАТЕЛЬНЫЙ";
-                    price = 100000 + Math.floor(Math.random() * 50000);
-                    chance = "0.5%";
-                } else if (isNiceEnd) {
-                    category = "КРАСИВОЕ ОКОНЧАНИЕ";
-                    price = 5000 + Math.floor(Math.random() * 3000);
-                    chance = "10%";
-                } else {
-                    // 2. РАНДОМ (если паттерн не выпал)
-                    let rand = Math.random() * 100;
-                    
-                    if (type === 1) { // Рынок (от 150)
-                        if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.00001%"; }
-                        else if (rand < 0.1) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "0.1%"; }
-                        else if (rand < 2.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "1.9%"; }
-                        else if (rand < 10.0) { price = 10000 + Math.floor(Math.random() * 40000); category = "БРОНЗОВЫЙ"; chance = "8%"; }
-                        else { price = 150 + Math.floor(Math.random() * 5000); category = "Обычный"; chance = "~90%"; }
-                    } else if (type === 5) { // Магазин (от 1250)
-                        if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.0001%"; }
-                        else if (rand < 1.0) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "0.9%"; }
-                        else if (rand < 10.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "9%"; }
-                        else if (rand < 30.0) { price = 10000 + Math.floor(Math.random() * 40000); category = "БРОНЗОВЫЙ"; chance = "20%"; }
-                        else { price = 1250 + Math.floor(Math.random() * 8000); category = "Обычный"; chance = "~70%"; }
-                    } else if (type === 20) { // Ювелирный (от 10000)
-                        if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.1%"; }
-                        else if (rand < 10.0) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "9.9%"; }
-                        else if (rand < 30.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "20%"; }
-                        else if (rand < 60.0) { price = 50000 + Math.floor(Math.random() * 50000); category = "БРОНЗОВЫЙ"; chance = "30%"; }
-                        else { price = 10000 + Math.floor(Math.random() * 40000); category = "Обычный"; chance = "~40%"; }
-                    }
+                // 1. Все 10 цифр одинаковые (9999999999) — джекпот
+                if (/^(\d)\1{9}$/.test(fullNum)) {
+                    multiplier *= 100000;
+                    reasons.push("Все 10 цифр одинаковые — идеальный номер");
+                }
+                // 2. 8+ одинаковых подряд
+                else if (/(\d)\1{7,}/.test(fullNum)) {
+                    multiplier *= 10000;
+                    reasons.push("8+ одинаковых цифр подряд — фантастика");
+                }
+                // 3. 7 одинаковых подряд
+                else if (/(\d)\1{6}/.test(fullNum)) {
+                    multiplier *= 2000;
+                    reasons.push("7 одинаковых цифр подряд");
+                }
+                // 4. 6 одинаковых подряд
+                else if (/(\d)\1{5}/.test(fullNum)) {
+                    multiplier *= 300;
+                    reasons.push("6 одинаковых цифр подряд");
+                }
+                // 5. 5 одинаковых подряд
+                else if (/(\d)\1{4}/.test(fullNum)) {
+                    multiplier *= 60;
+                    reasons.push("5 одинаковых цифр подряд");
+                }
+                // 6. 4 одинаковых подряд
+                else if (/(\d)\1{3}/.test(fullNum)) {
+                    multiplier *= 15;
+                    reasons.push("4 одинаковые цифры подряд");
+                }
+                // 7. 3 одинаковых подряд
+                else if (/(\d)\1{2}/.test(fullNum)) {
+                    multiplier *= 3;
+                    reasons.push("3 одинаковые цифры подряд");
                 }
 
-                // ФИНАЛЬНАЯ ПРОВЕРКА МИНИМУМА (защита от просадки паттернов на дешевых режимах)
-                if (price < minPrice) price = minPrice;
-                // ФИНАЛЬНАЯ ПРОВЕРКА МАКСИМУМА
+                // 8. Красивое окончание (доп. проверки)
+                if (/^(\d)\1{3}$/.test(last4) && !reasons.some(r => r.includes("4 одинаков"))) {
+                    multiplier *= 12;
+                    reasons.push(`Окончание *${last4} (4 одинаковые)`);
+                } else if (/^(\d)\1{2}$/.test(last3) && !reasons.some(r => r.includes("3 одинаков"))) {
+                    multiplier *= 3;
+                    reasons.push(`Окончание *${last3} (3 одинаковые)`);
+                }
+
+                // 9. Зеркальный (палиндром)
+                if (fullNum === fullNum.split('').reverse().join('')) {
+                    multiplier *= 20;
+                    reasons.push("Зеркальный номер (читается одинаково)");
+                }
+
+                // 10. Последовательность в конце (1234, 5678, 9876)
+                const isSeq = (s) => {
+                    const arr = s.split('').map(Number);
+                    const diff = arr[1] - arr[0];
+                    if (diff !== 1 && diff !== -1) return false;
+                    for (let i = 2; i < arr.length; i++) if (arr[i] - arr[i-1] !== diff) return false;
+                    return true;
+                };
+                if (isSeq(last4)) {
+                    multiplier *= 8;
+                    reasons.push(`Последовательность в конце (${last4})`);
+                } else if (isSeq(last3)) {
+                    multiplier *= 3;
+                    reasons.push(`Мини-последовательность в конце (${last3})`);
+                }
+
+                // 11. Две пары в конце (7788)
+                if (last4[0] === last4[1] && last4[2] === last4[3] && last4[0] !== last4[2] && !reasons.some(r => r.includes("4 одинаков"))) {
+                    multiplier *= 4;
+                    reasons.push(`Две пары в конце (${last4})`);
+                }
+                // 12. Чередование в конце (7878)
+                if (last4[0] === last4[2] && last4[1] === last4[3] && last4[0] !== last4[1]) {
+                    multiplier *= 3;
+                    reasons.push(`Чередование в конце (${last4})`);
+                }
+
+                // 13. Круглое окончание
+                if (fullNum.endsWith("0000") && !reasons.some(r => r.includes("4 одинаков"))) {
+                    multiplier *= 5;
+                    reasons.push("Круглое окончание 0000");
+                } else if (fullNum.endsWith("000")) {
+                    multiplier *= 2;
+                    reasons.push("Круглое окончание 000");
+                } else if (fullNum.endsWith("00")) {
+                    multiplier *= 1.4;
+                    reasons.push("Круглое окончание 00");
+                }
+
+                // 14. Пара в конце (77)
+                if (last2[0] === last2[1] && !reasons.some(r => r.includes(last2))) {
+                    multiplier *= 1.5;
+                    reasons.push(`Пара в конце (${last2})`);
+                }
+
+                // Если причин нет
+                if (reasons.length === 0) {
+                    reasons.push("Обычный номер без паттернов");
+                }
+
+                // Итоговая цена
+                let price = Math.floor(basePrice * multiplier);
+                if (price < basePrice) price = basePrice;
                 if (price > 1000000000) price = 1000000000;
 
-                return { price, category, chance };
+                // Категория по итоговой цене
+                let category;
+                if (price >= 1000000000) category = "БРИЛЛИАНТОВЫЙ";
+                else if (price >= 1000000) category = "ЗОЛОТОЙ";
+                else if (price >= 100000) category = "СЕРЕБРЯНЫЙ";
+                else if (price >= 10000) category = "БРОНЗОВЫЙ";
+                else if (price >= 1000) category = "КРАСИВОЕ ОКОНЧАНИЕ";
+                else category = "Обычный";
+
+                // Шанс (оценочно по категории)
+                let chance;
+                if (category === "БРИЛЛИАНТОВЫЙ") chance = "< 0.001%";
+                else if (category === "ЗОЛОТОЙ") chance = "~1%";
+                else if (category === "СЕРЕБРЯНЫЙ") chance = "~5%";
+                else if (category === "БРОНЗОВЫЙ") chance = "~15%";
+                else if (category === "КРАСИВОЕ ОКОНЧАНИЕ") chance = "~30%";
+                else chance = "~50%";
+
+                return { price, category, chance, reasons };
             }
 
             function getRandomOperator() {
@@ -801,7 +774,6 @@
                 return { op, xpMultiplier };
             }
 
-            // 4. УВЕДОМЛЕНИЯ
             function showToast(text) {
                 let old = getEl('toast-notification');
                 if (old) old.remove();
@@ -811,7 +783,6 @@
                 setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
             }
 
-            // 5. ОБНОВЛЕНИЕ UI
             function updateUI() {
                 getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
                 getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
@@ -907,7 +878,6 @@
                 getEl('stat-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
             }
 
-            // ℹ️ ИНФО-ОКНО
             function openInfo() {
                 getEl('info-screen').style.display = 'flex';
 
@@ -920,6 +890,16 @@
                     getEl('info-current-price').innerText = cg.price.toLocaleString('ru-RU') + ' ₽';
                     getEl('info-current-xp').innerText = '+' + cgRarity.xp + ' XP';
                     getEl('info-current-chance').innerText = cg.chance || '—';
+
+                    // Отображение причин
+                    const reasonsSection = getEl('info-reasons-section');
+                    const reasonsList = getEl('info-reasons-list');
+                    if (cg.reasons && cg.reasons.length > 0) {
+                        reasonsSection.style.display = 'block';
+                        reasonsList.innerHTML = cg.reasons.map(r => `<li>${r}</li>`).join('');
+                    } else {
+                        reasonsSection.style.display = 'none';
+                    }
                 } else {
                     getEl('info-current-number').innerText = '—';
                     getEl('info-current-number').className = 'best-num';
@@ -927,6 +907,7 @@
                     getEl('info-current-price').innerText = '—';
                     getEl('info-current-xp').innerText = '—';
                     getEl('info-current-chance').innerText = '—';
+                    getEl('info-reasons-section').style.display = 'none';
                 }
 
                 const ptsNeeded = state.level * 100;
@@ -935,15 +916,11 @@
 
                 const nextBonusLevel = (Math.floor(state.level / 10) + 1) * 10;
                 const nextBonusAmount = (nextBonusLevel / 10) * 10000;
-                getEl('info-next-bonus').innerText =
-                    `${nextBonusLevel} ур. → ${nextBonusAmount.toLocaleString('ru-RU')} ₽`;
+                getEl('info-next-bonus').innerText = `${nextBonusLevel} ур. → ${nextBonusAmount.toLocaleString('ru-RU')} ₽`;
 
                 const boostLeft = Math.max(0, Math.ceil((state.boostEndTime - Date.now()) / 1000));
-                if (boostLeft > 0) {
-                    getEl('info-boost').innerText = `⚡ x${state.boostMultiplier} (${boostLeft}с)`;
-                } else {
-                    getEl('info-boost').innerText = 'Нет';
-                }
+                if (boostLeft > 0) getEl('info-boost').innerText = `⚡ x${state.boostMultiplier} (${boostLeft}с)`;
+                else getEl('info-boost').innerText = 'Нет';
 
                 getEl('info-free-spins').innerText = state.freeSpins;
 
@@ -951,8 +928,7 @@
                 getEl('info-balance').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
                 getEl('info-max-balance').innerText = state.maxBalance.toLocaleString('ru-RU') + ' ₽';
                 getEl('info-inventory-value').innerText = invValue.toLocaleString('ru-RU') + ' ₽';
-                getEl('info-total-worth').innerText =
-                    (state.balance + invValue).toLocaleString('ru-RU') + ' ₽';
+                getEl('info-total-worth').innerText = (state.balance + invValue).toLocaleString('ru-RU') + ' ₽';
 
                 getEl('info-total-generated').innerText = state.totalGenerated;
                 getEl('info-total-sold').innerText = state.totalSold;
@@ -974,8 +950,7 @@
                 getEl('info-operator').innerText = state.currentOperator || '—';
             }
 
-            // 6. АНИМАЦИЯ ГЕНЕРАЦИИ
-            function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP, chance) {
+            function startGenerationAnimation(targetPhone, rarityClass, price, category, earnedXP, chance, reasons) {
                 let resDiv = getEl('custom-gen-result');
                 let btnRow = getEl('gen-buttons-row');
                 btnRow.style.display = 'none';
@@ -988,6 +963,10 @@
                         <div class="price-tag">${price.toLocaleString('ru-RU')} ₽</div>
                         <div class="category-text">${category} <span class="xp-gained-text">(+${earnedXP} XP)</span></div>
                         <div class="chance-text">🎲 Шанс выпадения: ${chance}</div>
+                        <div class="reasons-block">
+                            <div class="reasons-title">💡 Почему такая цена:</div>
+                            <ul class="reasons-list">${reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+                        </div>
                     `;
                     if (price >= 500000) {
                         resDiv.classList.add('shake-effect', 'flash-effect');
@@ -1006,12 +985,18 @@
                     <div class="price-tag" id="anim-price" style="opacity: 0.5;">Генерация...</div>
                     <div class="category-text" id="anim-category" style="opacity: 0.5;">Поиск номера...</div>
                     <div class="chance-text" id="anim-chance" style="opacity: 0.5;">🎲 Шанс: ???</div>
+                    <div class="reasons-block" id="anim-reasons" style="opacity: 0;">
+                        <div class="reasons-title">💡 Почему такая цена:</div>
+                        <ul class="reasons-list" id="anim-reasons-list"></ul>
+                    </div>
                 `;
 
                 let animPhone = getEl('anim-phone');
                 let animPrice = getEl('anim-price');
                 let animCategory = getEl('anim-category');
                 let animChance = getEl('anim-chance');
+                let animReasons = getEl('anim-reasons');
+                let animReasonsList = getEl('anim-reasons-list');
                 let targetChars = targetPhone.split('');
                 let currentStr = "+7-XXX-XXX-XX-XX".split('');
                 let iterations = 0;
@@ -1035,6 +1020,10 @@
                         animChance.innerText = `🎲 Шанс выпадения: ${chance}`;
                         animChance.style.opacity = '1';
                         
+                        // Причины
+                        animReasonsList.innerHTML = reasons.map(r => `<li>${r}</li>`).join('');
+                        animReasons.style.opacity = '1';
+                        
                         if (price >= 500000) {
                             resDiv.classList.add('shake-effect', 'flash-effect');
                             setTimeout(() => { resDiv.classList.remove('shake-effect', 'flash-effect'); }, 1000);
@@ -1048,7 +1037,6 @@
                 }, 50);
             }
 
-            // 7. ЛИДЕРБОРД
             function openLeaderboard() {
                 getEl('leaderboard-screen').style.display = 'flex';
                 let list = getEl('leaderboard-list');
@@ -1066,11 +1054,8 @@
                         for (let id in data) {
                             let p = data[id];
                             players.push({
-                                id: id,
-                                name: p.name || "Игрок",
-                                balance: p.balance || 0,
-                                avatar: (p.name || "И").charAt(0).toUpperCase(),
-                                isYou: id === myId
+                                id: id, name: p.name || "Игрок", balance: p.balance || 0,
+                                avatar: (p.name || "И").charAt(0).toUpperCase(), isYou: id === myId
                             });
                         }
                     }
@@ -1095,7 +1080,6 @@
                 });
             }
 
-            // 8. ГЛОБАЛЬНЫЙ РЫНОК
             function openGlobalMarket() {
                 getEl('global-market-screen').style.display = 'flex';
                 let list = getEl('global-market-list');
@@ -1110,10 +1094,7 @@
                     let data = snapshot.val();
                     let items = [];
                     if (data) {
-                        for (let id in data) {
-                            let item = data[id];
-                            items.push({ ...item, key: id });
-                        }
+                        for (let id in data) items.push({ ...data[id], key: id });
                     }
                     items.sort((a, b) => b.price - a.price);
 
@@ -1166,7 +1147,7 @@
                     
                     window.fbRemove(window.fbRef(window.db, 'market/' + key));
                     state.balance -= price;
-                    state.inventory.push({ phone: item.phone, price: item.price, category: item.category, chance: item.chance });
+                    state.inventory.push({ phone: item.phone, price: item.price, category: item.category, chance: item.chance, reasons: item.reasons || [] });
                     updateUI(); saveData();
                     showToast(`✅ Вы купили номер ${item.phone}!`);
 
@@ -1174,9 +1155,7 @@
                         window.fbOnValue(window.fbRef(window.db, 'players/' + sellerId), (sSnap) => {
                             let seller = sSnap.val();
                             if (seller) {
-                                let commission = item.price * 0.05;
-                                let sellerProfit = item.price - commission;
-                                seller.balance = (seller.balance || 0) + sellerProfit;
+                                seller.balance = (seller.balance || 0) + item.price * 0.95;
                                 window.fbSet(window.fbRef(window.db, 'players/' + sellerId), seller);
                             }
                         }, { onlyOnce: true });
@@ -1185,7 +1164,6 @@
                 }, { onlyOnce: true });
             }
 
-            // 9. АПГРЕЙДЕР
             function openCasino() {
                 getEl('casino-screen').style.display = 'flex';
                 selectedCasinoItemIndex = null;
@@ -1226,8 +1204,7 @@
                     getEl('casino-chance').style.color = "#dc3545";
                     return;
                 }
-                let multiplier = targetPrice / currentPrice;
-                let chance = Math.floor((1 / multiplier) * 100);
+                let chance = Math.floor((1 / (targetPrice / currentPrice)) * 100);
                 if (chance > 95) chance = 95;
                 if (chance < 1) chance = 1;
 
@@ -1280,13 +1257,8 @@
                 }, 1000);
             }
 
-            // 10. ОБРАБОТЧИКИ
             document.addEventListener('click', function(e) {
-                if (e.target.closest('.info-icon')) {
-                    openInfo();
-                    return;
-                }
-
+                if (e.target.closest('.info-icon')) { openInfo(); return; }
                 let target = e.target.closest('button, .menu-item');
                 if (!target) return;
 
@@ -1326,13 +1298,13 @@
                     let evalData = calculatePrice(fullNum, type);
                     let rarity = getRarity(evalData.category);
                     
-                    state.currentGen = { phone, price: evalData.price, category: evalData.category, chance: evalData.chance };
+                    state.currentGen = { phone, price: evalData.price, category: evalData.category, chance: evalData.chance, reasons: evalData.reasons };
                     let earnedXP = Math.floor(rarity.xp * opData.xpMultiplier * BOOST.getMultiplier());
 
                     state.totalGenerated++;
                     if (!state.bestNumber || evalData.price > state.bestNumber.price) state.bestNumber = state.currentGen;
 
-                    startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP, evalData.chance);
+                    startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP, evalData.chance, evalData.reasons);
                 }
 
                 if (target.id === 'btn-sell-now') {
@@ -1393,6 +1365,7 @@
                                 price: listingPrice,
                                 category: item.category,
                                 chance: item.chance,
+                                reasons: item.reasons || [],
                                 sellerId: myId,
                                 sellerName: myName,
                                 timestamp: Date.now()
@@ -1415,7 +1388,6 @@
                 if (target.id === 'btn-do-upgrade') doUpgrade();
             });
 
-            // 11. НАСТРОЙКИ
             document.getElementById('btn-sync-email').addEventListener('click', () => {
                 let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
                 if (!email || !email.includes('@')) { showToast("❌ Неверный Email!"); return; }
@@ -1456,11 +1428,7 @@
             });
 
             document.addEventListener('change', function(e) {
-                if (e.target.id === 'toggle-theme') {
-                    state.isDarkTheme = e.target.checked;
-                    document.body.classList.toggle('dark-theme', state.isDarkTheme);
-                    saveData();
-                }
+                if (e.target.id === 'toggle-theme') { state.isDarkTheme = e.target.checked; document.body.classList.toggle('dark-theme', state.isDarkTheme); saveData(); }
                 if (e.target.id === 'toggle-animation') { state.isAnimationEnabled = e.target.checked; saveData(); }
                 if (e.target.id === 'toggle-warning') { state.useSellWarning = e.target.checked; saveData(); }
                 if (e.target.id === 'input-warn-threshold') { state.warnThreshold = parseInt(e.target.value) || 100000; saveData(); }
@@ -1471,7 +1439,6 @@
                 if (!e.target.closest('#side-menu') && !e.target.closest('#btn-menu')) getEl('side-menu').classList.remove('open');
             });
 
-            // 12. СТАРТ
             document.getElementById('user-name-display').innerText = myName;
             if (state.isDarkTheme) document.body.classList.add('dark-theme');
             BOOST.init(state);
