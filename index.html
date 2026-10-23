@@ -73,9 +73,9 @@
         .shop-btn { color: white; border: none; padding: 15px 5px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .shop-btn:active { transform: scale(0.95); }
         .shop-btn span { font-size: 11px; font-weight: normal; opacity: 0.9; margin-top: 4px;}
-        #btn-market { background: #28a745; }
-        #btn-shop { background: #fd7e14; }
-        #btn-jewelry { background: #dc3545; }
+        #btn-market-gen { background: #28a745; }
+        #btn-shop-gen { background: #fd7e14; }
+        #btn-jewelry-gen { background: #dc3545; }
 
         /* Кнопка Рюкзака */
         #btn-open-bag-float { 
@@ -103,13 +103,13 @@
         .screen-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; color: white; }
         .btn-close { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;}
 
-        /* Рюкзак */
-        #inv-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
+        /* Рынок и Рюкзак */
+        #inv-balance-box, #market-balance-box { margin: 15px; padding: 20px; border-radius: 10px; text-align: center; background: var(--card-bg); }
         #btn-sell-all { background: #dc3545; color: white; border: none; padding: 15px; margin: 0 15px 15px 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: calc(100% - 30px); }
         #btn-sell-all:disabled { background: #555; cursor: not-allowed; }
-        #inv-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
-        .inv-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
-        .btn-sell-item { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #inv-list, #market-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; }
+        .inv-item, .market-item { padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
+        .btn-sell-item, .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
         /* Настройки */
         #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
@@ -211,7 +211,7 @@
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
-                <div id="user-name-display">Загрузка...</div>
+                <div id="user-name-display">Игрок</div>
                 <div id="lvl-text">Уровень: 1</div>
                 <div id="pts-text">Поинты: 0 / 100</div>
                 <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
@@ -225,14 +225,13 @@
             <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
         
-        <!-- Счетчик добавлен внутрь кнопки, чтобы не было ошибки -->
         <button id="btn-open-bag-float">🎒 <span id="bag-count" style="font-size:14px; margin-left:5px;">0</span></button>
 
         <div id="bottom-action-area">
             <div class="shop-buttons-row" id="gen-buttons-row">
-                <button class="shop-btn" id="btn-market">Рынок<span>1 000 ₽</span></button>
-                <button class="shop-btn" id="btn-shop">Магазин<span>5 000 ₽</span></button>
-                <button class="shop-btn" id="btn-jewelry">Ювелирный<span>20 000 ₽</span></button>
+                <button class="shop-btn" id="btn-market-gen">Рынок<span>1 000 ₽</span></button>
+                <button class="shop-btn" id="btn-shop-gen">Магазин<span>5 000 ₽</span></button>
+                <button class="shop-btn" id="btn-jewelry-gen">Ювелирный<span>20 000 ₽</span></button>
             </div>
             <div id="action-btns-wrapper">
                 <button class="btn-sell" id="btn-sell-now">Продать</button>
@@ -243,10 +242,24 @@
 
     <!-- БОКОВОЕ МЕНЮ -->
     <div id="side-menu">
+        <div class="menu-item" id="menu-market"><span>🏪</span> Рынок (Продажа)</div>
         <div class="menu-item" id="menu-settings"><span>⚙️</span> Настройки</div>
         <div class="menu-item" id="menu-casino"><span>🎰</span> Апгрейдер</div>
         <div class="menu-item" id="menu-profile"><span>👤</span> Статистика</div>
         <div class="menu-item" id="menu-leaderboard"><span>🏆</span> Лидерборд</div>
+    </div>
+
+    <!-- РЫНОК (ПРОДАЖА) -->
+    <div id="market-screen" class="full-screen">
+        <div class="screen-header">
+            <span style="font-weight:bold; font-size:18px;">🏪 Рынок (Продажа)</span>
+            <button class="btn-close" id="btn-close-market">Закрыть</button>
+        </div>
+        <div id="market-balance-box">
+            <div style="font-size:14px; margin-bottom:5px;">Ваш баланс</div>
+            <div id="market-balance-amount" style="font-size:28px; font-weight:bold; color:#28a745;">0 ₽</div>
+        </div>
+        <div id="market-list"></div>
     </div>
 
     <!-- ЛИДЕРБОРД -->
@@ -534,7 +547,8 @@
         function updateUI() {
             getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-            getEl('bag-count').innerText = state.inventory.length; // Теперь этот элемент существует
+            getEl('market-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
+            getEl('bag-count').innerText = state.inventory.length;
             getEl('lvl-text').innerText = `Уровень: ${state.level}`;
             
             if (state.balance > state.maxBalance) state.maxBalance = state.balance;
@@ -554,13 +568,13 @@
                 getEl('xp-bar-fill').style.width = `${(state.points / ptsNeeded) * 100}%`;
             }
 
-            let btnMarket = getEl('btn-market');
+            let btnMarketGen = getEl('btn-market-gen');
             if (state.freeSpins > 0) {
-                btnMarket.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
-                btnMarket.style.background = '#17a2b8';
+                btnMarketGen.innerHTML = `Рынок<span>Бесплатно (${state.freeSpins})</span>`;
+                btnMarketGen.style.background = '#17a2b8';
             } else {
-                btnMarket.innerHTML = `Рынок<span>1 000 ₽</span>`;
-                btnMarket.style.background = '#28a745';
+                btnMarketGen.innerHTML = `Рынок<span>1 000 ₽</span>`;
+                btnMarketGen.style.background = '#28a745';
             }
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
@@ -591,6 +605,30 @@
                         <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
                     </div>
                     <button class="btn-sell-item" data-index="${realIndex}">Продать</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- РЫНОК ---
+        function renderMarket() {
+            let list = getEl('market-list');
+            list.innerHTML = '';
+            if (state.inventory.length === 0) {
+                list.innerHTML = '<div style="text-align:center; margin-top:20px;">На рынке нет ваших номеров.</div>';
+                return;
+            }
+            [...state.inventory].reverse().forEach((item, index) => {
+                let realIndex = state.inventory.length - 1 - index;
+                let rarity = getRarity(item.category);
+                let div = document.createElement('div');
+                div.className = 'market-item';
+                div.innerHTML = `
+                    <div>
+                        <div class="${rarity.cls}" style="font-weight:bold; font-family:monospace;">${item.phone}</div>
+                        <div style="color:#28a745; font-size:14px; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
+                    </div>
+                    <button class="btn-sell-market" data-index="${realIndex}">Продать</button>
                 `;
                 list.appendChild(div);
             });
@@ -693,7 +731,7 @@
             }, 50);
         }
 
-        // 5. КАЗИНО (АПГРЕЙДЕР)
+        // 5. КАЗИНО
         function openCasino() {
             getEl('casino-screen').style.display = 'flex';
             selectedCasinoItemIndex = null;
@@ -832,12 +870,14 @@
 
             // Меню
             if (target.id === 'btn-menu') getEl('side-menu').classList.toggle('open');
+            if (target.id === 'menu-market') { getEl('side-menu').classList.remove('open'); getEl('market-screen').style.display = 'flex'; renderMarket(); }
             if (target.id === 'menu-settings') { getEl('side-menu').classList.remove('open'); getEl('settings-screen').style.display = 'flex'; }
             if (target.id === 'menu-casino') { getEl('side-menu').classList.remove('open'); openCasino(); }
             if (target.id === 'menu-profile') { getEl('side-menu').classList.remove('open'); getEl('profile-screen').style.display = 'flex'; renderProfile(); }
             if (target.id === 'menu-leaderboard') { getEl('side-menu').classList.remove('open'); openLeaderboard(); }
 
             // Закрытия
+            if (target.id === 'btn-close-market') getEl('market-screen').style.display = 'none';
             if (target.id === 'btn-close-settings') getEl('settings-screen').style.display = 'none';
             if (target.id === 'btn-close-bag') getEl('inventory-screen').style.display = 'none';
             if (target.id === 'btn-close-profile') getEl('profile-screen').style.display = 'none';
@@ -848,8 +888,8 @@
             if (target.id === 'btn-open-bag-float') { getEl('inventory-screen').style.display = 'flex'; renderInventory(); }
 
             // Генерация
-            if (['btn-market', 'btn-shop', 'btn-jewelry'].includes(target.id)) {
-                let type = target.id === 'btn-market' ? 1 : target.id === 'btn-shop' ? 5 : 20;
+            if (['btn-market-gen', 'btn-shop-gen', 'btn-jewelry-gen'].includes(target.id)) {
+                let type = target.id === 'btn-market-gen' ? 1 : target.id === 'btn-shop-gen' ? 5 : 20;
                 let cost = type * 1000;
                 
                 if (type === 1 && state.freeSpins > 0) state.freeSpins--;
@@ -874,7 +914,7 @@
                 startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
             }
 
-            // ПРОДАТЬ
+            // ПРОДАТЬ с главного экрана
             if (target.id === 'btn-sell-now') {
                 if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
@@ -883,26 +923,36 @@
                 state.totalSold++;
                 updateUI();
                 
-                // Прячем карточку и кнопки
                 getEl('custom-gen-result').classList.remove('force-show');
                 getEl('custom-gen-result').innerHTML = ''; 
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
-            // ОСТАВИТЬ
+            // ОСТАВИТЬ с главного экрана
             if (target.id === 'btn-keep') {
                 state.inventory.push(state.currentGen);
                 updateUI();
                 
-                // Прячем карточку и кнопки
                 getEl('custom-gen-result').classList.remove('force-show');
                 getEl('custom-gen-result').innerHTML = ''; 
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('gen-buttons-row').style.display = 'flex';
             }
 
-            // Продажа из рюкзака
+            // Продажа из Рынка
+            if (target.classList.contains('btn-sell-market')) {
+                let idx = parseInt(target.getAttribute('data-index'));
+                let item = state.inventory[idx];
+                if (state.useSellWarning && item.price >= state.warnThreshold) {
+                    if (!confirm(`Продать за ${item.price.toLocaleString('ru-RU')} ₽?`)) return;
+                }
+                state.balance += item.price; state.totalSold++; state.inventory.splice(idx, 1);
+                updateUI(); renderMarket();
+                showToast(`✅ Продан номер за ${item.price.toLocaleString('ru-RU')} ₽`);
+            }
+
+            // Продажа из Рюкзака
             if (target.classList.contains('btn-sell-item')) {
                 let idx = parseInt(target.getAttribute('data-index'));
                 let item = state.inventory[idx];
@@ -913,6 +963,7 @@
                 updateUI(); renderInventory();
             }
 
+            // Продать всё из Рюкзака
             if (target.id === 'btn-sell-all') {
                 if (state.inventory.length === 0) return;
                 let total = state.inventory.reduce((sum, item) => sum + item.price, 0);
