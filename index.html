@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор Номеров</title>
     
-    <!-- Подключаем Telegram -->
+    <!-- Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Подключаем Firebase -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
@@ -27,7 +27,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // Экспортируем функции в глобальную область для основного скрипта
         window.fbRef = ref; 
         window.fbSet = set; 
         window.fbOnValue = onValue; 
@@ -226,7 +225,8 @@
             <div id="operator-indicator">Оператор: <span id="current-operator">Неизвестен</span></div>
         </div>
         
-        <button id="btn-open-bag-float">🎒</button>
+        <!-- Счетчик добавлен внутрь кнопки, чтобы не было ошибки -->
+        <button id="btn-open-bag-float">🎒 <span id="bag-count" style="font-size:14px; margin-left:5px;">0</span></button>
 
         <div id="bottom-action-area">
             <div class="shop-buttons-row" id="gen-buttons-row">
@@ -358,7 +358,6 @@
     </div>
 
     <script>
-        // 1. ИНИЦИАЛИЗАЦИЯ
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
@@ -408,7 +407,6 @@
 
         let selectedCasinoItemIndex = null;
 
-        // 2. ФУНКЦИИ СОХРАНЕНИЯ
         function saveData() {
             localStorage.setItem('blum_balance', state.balance);
             localStorage.setItem('blum_inventory', JSON.stringify(state.inventory));
@@ -427,19 +425,22 @@
             localStorage.setItem('blum_animation', state.isAnimationEnabled);
             localStorage.setItem('blum_user_name', myName);
 
-            if (window.db && window.fbSet && window.fbRef && myId) {
-                window.fbSet(window.fbRef(window.db, 'players/' + myId), {
-                    name: myName, balance: state.balance, level: state.level, points: state.points,
-                    inventory: state.inventory, bestNumber: state.bestNumber,
-                    totalGenerated: state.totalGenerated, totalSold: state.totalSold,
-                    maxBalance: state.maxBalance, lastSeen: Date.now()
-                });
+            try {
+                if (window.db && window.fbSet && window.fbRef && myId) {
+                    window.fbSet(window.fbRef(window.db, 'players/' + myId), {
+                        name: myName, balance: state.balance, level: state.level, points: state.points,
+                        inventory: state.inventory, bestNumber: state.bestNumber,
+                        totalGenerated: state.totalGenerated, totalSold: state.totalSold,
+                        maxBalance: state.maxBalance, lastSeen: Date.now()
+                    });
+                }
+            } catch (e) {
+                console.log("Ошибка сохранения в облако", e);
             }
         }
 
         const getEl = (id) => document.getElementById(id);
 
-        // 3. ЛОГИКА РЕДКОСТИ И ЦЕНЫ
         function getRarity(category) {
             if (category.includes("БРИЛЛИАНТОВЫЙ")) return { cls: "rarity-diamond", xp: 1000 };
             if (category.includes("ЗОЛОТОЙ")) return { cls: "rarity-gold", xp: 150 };
@@ -530,12 +531,12 @@
             checkBoost();
         }
 
-        // 4. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
         function updateUI() {
             getEl('balance-display').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
             getEl('inv-balance-amount').innerText = state.balance.toLocaleString('ru-RU') + ' ₽';
-            getEl('bag-count').innerText = state.inventory.length;
+            getEl('bag-count').innerText = state.inventory.length; // Теперь этот элемент существует
             getEl('lvl-text').innerText = `Уровень: ${state.level}`;
+            
             if (state.balance > state.maxBalance) state.maxBalance = state.balance;
             
             let ptsNeeded = state.level * 100;
@@ -804,7 +805,7 @@
                     }
                 }
                 players.sort((a, b) => b.balance - a.balance);
-                players = players.slice(0, 50); // Топ 50
+                players = players.slice(0, 50);
 
                 list.innerHTML = '';
                 if(players.length === 0) { list.innerHTML = 'Пока нет игроков.'; return; }
@@ -824,7 +825,7 @@
             });
         }
 
-        // 7. ОБРАБОТЧИКИ СОБЫТИЙ (Делегирование)
+        // 7. ОБРАБОТЧИКИ СОБЫТИЙ
         document.addEventListener('click', function(e) {
             let target = e.target.closest('button, .info-icon, .menu-item');
             if (!target) return;
@@ -873,19 +874,30 @@
                 startGenerationAnimation(phone, rarity.cls, evalData.price, evalData.category, earnedXP);
             }
 
-            // Продать/Оставить
+            // ПРОДАТЬ
             if (target.id === 'btn-sell-now') {
                 if (state.useSellWarning && state.currentGen.price >= state.warnThreshold) {
                     if (!confirm(`Продать за ${state.currentGen.price.toLocaleString('ru-RU')} ₽?`)) return;
                 }
-                state.balance += state.currentGen.price; state.totalSold++;
+                state.balance += state.currentGen.price; 
+                state.totalSold++;
                 updateUI();
+                
+                // Прячем карточку и кнопки
+                getEl('custom-gen-result').classList.remove('force-show');
+                getEl('custom-gen-result').innerHTML = ''; 
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('gen-buttons-row').style.display = 'flex';
             }
+
+            // ОСТАВИТЬ
             if (target.id === 'btn-keep') {
                 state.inventory.push(state.currentGen);
                 updateUI();
+                
+                // Прячем карточку и кнопки
+                getEl('custom-gen-result').classList.remove('force-show');
+                getEl('custom-gen-result').innerHTML = ''; 
                 getEl('action-btns-wrapper').style.display = 'none';
                 getEl('gen-buttons-row').style.display = 'flex';
             }
@@ -915,7 +927,7 @@
             if (target.id === 'btn-do-upgrade') doUpgrade();
         });
 
-        // 8. СЛУШАТЕЛИ ИЗМЕНЕНИЙ (Настройки)
+        // 8. СЛУШАТЕЛИ ИЗМЕНЕНИЙ
         document.getElementById('btn-sync-email').addEventListener('click', () => {
             let email = document.getElementById('sync-email-input').value.trim().toLowerCase();
             if (!email || !email.includes('@')) { showToast("❌ Неверный Email!"); return; }
