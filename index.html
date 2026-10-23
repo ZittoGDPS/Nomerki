@@ -78,7 +78,7 @@
         #custom-gen-result { display: none; position: relative; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .force-show { display: block !important; }
         
-        /* Исправленная иконка info */
+        /* Иконка info */
         .info-icon { 
             position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; 
             background: #0088cc; color: white; border-radius: 50%; 
@@ -147,6 +147,17 @@
         .btn-list-item { background: #ffc107; color: #1e1e1e; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-sell-market { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
+        /* АНИМАЦИЯ ПРОДАЖИ НА РЫНКЕ */
+        @keyframes sellAnim {
+            0% { transform: scale(1); opacity: 1; }
+            40% { transform: scale(0.95) rotate(-2deg); background-color: rgba(40, 167, 69, 0.2); }
+            100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+        }
+        .selling-anim {
+            animation: sellAnim 0.5s forwards;
+            pointer-events: none;
+        }
+
         /* Настройки */
         #settings-content { padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; background: var(--card-bg); }
@@ -177,10 +188,22 @@
         .casino-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #333; }
         .casino-body { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         .casino-inventory-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .casino-inv-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; cursor: pointer; }
+        .casino-inv-item { background: #222; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
         .casino-inv-item.selected { border-color: #ffcc00; background: #333; }
         .casino-inv-item .num { font-family: monospace; font-size: 16px; font-weight: bold; }
         .casino-inv-item .prc { color: #28a745; font-weight: bold; }
+        
+        /* АНИМАЦИЯ СГОРАНИЯ В АПГРЕЙДЕРЕ */
+        @keyframes burnAnim {
+            0% { transform: scale(1); opacity: 1; filter: none; border-color: #ffcc00; background: #333; }
+            30% { transform: scale(1.05) rotate(2deg); filter: sepia(1) hue-rotate(-50deg) saturate(5); border-color: #ff0000; background: #3a0000; color: #ff0000; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+        .burning-anim {
+            animation: burnAnim 0.6s forwards;
+            pointer-events: none;
+        }
+
         .casino-controls { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; }
         .casino-input-group { display: flex; align-items: center; gap: 10px; }
         .casino-input { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
@@ -209,7 +232,7 @@
         .leader-item.top3 { background: linear-gradient(135deg, #fbe9e7, #cd7f32) !important; color: #1a1a1a !important; border: 2px solid #a0522d; box-shadow: 0 0 10px rgba(205, 127, 50, 0.6); }
         .leader-item.top3 .leader-avatar { background: #8b4513; }
 
-        /* Анимации */
+        /* Анимации карточек */
         @keyframes shakeScreen {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -1188,16 +1211,30 @@
 
                         resultText.innerText = `🎉 УСПЕХ! Номер улучшен до ${targetPrice.toLocaleString('ru-RU')} ₽`;
                         resultText.style.color = "#00ff00";
+                        
+                        updateUI();
+                        renderInventory();
+                        openCasino(); // Обновляем список в случае успеха
                     } else {
-                        state.inventory.splice(selectedCasinoItemIndex, 1);
+                        // Анимация сгорания
+                        let casinoItemDiv = getEl('casino-inventory-list').querySelector('.casino-inv-item.selected');
+                        if (casinoItemDiv) {
+                            casinoItemDiv.classList.add('burning-anim');
+                        }
+
                         resultText.innerText = `😢 ПРОВАЛ... Номер сгорел.`;
                         resultText.style.color = "#dc3545";
                         getEl('casino-controls').style.display = 'none';
-                        selectedCasinoItemIndex = null;
+
+                        // Ждем окончания анимации и удаляем
+                        setTimeout(() => {
+                            state.inventory.splice(selectedCasinoItemIndex, 1);
+                            selectedCasinoItemIndex = null;
+                            updateUI();
+                            renderInventory();
+                            openCasino(); // Обновляем список в случае проигрыша (номер пропадает)
+                        }, 600);
                     }
-                    updateUI();
-                    renderInventory();
-                    if (selectedCasinoItemIndex !== null) openCasino();
                 }, 1000);
             }
 
@@ -1299,21 +1336,31 @@
                     if (listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
 
                     if (window.db && window.fbRef && window.fbSet) {
-                        state.inventory.splice(idx, 1);
-                        updateUI();
-                        renderInventory();
+                        // АНИМАЦИЯ ПРОДАЖИ
+                        let itemDiv = target.closest('.inv-item');
+                        if (itemDiv) {
+                            itemDiv.classList.add('selling-anim');
+                        }
+                        target.disabled = true;
+                        target.innerText = "Продажа...";
 
-                        let newRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
-                        window.fbSet(newRef, {
-                            phone: item.phone,
-                            price: listingPrice,
-                            category: item.category,
-                            chance: item.chance,
-                            sellerId: myId,
-                            sellerName: myName,
-                            timestamp: Date.now()
-                        });
-                        showToast(`✅ Лот выставлен на рынок!`);
+                        setTimeout(() => {
+                            state.inventory.splice(idx, 1);
+                            updateUI();
+                            renderInventory();
+
+                            let newRef = window.fbRef(window.db, 'market/' + Date.now() + '_' + myId);
+                            window.fbSet(newRef, {
+                                phone: item.phone,
+                                price: listingPrice,
+                                category: item.category,
+                                chance: item.chance,
+                                sellerId: myId,
+                                sellerName: myName,
+                                timestamp: Date.now()
+                            });
+                            showToast(`✅ Лот выставлен на рынок!`);
+                        }, 500); // Ждем окончания анимации
                     } else { showToast("❌ Ошибка подключения."); }
                 }
 
