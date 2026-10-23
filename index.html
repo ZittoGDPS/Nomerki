@@ -407,13 +407,12 @@
 
             <div class="profile-section">
                 <h3>🎲 Шансы выпадения</h3>
-                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>0.00001% - 0.1%</span></div>
-                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>0.03% - 5%</span></div>
-                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>5% - 10%</span></div>
-                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>~1%</span></div>
-                <div class="profile-row"><span class="rarity-common">Зеркальный:</span> <span>0.001%</span></div>
+                <div class="profile-row"><span class="rarity-diamond">Бриллиантовый:</span> <span>до 0.1%</span></div>
+                <div class="profile-row"><span class="rarity-gold">Золотой:</span> <span>до 10%</span></div>
+                <div class="profile-row"><span class="rarity-silver">Серебряный:</span> <span>до 20%</span></div>
+                <div class="profile-row"><span class="rarity-bronze">Бронзовый:</span> <span>до 30%</span></div>
                 <div class="profile-row"><span class="rarity-common">Обычный:</span> <span>Остальное</span></div>
-                <div style="font-size:11px; color:#888; margin-top:10px; text-align:center;">* Точный шанс зависит от кнопки генерации</div>
+                <div style="font-size:11px; color:#888; margin-top:10px; text-align:center;">* Шансы зависят от режима:<br>Рынок (от 150 ₽) / Магазин (от 1 250 ₽) / Ювелирный (от 10 000 ₽)</div>
             </div>
         </div>
     </div>
@@ -715,32 +714,79 @@
                 return { cls: "rarity-common", xp: 5 };
             }
 
+            // --- НОВАЯ ЛОГИКА ГЕНЕРАЦИИ ЦЕН ---
             function calculatePrice(fullNum, type) {
-                let price = 150, category = "Обычный", chance = "100%";
-                let rand = Math.random() * 100;
-                
-                if (type === 1) {
-                    if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.00001%"; }
-                    else if (rand < 5) { price = 100000; category = "СЕРЕБРЯНЫЙ"; chance = "5%"; }
-                } else if (type === 5) {
-                    if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.0001%"; }
-                    else if (rand < 10) { price = 100000; category = "СЕРЕБРЯНЫЙ"; chance = "10%"; }
-                } else if (type === 20) {
-                    if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.1%"; }
-                    else if (rand < 5) { price = 1000000; category = "ЗОЛОТОЙ"; chance = "5%"; }
+                let minPrice = 150;
+                if (type === 5) minPrice = 1250;
+                if (type === 20) minPrice = 10000;
+
+                let price = minPrice;
+                let category = "Обычный";
+                let chance = "Высокий";
+
+                let last4 = fullNum.slice(-4);
+                let isMirror = fullNum === fullNum.split('').reverse().join('');
+                let isSeq = fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876");
+                let isTriple = /(\d)\1{2}/.test(fullNum);
+                let isDoubleDouble = last4[0] === last4[1] && last4[2] === last4[3];
+                let isJackpot = last4 === "7777" || last4 === "8888" || last4 === "0000";
+                let isNiceEnd = fullNum.slice(-2)[0] === fullNum.slice(-2)[1];
+
+                // 1. ПРОВЕРКА ПАТТЕРНОВ (накладываются поверх базовой цены)
+                if (isJackpot) {
+                    category = "ЗОЛОТОЙ";
+                    price = 5000000 + Math.floor(Math.random() * 5000000);
+                    chance = "0.03%";
+                } else if (isTriple) {
+                    category = "СЕРЕБРЯНЫЙ";
+                    price = 150000 + Math.floor(Math.random() * 100000);
+                    chance = "0.1%";
+                } else if (isMirror) {
+                    category = "ЗЕРКАЛЬНЫЙ";
+                    price = 300000 + Math.floor(Math.random() * 200000);
+                    chance = "0.001%";
+                } else if (isDoubleDouble) {
+                    category = "БРОНЗОВЫЙ";
+                    price = 50000 + Math.floor(Math.random() * 30000);
+                    chance = "1%";
+                } else if (isSeq) {
+                    category = "ПОСЛЕДОВАТЕЛЬНЫЙ";
+                    price = 100000 + Math.floor(Math.random() * 50000);
+                    chance = "0.5%";
+                } else if (isNiceEnd) {
+                    category = "КРАСИВОЕ ОКОНЧАНИЕ";
+                    price = 5000 + Math.floor(Math.random() * 3000);
+                    chance = "10%";
+                } else {
+                    // 2. РАНДОМ (если паттерн не выпал)
+                    let rand = Math.random() * 100;
+                    
+                    if (type === 1) { // Рынок (от 150)
+                        if (rand < 0.00001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.00001%"; }
+                        else if (rand < 0.1) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "0.1%"; }
+                        else if (rand < 2.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "1.9%"; }
+                        else if (rand < 10.0) { price = 10000 + Math.floor(Math.random() * 40000); category = "БРОНЗОВЫЙ"; chance = "8%"; }
+                        else { price = 150 + Math.floor(Math.random() * 5000); category = "Обычный"; chance = "~90%"; }
+                    } else if (type === 5) { // Магазин (от 1250)
+                        if (rand < 0.0001) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.0001%"; }
+                        else if (rand < 1.0) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "0.9%"; }
+                        else if (rand < 10.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "9%"; }
+                        else if (rand < 30.0) { price = 10000 + Math.floor(Math.random() * 40000); category = "БРОНЗОВЫЙ"; chance = "20%"; }
+                        else { price = 1250 + Math.floor(Math.random() * 8000); category = "Обычный"; chance = "~70%"; }
+                    } else if (type === 20) { // Ювелирный (от 10000)
+                        if (rand < 0.1) { price = 1000000000; category = "БРИЛЛИАНТОВЫЙ"; chance = "0.1%"; }
+                        else if (rand < 10.0) { price = 1000000 + Math.floor(Math.random() * 9000000); category = "ЗОЛОТОЙ"; chance = "9.9%"; }
+                        else if (rand < 30.0) { price = 100000 + Math.floor(Math.random() * 400000); category = "СЕРЕБРЯНЫЙ"; chance = "20%"; }
+                        else if (rand < 60.0) { price = 50000 + Math.floor(Math.random() * 50000); category = "БРОНЗОВЫЙ"; chance = "30%"; }
+                        else { price = 10000 + Math.floor(Math.random() * 40000); category = "Обычный"; chance = "~40%"; }
+                    }
                 }
 
-                if (category === "Обычный") {
-                    let last4 = fullNum.slice(-4);
-                    if (last4 === "7777" || last4 === "8888" || last4 === "0000") { price = 5000000; category = "ЗОЛОТОЙ"; chance = "0.03%"; }
-                    else if (/(\d)\1{2}/.test(fullNum)) { price = 150000; category = "СЕРЕБРЯНЫЙ"; chance = "0.1%"; }
-                    else if (fullNum === fullNum.split('').reverse().join('')) { price = 300000; category = "ЗЕРКАЛЬНЫЙ"; chance = "0.001%"; }
-                    else if (last4[0] === last4[1] && last4[2] === last4[3]) { price = 50000; category = "БРОНЗОВЫЙ"; chance = "1%"; }
-                    else if (fullNum.includes("1234") || fullNum.includes("5678") || fullNum.includes("9876")) { price = 100000; category = "ПОСЛЕДОВАТЕЛЬНЫЙ"; chance = "0.5%"; }
-                    else if (fullNum.slice(-2)[0] === fullNum.slice(-2)[1]) { price = 5000; category = "КРАСИВОЕ ОКОНЧАНИЕ"; chance = "10%"; }
-                    
-                    if (price > 150) price += Math.floor(Math.random() * (price * 0.1)); 
-                }
+                // ФИНАЛЬНАЯ ПРОВЕРКА МИНИМУМА (защита от просадки паттернов на дешевых режимах)
+                if (price < minPrice) price = minPrice;
+                // ФИНАЛЬНАЯ ПРОВЕРКА МАКСИМУМА
+                if (price > 1000000000) price = 1000000000;
+
                 return { price, category, chance };
             }
 
@@ -1214,25 +1260,21 @@
                         
                         updateUI();
                         renderInventory();
-                        openCasino(); // Обновляем список в случае успеха
+                        openCasino();
                     } else {
-                        // Анимация сгорания
                         let casinoItemDiv = getEl('casino-inventory-list').querySelector('.casino-inv-item.selected');
-                        if (casinoItemDiv) {
-                            casinoItemDiv.classList.add('burning-anim');
-                        }
+                        if (casinoItemDiv) casinoItemDiv.classList.add('burning-anim');
 
                         resultText.innerText = `😢 ПРОВАЛ... Номер сгорел.`;
                         resultText.style.color = "#dc3545";
                         getEl('casino-controls').style.display = 'none';
 
-                        // Ждем окончания анимации и удаляем
                         setTimeout(() => {
                             state.inventory.splice(selectedCasinoItemIndex, 1);
                             selectedCasinoItemIndex = null;
                             updateUI();
                             renderInventory();
-                            openCasino(); // Обновляем список в случае проигрыша (номер пропадает)
+                            openCasino();
                         }, 600);
                     }
                 }, 1000);
@@ -1240,7 +1282,6 @@
 
             // 10. ОБРАБОТЧИКИ
             document.addEventListener('click', function(e) {
-                // ℹ️ Иконка «i» — ловим клик надежно
                 if (e.target.closest('.info-icon')) {
                     openInfo();
                     return;
@@ -1336,11 +1377,8 @@
                     if (listingPrice < 100) { showToast("Минимальная цена: 100 ₽"); return; }
 
                     if (window.db && window.fbRef && window.fbSet) {
-                        // АНИМАЦИЯ ПРОДАЖИ
                         let itemDiv = target.closest('.inv-item');
-                        if (itemDiv) {
-                            itemDiv.classList.add('selling-anim');
-                        }
+                        if (itemDiv) itemDiv.classList.add('selling-anim');
                         target.disabled = true;
                         target.innerText = "Продажа...";
 
@@ -1360,7 +1398,7 @@
                                 timestamp: Date.now()
                             });
                             showToast(`✅ Лот выставлен на рынок!`);
-                        }, 500); // Ждем окончания анимации
+                        }, 500);
                     } else { showToast("❌ Ошибка подключения."); }
                 }
 
