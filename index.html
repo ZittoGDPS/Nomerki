@@ -192,7 +192,8 @@
     <div id="game-wrapper">
         <div id="top-bar">
             <div id="profile-box">
-                <div id="user-name-display">Загрузка...</div>
+                <!-- Убрали "Загрузка...", теперь имя сразу ставится из локальной памяти -->
+                <div id="user-name-display">Игрок</div>
                 <div id="lvl-text">Уровень: 1</div>
                 <div id="pts-text">Поинты: 0 / 100</div>
                 <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
@@ -341,17 +342,16 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.ready(); tg.expand(); }
 
-        let myName = "Игрок";
+        // 1. МГНОВЕННАЯ ИНИЦИАЛИЗАЦИЯ ID (без ожидания)
+        let myName = localStorage.getItem('blum_user_name') || "Игрок";
         let myId = null;
         let isBrowser = false;
 
-        // 1. ПЕРВИЧНАЯ ИНИЦИАЛИЗАЦИЯ ID
         const urlParams = new URLSearchParams(window.location.search);
         const urlUserId = urlParams.get('user_id');
 
         if (urlUserId) {
             myId = urlUserId;
-            myName = "Игрок (Ссылка)";
         } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             myName = tg.initDataUnsafe.user.first_name || "Игрок";
             myId = tg.initDataUnsafe.user.id.toString();
@@ -363,18 +363,18 @@
                 localStorage.setItem('blum_browser_id', savedBrowserId);
             }
             myId = savedBrowserId;
-            myName = "Гость";
         }
 
-        // Проверяем, входил ли он уже по Email
+        // Проверяем Email
         let savedEmailId = localStorage.getItem('blum_email_id');
         if (savedEmailId) {
             myId = savedEmailId;
-            myName = "Игрок (Email)";
+            myName = localStorage.getItem('blum_user_name') || "Игрок (Email)";
         }
 
         const viewPlayerId = urlParams.get('player');
 
+        // 2. МГНОВЕННАЯ ЗАГРУЗКА ЛОКАЛЬНЫХ ДАННЫХ
         let state = {
             balance: parseInt(localStorage.getItem('blum_balance')) || 0,
             inventory: JSON.parse(localStorage.getItem('blum_inventory')) || [],
@@ -413,6 +413,7 @@
             localStorage.setItem('blum_free_spins', state.freeSpins);
             localStorage.setItem('blum_operator', state.currentOperator);
             localStorage.setItem('blum_animation', state.isAnimationEnabled);
+            localStorage.setItem('blum_user_name', myName);
 
             if (window.db && window.fbSet && window.fbRef && myId) {
                 window.fbSet(window.fbRef(window.db, 'players/' + myId), {
@@ -551,6 +552,8 @@
 
             getEl('current-operator').innerText = state.currentOperator || "Неизвестен";
             getEl('toggle-animation').checked = state.isAnimationEnabled;
+            
+            // Устанавливаем имя сразу, без "Загрузка..."
             document.getElementById('user-name-display').innerText = myName;
 
             let btnAll = getEl('btn-sell-all');
@@ -886,13 +889,11 @@
             }
         });
 
-        // Инициализация
+        // МГНОВЕННЫЙ ЗАПУСК БЕЗ ОЖИДАНИЯ
         document.getElementById('user-name-display').innerText = myName;
-
-        // МГНОВЕННЫЙ ЗАПУСК
         updateUI();
 
-        // Асинхронная загрузка из Firebase (без блокировки интерфейса)
+        // АСИНХРОННАЯ ЗАГРУЗКА ИЗ FIREBASE (в фоне)
         if (window.db && window.fbOnValue && window.fbRef && !viewPlayerId) {
             window.fbOnValue(window.fbRef(window.db, 'players/' + myId), (snapshot) => {
                 const data = snapshot.val();
