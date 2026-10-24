@@ -23,7 +23,11 @@
 .list-item.top2 b,.list-item.top2 .small,.list-item.top2 .item-price,.list-item.top2 button{color:#1a1a1a!important}
 .list-item.top3{background:linear-gradient(135deg,#fbe9e7,#cd7f32)!important;color:#1a1a1a!important;border:2px solid #a0522d;box-shadow:0 0 10px rgba(205,127,50,.6)}
 .list-item.top3 b,.list-item.top3 .small,.list-item.top3 .item-price,.list-item.top3 button{color:#1a1a1a!important}
-.item-main{min-width:0;flex:1}.item-phone{font-weight:800;overflow-wrap:anywhere}.item-price{color:var(--green);font-size:13px;font-weight:750;margin-top:4px}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.mini{padding:9px 11px;border-radius:10px;background:#29303e;color:#fff;font-size:12px;font-weight:750}.mini.green{background:#197848}.mini.red{background:#8d3039}.mini.blue{background:#236b9e}.wide{width:100%;padding:14px;border-radius:13px;background:var(--blue);color:#fff;font-weight:800;margin-top:10px}.wide.red{background:var(--red)}.wide.green{background:var(--green)}.input{width:100%;background:#0e1016;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;margin:5px 0 10px}.wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.slot{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px;min-height:135px;display:flex;flex-direction:column;gap:8px}.slot.empty{border-style:dashed}.slot small{color:var(--muted)}.slot .mini{margin-top:auto}.toast{position:fixed;z-index:100;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,25px);width:min(calc(100% - 34px),480px);padding:14px 17px;border-radius:14px;background:#f4f6fa;color:#14161c;font-weight:700;box-shadow:0 12px 40px #0008;opacity:0;pointer-events:none;transition:.25s var(--ease);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.switch{display:flex;align-items:center;gap:10px}.switch input{width:20px;height:20px;accent-color:var(--blue)}.empty-hint{text-align:center;color:var(--muted);padding:35px 10px;line-height:1.6}.tabs{display:flex;gap:8px;margin-bottom:12px}.tab{flex:1;padding:11px;background:var(--panel);color:var(--text);border-radius:11px}.tab.active{background:var(--blue)}.light{--bg:#eef1f5;--panel:#fff;--panel2:#f3f4f7;--text:#171922;--muted:#697080;--line:#dfe3e9}.light .pill,.light .empty{background:var(--panel)}.light .menu,.light .input{background:var(--panel)}
+.item-main{min-width:0;flex:1}.item-phone{font-weight:800;overflow-wrap:anywhere}.item-price{color:var(--green);font-size:13px;font-weight:750;margin-top:4px}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.mini{padding:9px 11px;border-radius:10px;background:#29303e;color:#fff;font-size:12px;font-weight:750}.mini.green{background:#197848}.mini.red{background:#8d3039}.mini.blue{background:#236b9e}.wide{width:100%;padding:14px;border-radius:13px;background:var(--blue);color:#fff;font-weight:800;margin-top:10px}.wide.red{background:var(--red)}.wide.green{background:var(--green)}.input{width:100%;background:#0e1016;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;margin:5px 0 10px}.wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.slot{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px;min-height:135px;display:flex;flex-direction:column;gap:8px}.slot.empty{border-style:dashed}.slot small{color:var(--muted)}.slot .mini{margin-top:auto}.toast{position:fixed;z-index:100;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,25px);width:min(calc(100% - 34px),480px);padding:14px 17px;border-radius:14px;background:#f4f6fa;color:#14161c;font-weight:700;box-shadow:0 12px 40px #0008;opacity:0;pointer-events:none;transition:.25s var(--ease);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.switch{display:flex;align-items:center;gap:10px}.switch input{width:20px;height:20px;accent-color:var(--blue)}.empty-hint{text-align:center;color:var(--muted);padding:35px 10px;line-height:1.6}
+.tabs-row{display:flex;gap:8px;margin-bottom:12px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:var(--panel);color:var(--text);font-weight:bold;cursor:pointer;font-size:13px;border:1px solid var(--line);}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.light{--bg:#eef1f5;--panel:#fff;--panel2:#f3f4f7;--text:#171922;--muted:#697080;--line:#dfe3e9}.light .pill,.light .empty{background:var(--panel)}.light .menu,.light .input{background:var(--panel)}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}@keyframes sheetIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media(max-width:390px){.app{padding-left:13px;padding-right:13px}.balance{font-size:29px}.pill{padding:8px;font-size:12px}.sim-card{padding:23px 19px}.sim-chip{width:91px;height:82px}.phone{font-size:25px}.operator{font-size:24px}.game{min-height:310px}.bag{width:61px}.buy,.sell,.keep{font-size:15px}}
 @media(min-width:700px){body{background:#030407}.app{border-left:1px solid #171922;border-right:1px solid #171922}}
@@ -56,11 +60,22 @@
 </main>
 <div class="scrim" id="scrim"></div>
 <aside class="menu" id="menu" aria-label="Меню"><div class="menu-head"><b>Simkarta</b><button class="icon-btn" id="menuClose" aria-label="Закрыть">✕</button></div>
-<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Лидерборд</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button>
+<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Топ игроков</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button>
 <button data-open="admin" id="adminMenuBtn" style="display:none; color: var(--gold);"><span>👑</span>Админ-панель</button>
 <div class="cloud-status" id="cloudStatus">Локальное сохранение включено.</div></aside>
 <section class="sheet" id="sheet" aria-hidden="true"><header class="sheet-head"><h2 id="sheetTitle"></h2><button class="close" id="sheetClose">Закрыть</button></header><div class="sheet-body" id="sheetBody"></div></section>
 <div class="toast" id="toast" role="status"></div>
+
+<!-- Баннер входящей заявки -->
+<div id="reqBanner" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--blue); color:white; padding:15px; border-radius:15px; z-index:1000; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.5); text-align:center;">
+    <div style="font-weight:bold; margin-bottom:10px;">Заявка в друзья</div>
+    <div id="reqBannerText" style="margin-bottom:15px;"></div>
+    <div style="display:flex; gap:10px;">
+        <button class="wide green" style="margin:0; padding:10px;" onclick="approveFirstRequest()">Одобрить</button>
+        <button class="wide red" style="margin:0; padding:10px;" onclick="declineFirstRequest()">Отклонить</button>
+    </div>
+</div>
+
 <script>
 'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -76,10 +91,10 @@ const phoneKey=s=>{let d=digits(s);if(d.length===11&&'78'.includes(d[0]))d=d.sli
 const list=v=>Array.isArray(v)?v:Object.values(v||{});
 function cleanItem(x){if(!x?.phone)return null;return{phone:String(x.phone),price:Math.max(0,Math.floor(finite(x.price))),category:String(x.category||'Обычный'),chance:String(x.chance||''),reasons:Array.isArray(x.reasons)?x.reasons.map(String):[],lvl:Math.max(0,Math.min(5,Math.floor(finite(x.lvl))))}}
 function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(finite(w?.slotsUnlocked,1)))),items:Array.from({length:10},(_,i)=>cleanItem(w?.items?.[i])),lastTick:finite(w?.lastTick,Date.now())}}
-function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~50%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
+function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~50%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
 let isNewStarter = false;
-function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
-let state=loadState(), busy=false, currentView='', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, genToken=0;
+function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
+let state=loadState(), busy=false, currentView='', friendsTab='list', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, unsubFriendReqs=null, unsubFriendAcc=null, genToken=0, currentReqBannerId=null;
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('blum_email_id')||localStorage.getItem('blum_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
 let myName=tg?.initDataUnsafe?.user?.first_name||localStorage.getItem('blum_user_name')||'Игрок';
@@ -153,10 +168,52 @@ function casinoHTML(){const it=state.inventory[casinoIndex];return`<div class="s
 function bestBlock(){const b=state.bestNumber;return b?`<div class="section"><h3>Лучший номер</h3>${itemRow(b,0)}</div>`:''}
 function profileHTML(){const inv=state.inventory.reduce((s,x)=>s+x.price,0);return`${bestBlock()}<div class="section"><h3>Прогресс</h3>${[['Уровень',state.level],['Опыт',`${state.points} / ${state.level*100}`],['Баланс',money(state.balance)],['Максимальный баланс',money(state.maxBalance)],['Сгенерировано',fmt(state.totalGenerated)],['Продано',fmt(state.totalSold)],['Стоимость рюкзака',money(inv)]].map(x=>`<div class="row"><span>${x[0]}</span><span>${x[1]}</span></div>`).join('')}</div><div class="section"><h3>Публичный профиль</h3><label class="small muted">Юзернейм</label><input class="input" id="username" value="${esc(state.username)}" placeholder="@username" maxlength="33" autocomplete="off"><button class="wide" data-action="save-username">Сохранить юзернейм</button><p class="small muted">Номер, по которому друзья смогут найти вас:</p><button class="wide green" data-action="profile-number">Выбрать из рюкзака</button>${state.profileNumber?`<div class="row"><span>${esc(state.profileNumber)}</span><button class="mini red" data-action="clear-profile-number">Убрать</button></div>`:''}</div>`}
 function settingsHTML(){const s=state.settings;return`<div class="section"><h3>Интерфейс</h3><label class="row"><span>Светлая тема</span><span class="switch"><input id="setTheme" type="checkbox" ${s.theme==='light'?'checked':''}></span></label><label class="row"><span>Анимация</span><span class="switch"><input id="setAnimation" type="checkbox" ${s.animation?'checked':''}></span></label><label class="row"><span>Звуки</span><span class="switch"><input id="setSound" type="checkbox" ${s.sound?'checked':''}></span></label></div><div class="section"><h3>Продажа</h3><label class="row"><span>Предупреждать о дорогих номерах</span><input id="setWarn" type="checkbox" ${s.warn?'checked':''}></label><label class="small muted">Порог предупреждения, ₽</label><input class="input" id="setWarnAt" type="number" min="0" value="${s.warnAt}"></div><div class="section"><h3>Синхронизация по Email</h3><p class="small muted">Email используется как идентификатор сохранения. Это не парольная авторизация.</p><input class="input" id="syncEmail" type="email" placeholder="your@mail.com" autocomplete="email"><button class="wide" data-action="sync-email">Загрузить / привязать</button></div><div class="section"><button class="wide red" data-action="reset">Сбросить прогресс</button></div>`}
-function personRow(id,p,i=0){const rc=i===1?'top1':i===2?'top2':i===3?'top3':'';return`<div class="list-item ${rc}"><button class="item-main" style="background:none;color:inherit;text-align:left" data-player="${esc(id)}"><b>${i?`#${i} `:''}${esc(p?.name||'Игрок')}${id===myId?' (Вы)':''}</b><div class="small muted">${p?.username?'@'+esc(p.username)+' · ':''}ур. ${p?.level||1}</div></button><div class="item-price">${money(p?.balance)}</div>${id!==myId&&currentView==='friends'?`<button class="mini red" data-friend-remove="${esc(id)}">✕</button>`:''}</div>`}
-function friendsHTML(){return`<div class="section"><label class="small muted">@юзернейм или номер из профиля</label><input class="input" id="friendQuery" placeholder="@username"><button class="wide" data-action="friend-add">Добавить друга</button></div><div class="section">${state.friends.length?friendCache.map(x=>personRow(x.id,x.p)).join(''):'<div class="empty-hint">Добавьте друга, чтобы сравнивать прогресс.</div>'}</div>`}
+function personRow(id,p,i=0,showRemove=false){const rc=i===1?'top1':i===2?'top2':i===3?'top3':'';return`<div class="list-item ${rc}"><button class="item-main" style="background:none;color:inherit;text-align:left" data-player="${esc(id)}"><b>${i?`#${i} `:''}${esc(p?.name||'Игрок')}${id===myId?' (Вы)':''}</b><div class="small muted">${p?.username?'@'+esc(p.username)+' · ':''}ур. ${p?.level||1}</div></button><div class="item-price">${money(p?.balance)}</div>${showRemove&&id!==myId?`<button class="mini red" data-friend-remove="${esc(id)}">✕</button>`:''}</div>`}
+
+function friendsHTML(){
+    let html = `<div class="tabs-row">
+        <button class="tab-btn ${friendsTab==='list'?'active':''}" onclick="setFriendsTab('list')">👥 Друзья</button>
+        <button class="tab-btn ${friendsTab==='leaderboard'?'active':''}" onclick="setFriendsTab('leaderboard')">🏆 Рейтинг</button>
+        <button class="tab-btn ${friendsTab==='requests'?'active':''}" onclick="setFriendsTab('requests')">📩 Заявки ${Object.keys(state.incomingReqs||{}).length ? '('+Object.keys(state.incomingReqs||{}).length+')' : ''}</button>
+    </div>`;
+
+    if (friendsTab === 'list') {
+        html += `<div class="section"><label class="small muted">@юзернейм или номер из профиля</label><input class="input" id="friendQuery" placeholder="@username"><button class="wide" data-action="friend-add">Отправить заявку</button></div>`;
+        html += `<div class="section">${state.friends.length?friendCache.map(x=>personRow(x.id,x.p, 0, true)).join(''):'<div class="empty-hint">Добавьте друга, чтобы сравнивать прогресс.</div>'}</div>`;
+    } else if (friendsTab === 'leaderboard') {
+        let all = friendCache.filter(x=>x.p).map(x=>({id:x.id, p:x.p}));
+        if (!all.find(x=>x.id === myId)) {
+            all.push({ id: myId, p: publicProfile() });
+        }
+        all.sort((a,b) => (b.p.balance||0) - (a.p.balance||0));
+        html += `<div class="section">${all.map((x,i) => personRow(x.id, x.p, i+1, false)).join('')}</div>`;
+    } else if (friendsTab === 'requests') {
+        const reqIds = Object.keys(state.incomingReqs || {});
+        if (reqIds.length === 0) {
+            html += `<div class="empty-hint">Нет входящих заявок.</div>`;
+        } else {
+            html += `<div class="section">`;
+            reqIds.forEach(id => {
+                const req = state.incomingReqs[id];
+                html += `<div class="list-item">
+                    <div class="item-main">
+                        <b>@${esc(req.senderName)}</b>
+                        <div class="small muted">Хочет добавить вас в друзья</div>
+                    </div>
+                    <div class="actions">
+                        <button class="mini green" onclick="approveRequest('${id}')">✅</button>
+                        <button class="mini red" onclick="declineRequest('${id}')">❌</button>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
+    }
+    return html;
+}
+
 function marketHTML(){return`<div id="marketList">${marketCache===null?'<div class="empty-hint">Загрузка…</div>':marketCache.length?marketCache.map(it=>`<div class="section">${itemRow(it,0,it.sellerId===myId?`<button class="mini red" data-market-take="${esc(it.key)}">Снять</button>`:`<button class="mini green" data-market-buy="${esc(it.key)}">Купить</button>`)}<div class="small muted">Продавец: ${esc(it.sellerName||'Игрок')}</div></div>`).join(''):'<div class="empty-hint">На рынке пока нет лотов.</div>'}</div>`}
-function leadersHTML(){return`<div class="section" id="leaderList">${leaderCache.length?leaderCache.map((x,i)=>personRow(x.id,x.p,i+1)).join(''):'<div class="empty-hint">Загрузка…</div>'}</div>`}
+function leadersHTML(){return`<div class="section" id="leaderList">${leaderCache.length?leaderCache.map((x,i)=>personRow(x.id,x.p,i+1, false)).join(''):'<div class="empty-hint">Загрузка…</div>'}</div>`}
 function pickHTML(){return`<div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-pick="${i}">Выбрать</button>`)).join(''):'<div class="empty-hint">В рюкзаке нет номеров.</div>'}</div>`}
 function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return`<div class="section"><h3>${esc(p.name||'Игрок')}</h3><div class="row"><span>Уровень</span><span>${p.level||1}</span></div><div class="row"><span>Баланс</span><span>${money(p.balance)}</span></div><div class="row"><span>Сгенерировано</span><span>${fmt(p.totalGenerated)}</span></div><div class="row"><span>Номеров в рюкзаке</span><span>${fmt(p.invCount)}</span></div>${p.profileNumber?`<div class="row"><span>Номер для друзей</span><span>${esc(p.profileNumber)}</span></div>`:''}</div>`}
 
@@ -202,6 +259,11 @@ function adminHTML(){
     </div>`;
 }
 
+window.setFriendsTab = function(tab) {
+    friendsTab = tab;
+    renderView();
+};
+
 function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Simkarta';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
 function openScreen(name){
     closeMenu();
@@ -214,7 +276,7 @@ function closeMenu(){$('#menu').classList.remove('open');$('#scrim').classList.r
 function updateChance(){const input=$('#casinoTarget'),out=$('#casinoChance'),it=state.inventory[casinoIndex];if(!input||!out||!it)return;const target=Math.floor(finite(input.value)),chance=Math.min(95,it.price/target*95);if(target<=it.price||target>1e9){out.textContent='Недопустимая цена';out.style.color='var(--red)'}else{out.textContent=(chance<.01?'<0,01':chance.toFixed(2).replace('.',','))+'%';out.style.color='var(--green)'}}
 function doUpgrade(){const it=state.inventory[casinoIndex],target=Math.floor(finite($('#casinoTarget')?.value));if(!it||busy||target<=it.price||target>1e9)return toast('Введите цену выше текущей, но не более 1 млрд ₽');const chance=Math.min(95,it.price/target*95);busy=true;render();toast('Проверяем удачу…');setTimeout(()=>{const i=state.inventory.indexOf(it);if(i<0){busy=false;casinoIndex=null;return render()}if(Math.random()*100<chance){it.price=target;it.category=category(target);toast(`Успех! Новая цена: ${money(target)}`);audio.play(1200,.2)}else{state.inventory.splice(i,1);toast('Не повезло: номер сгорел');audio.play(150,.25)}casinoIndex=null;busy=false;commit()},850)}
 function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.price);return{name:myName,username:state.username,level:state.level,balance:state.balance,maxBalance:state.maxBalance,totalGenerated:state.totalGenerated,totalSold:state.totalSold,invCount:inv.length,invValue:inv.reduce((s,x)=>s+x.price,0),wallIncome:state.wall.items.reduce((s,x)=>s+wallIncome(x),0),bestNumber:state.bestNumber,top3:inv.slice(0,3),profileNumber:state.profileNumber,lastSeen:Date.now(),updatedAt:state.updatedAt}}
-function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
+function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
 async function initCloud(){
@@ -227,7 +289,7 @@ async function initCloud(){
         
         cloudReady=true;
         cloudMessage('Облачная синхронизация активна.');
-        subscribePayouts();subscribeGifts();
+        subscribePayouts();subscribeGifts();subscribeFriendReqs();
         
         // Автоматическая привязка ТГ юзернейма для друзей
         if (!state.username && tgUsername) {
@@ -252,7 +314,7 @@ async function loadFriends(){
     if(!state.friends.length){friendCache=[];return renderView()}
     if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}
     
-    // Загружаем профили (даже если профиль не найден, не крашим всё)
+    // Загружаем профили
     const rows=await Promise.all(state.friends.map(async id=>({id, p: await fetchProfile(id) || {name:'Неизвестный', level:1, balance:0}})));
     if(token===viewToken&&currentView==='friends'){
         friendCache=rows;
@@ -290,20 +352,124 @@ async function findPlayer(q){
     }
     return id?{id:String(id),p:await fetchProfile(String(id))}:null
 }
+
 async function addFriend(){
     const input=$('#friendQuery'),q=input.value.trim();if(!q)return;
     try{
         const found=await findPlayer(q);
-        if(!found||!found.p) return toast('Игрок не найден. Убедитесь, что он заходил в игру (ввел юз или синхронизировал аккаунт)');
+        if(!found||!found.p) return toast('Игрок не найден.');
         if(found.id===myId)return toast('Это ваш профиль');
         if(state.friends.includes(found.id))return toast('Игрок уже в друзьях');
-        if(state.friends.length>=100)return toast('Максимум 100 друзей');
-        state.friends.push(found.id);
-        input.value='';commit();
-        await loadFriends();
-        toast('Друг добавлен')
-    }catch{toast('Не удалось найти игрока')}
+        
+        // Отправляем заявку
+        await cloud.set(cloud.ref(cloud.db, 'friendRequests/' + found.id + '/' + myId), {
+            senderName: myName,
+            ts: Date.now()
+        });
+        
+        input.value='';
+        toast('📩 Заявка в друзья отправлена!');
+    }catch(e){
+        console.warn(e);
+        toast('Не удалось отправить заявку');
+    }
 }
+
+window.approveRequest = async function(senderId) {
+    if (!state.friends.includes(senderId)) {
+        state.friends.push(senderId);
+        await cloud.set(cloud.ref(cloud.db, 'friend_accepted/' + senderId + '/' + myId), {
+            name: myName, ts: Date.now()
+        });
+    }
+    await cloud.remove(cloud.ref(cloud.db, 'friendRequests/' + myId + '/' + senderId));
+    delete state.incomingReqs[senderId];
+    commit();
+    toast('✅ Заявка одобрена');
+    if (currentView === 'friends') loadFriends();
+    showRequestBanner();
+};
+
+window.declineRequest = async function(senderId) {
+    await cloud.remove(cloud.ref(cloud.db, 'friendRequests/' + myId + '/' + senderId));
+    delete state.incomingReqs[senderId];
+    commit();
+    toast('❌ Заявка отклонена');
+    if (currentView === 'friends') loadFriends();
+    showRequestBanner();
+};
+
+window.approveFirstRequest = function() {
+    if (currentReqBannerId) {
+        approveRequest(currentReqBannerId);
+        currentReqBannerId = null;
+        $('#reqBanner').style.display = 'none';
+    }
+};
+
+window.declineFirstRequest = function() {
+    if (currentReqBannerId) {
+        declineRequest(currentReqBannerId);
+        currentReqBannerId = null;
+        $('#reqBanner').style.display = 'none';
+    }
+};
+
+function showRequestBanner() {
+    const reqIds = Object.keys(state.incomingReqs || {});
+    if (reqIds.length === 0) {
+        $('#reqBanner').style.display = 'none';
+        return;
+    }
+    currentReqBannerId = reqIds[0];
+    const req = state.incomingReqs[currentReqBannerId];
+    $('#reqBannerText').innerHTML = `Игрок <b>@${esc(req.senderName)}</b> хочет добавить вас в друзья.`;
+    $('#reqBanner').style.display = 'block';
+}
+
+function subscribeFriendReqs() {
+    if (!cloudReady) return;
+    unsubFriendReqs?.();
+    unsubFriendAcc?.();
+    
+    unsubFriendReqs = cloud.onValue(cloud.ref(cloud.db, 'friendRequests/' + myId), snap => {
+        const reqs = snap.val() || {};
+        const oldReqs = state.incomingReqs || {};
+        let hasNew = false;
+        
+        for (let id in reqs) {
+            if (!oldReqs[id]) hasNew = true;
+        }
+        
+        state.incomingReqs = reqs;
+        persist();
+        
+        if (hasNew) {
+            showRequestBanner();
+            if (currentView === 'friends') renderView();
+        }
+    });
+
+    unsubFriendAcc = cloud.onValue(cloud.ref(cloud.db, 'friend_accepted/' + myId), snap => {
+        const acc = snap.val() || {};
+        let added = false;
+        
+        Object.keys(acc).forEach(async key => {
+            if (!state.friends.includes(key)) {
+                state.friends.push(key);
+                added = true;
+                toast(`🎉 ${acc[key].name || 'Игрок'} принял вашу заявку в друзья!`);
+            }
+            await cloud.remove(cloud.ref(cloud.db, 'friend_accepted/' + myId + '/' + key));
+        });
+        
+        if (added) {
+            commit();
+            if (currentView === 'friends') loadFriends();
+        }
+    });
+}
+
 function subscribeMarket(){unsubMarket?.();marketCache=null;if(!cloudReady){marketCache=[];return renderView()}unsubMarket=cloud.onValue(cloud.ref(cloud.db,'market'),snap=>{const d=snap.val()||{};marketCache=Object.entries(d).filter(([,x])=>x?.phone).map(([key,x])=>({...x,key})).sort((a,b)=>b.price-a.price);if(currentView==='market')renderView()},()=>{marketCache=[];if(currentView==='market'){renderView();toast('Не удалось загрузить рынок')}})}
 async function claimLot(key){let claimed=null;await cloud.runTransaction(cloud.ref(cloud.db,'market/'+key),cur=>{claimed=cur;return null});return claimed?.phone?claimed:null}
 let marketBusy=false;
@@ -333,7 +499,7 @@ function subscribeGifts(){
         });
     });
 }
-async function syncEmail(){const email=$('#syncEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Введите корректный Email');if(!cloudReady)return toast('Нет подключения к облаку');const id=keySafe('email_'+email);try{const snap=await cloud.get(cloud.ref(cloud.db,'players/'+id)),data=snap.val();myId=id;myName=email.split('@')[0];localStorage.setItem('blum_email_id',id);localStorage.setItem('blum_user_name',myName);if(data)applyCloud(data);cloudReady=true;subscribePayouts();subscribeGifts();commit();closeScreen();toast(data?'Прогресс загружен':'Email привязан')}catch{toast('Не удалось синхронизировать')}}
+async function syncEmail(){const email=$('#syncEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Введите корректный Email');if(!cloudReady)return toast('Нет подключения к облаку');const id=keySafe('email_'+email);try{const snap=await cloud.get(cloud.ref(cloud.db,'players/'+id)),data=snap.val();myId=id;myName=email.split('@')[0];localStorage.setItem('blum_email_id',id);localStorage.setItem('blum_user_name',myName);if(data)applyCloud(data);cloudReady=true;subscribePayouts();subscribeGifts();subscribeFriendReqs();commit();closeScreen();toast(data?'Прогресс загружен':'Email привязан')}catch{toast('Не удалось синхронизировать')}}
 function sellAll(){if(!state.inventory.length)return;const total=state.inventory.reduce((s,x)=>s+x.price,0);if(state.settings.warn&&total>=state.settings.warnAt&&!confirm(`Продать все номера за ${money(total)}?`))return;state.balance+=total;state.totalSold+=state.inventory.length;state.inventory=[];enforceProfile();commit();toast(`Получено ${money(total)}`)}
 function slotBuy(i){if(i!==state.wall.slotsUnlocked)return;const cost=i*25000;if(state.balance<cost)return toast('Недостаточно средств');if(!confirm(`Открыть слот за ${money(cost)}?`))return;state.balance-=cost;state.wall.slotsUnlocked++;commit()}
 function slotUpgrade(i){const it=state.wall.items[i];if(!it||it.lvl>=5)return;const cost=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));if(state.balance<cost)return toast('Недостаточно средств');state.balance-=cost;it.lvl++;commit();toast('Номер улучшен')}
