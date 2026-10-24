@@ -56,7 +56,9 @@
 </main>
 <div class="scrim" id="scrim"></div>
 <aside class="menu" id="menu" aria-label="Меню"><div class="menu-head"><b>Simkarta</b><button class="icon-btn" id="menuClose" aria-label="Закрыть">✕</button></div>
-<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Лидерборд</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button><div class="cloud-status" id="cloudStatus">Локальное сохранение включено.</div></aside>
+<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Лидерборд</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button>
+<button data-open="admin" id="adminMenuBtn" style="display:none; color: var(--gold);"><span>👑</span>Админ-панель</button>
+<div class="cloud-status" id="cloudStatus">Локальное сохранение включено.</div></aside>
 <section class="sheet" id="sheet" aria-hidden="true"><header class="sheet-head"><h2 id="sheetTitle"></h2><button class="close" id="sheetClose">Закрыть</button></header><div class="sheet-body" id="sheetBody"></div></section>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -120,12 +122,18 @@ function makeNumber(type){const raw=randomNumber(),phone=`+7 ${raw.slice(0,3)} $
 function addXP(amount){state.points+=Math.max(0,Math.floor(amount));while(state.points>=state.level*100){state.points-=state.level*100;state.level++;state.freeSpins+=3;state.boostMult=state.level>50?5:state.level>20?3:2;state.boostEnd=Date.now()+30000;if(state.level%10===0)state.balance+=state.level/10*10000;toast(`Уровень ${state.level}! +3 бесплатные симки и буст ×${state.boostMult}`)}}
 function settleCurrent(){if(!state.current?.xpPending)return;addXP(state.current.xpPending);state.current.xpPending=0}
 function cardHTML(it){const r=rarity(it.category)[0];return`<article class="sim-card"><div class="sim-top"><div><div class="operator"><span class="op-badge">${esc(state.operator[0]||'Ё')}</span>${esc(state.operator)}</div><div class="country">🇷🇺 Россия</div></div><div class="sim-chip"><div class="chip"><i class="chip-core"></i></div></div></div><div class="phone ${r}">${esc(it.phone)}</div><div class="card-meta"><div><div class="price">${money(it.price)}</div><div class="small muted">+${fmt(it.xp||0)} XP · шанс ${esc(it.chance||'—')}</div></div><div class="rarity ${r}">${esc(it.category)}</div></div>${it.reasons?.length?`<div class="reasons">${it.reasons.map(x=>esc(x)).join(' · ')}</div>`:''}</article>`}
-function render(){document.body.classList.toggle('light',state.settings.theme==='light');$('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';const has=!!state.current;$('#buy').classList.toggle('hidden',has);$('#decision').classList.toggle('show',has);$('#buy').disabled=busy;$('#sellCurrent').disabled=busy;$('#keepCurrent').disabled=busy;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;$('#buy').textContent=`Купить симку · ${free?'бесплатно':money(cost)}`;const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';if(currentView)renderView(false)}
+function render(){
+    document.body.classList.toggle('light',state.settings.theme==='light');
+    $('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';const has=!!state.current;$('#buy').classList.toggle('hidden',has);$('#decision').classList.toggle('show',has);$('#buy').disabled=busy;$('#sellCurrent').disabled=busy;$('#keepCurrent').disabled=busy;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;$('#buy').textContent=`Купить симку · ${free?'бесплатно':money(cost)}`;const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
+    // Отображение кнопки админа
+    $('#adminMenuBtn').style.display = (state.username && state.username.toLowerCase() === 'zxczitto') ? 'flex' : 'none';
+    if(currentView)renderView(false)
+}
 async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);state.current=it;commit();audio.play(760,.09);const token=++genToken;if(state.settings.animation){const phone=$('.phone');if(phone){const target=state.current.phone;let n=0;const timer=setInterval(()=>{if(token!==genToken){clearInterval(timer);return}phone.textContent=[...target].map((c,i)=>/\d/.test(c)&&i>n?String(Math.floor(Math.random()*10)):c).join('');if(++n>target.length){clearInterval(timer);phone.textContent=target;finishGeneration()}},35)}else finishGeneration()}else finishGeneration();function finishGeneration(){if(token!==genToken)return;settleCurrent();busy=false;commit();audio.play(980,.14)}}
 function sellCurrent(){const it=state.current;if(!it||busy)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;genToken++;state.balance+=it.price;state.totalSold++;state.current=null;commit();audio.play(1100,.12)}
 function keepCurrent(){if(!state.current||busy)return;genToken++;state.inventory.push(cleanItem(state.current));state.current=null;commit();audio.play(840,.1)}
 function inventorySell(index){const it=state.inventory[index];if(!it)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;state.balance+=it.price;state.totalSold++;state.inventory.splice(index,1);commit();toast(`Получено ${money(it.price)}`)}
-const titles={inventory:'Мои симки',wall:'СИМ-стена',market:'Рынок игроков',casino:'Апгрейдер',profile:'Статистика',leaders:'Топ игроков',friends:'Друзья',settings:'Настройки',player:'Профиль игрока',pick:'Выберите номер',info:'Шансы выпадения'};
+const titles={inventory:'Мои симки',wall:'СИМ-стена',market:'Рынок игроков',casino:'Апгрейдер',profile:'Статистика',leaders:'Топ игроков',friends:'Друзья',settings:'Настройки',player:'Профиль игрока',pick:'Выберите номер',info:'Шансы выпадения',admin:'👑 Админ-панель'};
 let marketCache=null,friendCache=[],leaderCache=[],viewToken=0,profileView=null,pickSlot=null;
 function itemRow(it,i,actions=''){return`<div class="list-item"><div class="item-main"><div class="item-phone ${rarity(it.category)[0]}">${esc(it.phone)}${it.lvl?` · ⭐${it.lvl}`:''}</div><div class="item-price">${money(it.price)}</div></div><div class="actions">${actions}</div></div>`}
 function inventoryHTML(){const total=state.inventory.reduce((s,x)=>s+x.price,0);return`<div class="section"><div class="row"><span>Номеров</span><span>${state.inventory.length}</span></div><div class="row"><span>Общая стоимость</span><span>${money(total)}</span></div><button class="wide green" data-action="sell-all" ${!state.inventory.length?'disabled':''}>Продать все</button></div><div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-sell="${i}">Продать</button><button class="mini" data-list="${i}">На рынок</button>`)).join(''):'<div class="empty-hint">Пока пусто. Купите симку и нажмите «Оставить».</div>'}</div>`}
@@ -141,9 +149,55 @@ function marketHTML(){return`<div id="marketList">${marketCache===null?'<div cla
 function leadersHTML(){return`<div class="section" id="leaderList">${leaderCache.length?leaderCache.map((x,i)=>personRow(x.id,x.p,i+1)).join(''):'<div class="empty-hint">Загрузка…</div>'}</div>`}
 function pickHTML(){return`<div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-pick="${i}">Выбрать</button>`)).join(''):'<div class="empty-hint">В рюкзаке нет номеров.</div>'}</div>`}
 function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return`<div class="section"><h3>${esc(p.name||'Игрок')}</h3><div class="row"><span>Уровень</span><span>${p.level||1}</span></div><div class="row"><span>Баланс</span><span>${money(p.balance)}</span></div><div class="row"><span>Сгенерировано</span><span>${fmt(p.totalGenerated)}</span></div><div class="row"><span>Номеров в рюкзаке</span><span>${fmt(p.invCount)}</span></div>${p.profileNumber?`<div class="row"><span>Номер для друзей</span><span>${esc(p.profileNumber)}</span></div>`:''}</div>`}
-function infoHTML(){return`<div class="section"><h3>Шансы выпадения</h3><div class="row"><span class="rarity-diamond">💎 Бриллиантовый:</span><span>&lt; 0.001%</span></div><div class="row"><span class="rarity-gold">🥇 Золотой:</span><span>~1%</span></div><div class="row"><span class="rarity-silver">🥈 Серебряный:</span><span>~10%</span></div><div class="row"><span class="rarity-bronze">🥉 Бронзовый:</span><span>~20%</span></div><div class="row"><span class="rarity-lucky">✨ Красивое окончание:</span><span>~30%</span></div><div class="row"><span class="rarity-common">📱 Обычный:</span><span>~50%</span></div></div><div class="section"><h3>Особенности</h3><div class="row"><span>Бонус удачи (5%):</span><span class="small muted" style="text-align:right">Повышает множитель до бронзового или серебряного</span></div><div class="row"><span>Час семёрок:</span><span class="small muted" style="text-align:right">С 19:00 до 20:00 номера с 7 на конце ×2</span></div></div>`}
-function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Simkarta';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
-function openScreen(name){closeMenu();currentView=name;viewToken++;$('#sheet').classList.add('open');$('#sheet').setAttribute('aria-hidden','false');renderView();if(name==='market')subscribeMarket();if(name==='leaders')loadLeaders();if(name==='friends')loadFriends()}
+
+function infoHTML(){
+    return `<div class="section"><h3>🎲 Шансы выпадения (Базовые)</h3>
+        <div class="row"><span class="rarity-diamond">💎 Бриллиантовый:</span><span>&lt; 0.001%</span></div>
+        <div class="row"><span class="rarity-gold">🥇 Золотой:</span><span>~1%</span></div>
+        <div class="row"><span class="rarity-silver">🥈 Серебряный:</span><span>~10%</span></div>
+        <div class="row"><span class="rarity-bronze">🥉 Бронзовый:</span><span>~20%</span></div>
+        <div class="row"><span class="rarity-lucky">✨ Красивое окончание:</span><span>~30%</span></div>
+        <div class="row"><span class="rarity-common">📱 Обычный:</span><span>~50%</span></div>
+    </div>
+    <div class="section"><h3>🏪 Шансы для 3-х ячеек</h3>
+        <div class="small muted" style="margin-bottom:10px;">Бонус удачи (+5%) гарантирует выпадение Бронзы или Серебра в любом магазине.</div>
+        <div class="row"><span>🏪 Ларёк (1к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
+        <div class="row"><span>🏬 Магазин (5к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
+        <div class="row"><span>💎 Ювелирный (20к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
+    </div>
+    <div class="section"><h3>Особенности</h3>
+        <div class="row"><span>Час семёрок:</span><span class="small muted" style="text-align:right">С 19:00 до 20:00 номера с 7 на конце ×2</span></div>
+        <div class="row"><span>Буст уровня:</span><span class="small muted" style="text-align:right">Каждый уровень дает +3 симки и буст опыта</span></div>
+    </div>`;
+}
+
+function adminHTML(){
+    return `<div class="section">
+        <h3>Управление профилем</h3>
+        <button class="wide green" data-action="admin-add-balance">+ 1 000 000 ₽</button>
+        <button class="wide" data-action="admin-set-balance">Установить баланс</button>
+        <button class="wide" data-action="admin-set-level">Установить уровень</button>
+        <button class="wide" data-action="admin-add-spins">Выдать 100 бесплатных спинов</button>
+    </div>
+    <div class="section">
+        <h3>Создание номера</h3>
+        <button class="wide red" data-action="admin-spawn-diamond">💎 Выдать Бриллиантовый номер</button>
+        <button class="wide" data-action="admin-spawn-gold">🥇 Выдать Золотой номер</button>
+        <button class="wide" data-action="admin-spawn-custom">Создать кастомный номер</button>
+    </div>
+    <div class="section">
+        <h3>Система</h3>
+        <button class="wide red" data-action="admin-reset-boost">Сбросить кулдаун буста</button>
+        <button class="wide" data-action="admin-force-sync">Принудительная синхронизация</button>
+    </div>`;
+}
+
+function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Simkarta';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
+function openScreen(name){
+    closeMenu();
+    if (name === 'admin' && state.username.toLowerCase() !== 'zxczitto') return toast('Доступ запрещен');
+    currentView=name;viewToken++;$('#sheet').classList.add('open');$('#sheet').setAttribute('aria-hidden','false');renderView();if(name==='market')subscribeMarket();if(name==='leaders')loadLeaders();if(name==='friends')loadFriends()
+}
 function closeScreen(){if(busy&&currentView==='casino')return toast('Дождитесь завершения апгрейда');$('#sheet').classList.remove('open');$('#sheet').setAttribute('aria-hidden','true');currentView='';viewToken++;unsubMarket?.();unsubMarket=null;profileView=null;pickSlot=null}
 function openMenu(){$('#menu').classList.add('open');$('#scrim').classList.add('open')}
 function closeMenu(){$('#menu').classList.remove('open');$('#scrim').classList.remove('open')}
@@ -182,7 +236,74 @@ $('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-open]');
 $('#sheetBody').addEventListener('input',e=>{if(e.target.id==='casinoTarget')updateChance()});
 $('#sheetBody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='friendQuery')addFriend();if(e.key==='Enter'&&e.target.id==='username')saveUsername()});
 $('#sheetBody').addEventListener('change',e=>{const id=e.target.id;if(id==='setTheme')state.settings.theme=e.target.checked?'light':'dark';else if(id==='setAnimation')state.settings.animation=e.target.checked;else if(id==='setSound')state.settings.sound=e.target.checked;else if(id==='setWarn')state.settings.warn=e.target.checked;else if(id==='setWarnAt')state.settings.warnAt=Math.max(0,Math.floor(finite(e.target.value,100000)));else return;commit()});
-$('#sheetBody').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||b.disabled)return;audio.play();const d=b.dataset;if(d.sell!==undefined)return inventorySell(Number(d.sell));if(d.list!==undefined)return listItem(Number(d.list));if(d.slotBuy!==undefined)return slotBuy(Number(d.slotBuy));if(d.slotSet!==undefined){pickSlot=Number(d.slotSet);return openScreen('pick')}if(d.slotUp!==undefined)return slotUpgrade(Number(d.slotUp));if(d.slotRemove!==undefined){const it=state.wall.items[Number(d.slotRemove)];if(it){state.inventory.push(it);state.wall.items[Number(d.slotRemove)]=null;commit()}return}if(d.casino!==undefined){casinoIndex=Number(d.casino);return renderView()}if(d.marketBuy)return buyLot(d.marketBuy);if(d.marketTake)return takeLot(d.marketTake);if(d.player)return showPlayer(d.player);if(d.friendRemove){state.friends=state.friends.filter(x=>x!==d.friendRemove);commit();return loadFriends()}if(d.pick!==undefined){if(pickSlot!==null){const it=state.inventory[Number(d.pick)];if(!it||state.wall.items[pickSlot])return;state.inventory.splice(Number(d.pick),1);state.wall.items[pickSlot]=it;enforceProfile();pickSlot=null;commit();openScreen('wall')}else setProfileNumber(Number(d.pick));return}switch(b.dataset.action){case'sell-all':sellAll();break;case'upgrade':doUpgrade();break;case'save-username':saveUsername();break;case'profile-number':pickSlot=null;openScreen('pick');break;case'clear-profile-number':{const key=phoneKey(state.profileNumber);state.profileNumber='';if(cloudReady&&key)cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+key),cur=>cur===myId?null:undefined).catch(()=>{});commit();break}case'friend-add':addFriend();break;case'sync-email':syncEmail();break;case'reset':resetProgress();break}});
+$('#sheetBody').addEventListener('click',async e=>{
+    const b=e.target.closest('button');
+    if(!b||b.disabled)return;
+    audio.play();
+    const d=b.dataset;
+    
+    // Admin Actions
+    if (d.action && d.action.startsWith('admin-')) {
+        if (state.username.toLowerCase() !== 'zxczitto') return toast('Доступ запрещен');
+        if (d.action === 'admin-add-balance') { state.balance += 1000000; commit(); toast('Баланс пополнен на 1 млн'); return; }
+        if (d.action === 'admin-set-balance') { const v = prompt('Новый баланс:', state.balance); if(v!==null) { state.balance = Math.max(0, parseInt(v)||0); commit(); } return; }
+        if (d.action === 'admin-set-level') { const v = prompt('Новый уровень:', state.level); if(v!==null) { state.level = Math.max(1, parseInt(v)||1); state.points = 0; commit(); } return; }
+        if (d.action === 'admin-add-spins') { state.freeSpins += 100; commit(); toast('+100 спинов'); return; }
+        
+        if (d.action === 'admin-spawn-diamond') { 
+            state.current = { phone: '+7 999 999-99-99', price: 1000000000, category: 'БРИЛЛИАНТОВЫЙ', chance: '< 0.001%', reasons: ['Админ подарок'], lvl: 0, xp: 1000, xpPending: 1000 };
+            commit(); closeScreen(); return; 
+        }
+        if (d.action === 'admin-spawn-gold') { 
+            state.current = { phone: '+7 888 888-88-88', price: 1000000, category: 'ЗОЛОТОЙ', chance: '~1%', reasons: ['Админ подарок'], lvl: 0, xp: 150, xpPending: 150 };
+            commit(); closeScreen(); return; 
+        }
+        if (d.action === 'admin-spawn-custom') {
+            const phone = prompt('Введите номер (например +7 999 123-45-67):');
+            if(!phone) return;
+            const priceStr = prompt('Цена номера:');
+            const price = Math.floor(finite(priceStr));
+            state.current = { phone, price, category: category(price), chance: '100%', reasons: ['Админ подарок'], lvl: 0, xp: 50, xpPending: 50 };
+            commit(); closeScreen(); return;
+        }
+        if (d.action === 'admin-reset-boost') { state.boostEnd = 0; state.boostMult = 1; commit(); toast('Буст сброшен'); return; }
+        if (d.action === 'admin-force-sync') { queueSync(); toast('Синхронизация запущена'); return; }
+        return;
+    }
+
+    // Regular actions
+    if(d.sell!==undefined)return inventorySell(Number(d.sell));
+    if(d.list!==undefined)return listItem(Number(d.list));
+    if(d.slotBuy!==undefined)return slotBuy(Number(d.slotBuy));
+    if(d.slotSet!==undefined){pickSlot=Number(d.slotSet);return openScreen('pick')}
+    if(d.slotUp!==undefined)return slotUpgrade(Number(d.slotUp));
+    if(d.slotRemove!==undefined){const it=state.wall.items[Number(d.slotRemove)];if(it){state.inventory.push(it);state.wall.items[Number(d.slotRemove)]=null;commit()}return}
+    if(d.casino!==undefined){casinoIndex=Number(d.casino);return renderView()}
+    if(d.marketBuy)return buyLot(d.marketBuy);
+    if(d.marketTake)return takeLot(d.marketTake);
+    if(d.player)return showPlayer(d.player);
+    if(d.friendRemove){state.friends=state.friends.filter(x=>x!==d.friendRemove);commit();return loadFriends()}
+    if(d.pick!==undefined){
+        if(pickSlot!==null){
+            const it=state.inventory[Number(d.pick)];
+            if(!it||state.wall.items[pickSlot])return;
+            state.inventory.splice(Number(d.pick),1);
+            state.wall.items[pickSlot]=it;
+            enforceProfile();pickSlot=null;commit();openScreen('wall')
+        }else setProfileNumber(Number(d.pick));
+        return
+    }
+    switch(b.dataset.action){
+        case'sell-all':sellAll();break;
+        case'upgrade':doUpgrade();break;
+        case'save-username':saveUsername();break;
+        case'profile-number':pickSlot=null;openScreen('pick');break;
+        case'clear-profile-number':{const key=phoneKey(state.profileNumber);state.profileNumber='';if(cloudReady&&key)cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+key),cur=>cur===myId?null:undefined).catch(()=>{});commit();break}
+        case'friend-add':addFriend();break;
+        case'sync-email':syncEmail();break;
+        case'reset':resetProgress();break;
+    }
+});
 window.addEventListener('beforeunload',persist);document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()});
 settleCurrent();render();persist();initCloud();setInterval(wallTick,1000);
 if (isNewStarter) setTimeout(() => toast('🎁 Стартовый набор: +100 000 ₽!'), 500);
