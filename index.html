@@ -79,7 +79,7 @@ function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(fin
 function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~50%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
 let isNewStarter = false;
 function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
-let state=loadState(), busy=false, currentView='', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, genToken=0;
+let state=loadState(), busy=false, currentView='', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, genToken=0;
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('blum_email_id')||localStorage.getItem('blum_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
 let myName=tg?.initDataUnsafe?.user?.first_name||localStorage.getItem('blum_user_name')||'Игрок';
@@ -136,7 +136,7 @@ function inventorySell(index){const it=state.inventory[index];if(!it)return;if(s
 const titles={inventory:'Мои симки',wall:'СИМ-стена',market:'Рынок игроков',casino:'Апгрейдер',profile:'Статистика',leaders:'Топ игроков',friends:'Друзья',settings:'Настройки',player:'Профиль игрока',pick:'Выберите номер',info:'Шансы выпадения',admin:'👑 Админ-панель'};
 let marketCache=null,friendCache=[],leaderCache=[],viewToken=0,profileView=null,pickSlot=null;
 function itemRow(it,i,actions=''){return`<div class="list-item"><div class="item-main"><div class="item-phone ${rarity(it.category)[0]}">${esc(it.phone)}${it.lvl?` · ⭐${it.lvl}`:''}</div><div class="item-price">${money(it.price)}</div></div><div class="actions">${actions}</div></div>`}
-function inventoryHTML(){const total=state.inventory.reduce((s,x)=>s+x.price,0);return`<div class="section"><div class="row"><span>Номеров</span><span>${state.inventory.length}</span></div><div class="row"><span>Общая стоимость</span><span>${money(total)}</span></div><button class="wide green" data-action="sell-all" ${!state.inventory.length?'disabled':''}>Продать все</button></div><div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-sell="${i}">Продать</button><button class="mini" data-list="${i}">На рынок</button>`)).join(''):'<div class="empty-hint">Пока пусто. Купите симку и нажмите «Оставить».</div>'}</div>`}
+function inventoryHTML(){const total=state.inventory.reduce((s,x)=>s+x.price,0);return`<div class="section"><div class="row"><span>Номеров</span><span>${state.inventory.length}</span></div><div class="row"><span>Общая стоимость</span><span>${money(total)}</span></div><button class="wide green" data-action="sell-all" ${!state.inventory.length?'disabled':''}>Продать все</button></div><div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini blue" data-gift="${i}">🎁</button><button class="mini green" data-sell="${i}">Продать</button><button class="mini" data-list="${i}">Рынок</button>`)).join(''):'<div class="empty-hint">Пока пусто. Купите симку и нажмите «Оставить».</div>'}</div>`}
 function wallIncome(it){if(!it)return 0;const cat=it.category,m=cat.includes('БРИЛЛИАНТ')?10:cat.includes('ЗОЛОТ')?5:cat.includes('СЕРЕБР')?2:cat.includes('БРОНЗ')?1.5:1;return Math.floor(it.price*.01*m*(1+.3*it.lvl))}
 function wallHTML(){const income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0),left=Math.max(0,Math.ceil((60000-(Date.now()-state.wall.lastTick))/1000));return`<div class="section"><div class="row"><span>Доход</span><span class="item-price">+${money(income)}/мин</span></div><div class="row"><span>Следующее начисление</span><span>${left} с</span></div></div><div class="wall-grid">${state.wall.items.map((it,i)=>{const unlocked=i<state.wall.slotsUnlocked;if(!unlocked){const cost=i*25000,can=i===state.wall.slotsUnlocked;return`<div class="slot"><small>Слот ${i+1}</small><b>🔒 Закрыт</b>${can?`<button class="mini blue" data-slot-buy="${i}">Открыть · ${money(cost)}</button>`:'<small>Откройте предыдущий слот</small>'}</div>`}if(!it)return`<div class="slot empty"><small>Слот ${i+1}</small><b>Пусто</b><button class="mini green" data-slot-set="${i}">Установить</button></div>`;const up=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));return`<div class="slot"><small>Слот ${i+1}</small><div class="item-phone small">${esc(it.phone)}</div><div class="item-price">+${money(wallIncome(it))}/мин</div><small>${'★'.repeat(it.lvl)}${'☆'.repeat(5-it.lvl)}</small>${it.lvl<5?`<button class="mini" data-slot-up="${i}">Улучшить · ${money(up)}</button>`:'<small>Максимальный уровень</small>'}<button class="mini red" data-slot-remove="${i}">Снять</button></div>`}).join('')}</div>`}
 function casinoHTML(){const it=state.inventory[casinoIndex];return`<div class="section"><h3>1. Выберите номер</h3>${state.inventory.length?state.inventory.map((x,i)=>itemRow(x,i,`<button class="mini ${i===casinoIndex?'green':'blue'}" data-casino="${i}">${i===casinoIndex?'Выбран':'Выбрать'}</button>`)).join(''):'<div class="empty-hint">Рюкзак пуст.</div>'}</div>${it?`<div class="section"><h3>2. Укажите новую стоимость</h3><div class="small muted">${esc(it.phone)} · сейчас ${money(it.price)}</div><input class="input" id="casinoTarget" type="number" min="${it.price+1}" max="1000000000" value="${Math.min(1e9,it.price*2)}" inputmode="numeric"><div class="row"><span>Шанс успеха</span><span id="casinoChance"></span></div><button class="wide red" data-action="upgrade" ${busy?'disabled':''}>Апгрейд</button><p class="small muted">При неудаче номер сгорает. Максимальная цена — 1 млрд ₽.</p></div>`:''}<div id="casinoMessage"></div>`}
@@ -207,7 +207,7 @@ function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.pr
 function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
-async function initCloud(){try{const[a,b]=await Promise.all([import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js')]);const app=a.initializeApp({apiKey:'AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI',authDomain:'nomerki-gam3.firebaseapp.com',databaseURL:'https://nomerki-gam3-default-rtdb.firebaseio.com',projectId:'nomerki-gam3',storageBucket:'nomerki-gam3.firebasestorage.app',messagingSenderId:'582885790988',appId:'1:582885790988:web:ef8965c63a38da68d82529',measurementId:'G-8EGEPGFF4H'});cloud={...b,db:b.getDatabase(app)};const snap=await cloud.get(cloud.ref(cloud.db,'players/'+myId)),data=snap.val();if(data&&(!data.updatedAt||finite(data.updatedAt)>finite(state.updatedAt))){applyCloud(data);render();persist()}cloudReady=true;cloudMessage('Облачная синхронизация активна.');subscribePayouts();queueSync()}catch(e){console.warn('Cloud unavailable',e);cloudMessage('Облако недоступно — используется локальное сохранение.')}}
+async function initCloud(){try{const[a,b]=await Promise.all([import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js')]);const app=a.initializeApp({apiKey:'AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI',authDomain:'nomerki-gam3.firebaseapp.com',databaseURL:'https://nomerki-gam3-default-rtdb.firebaseio.com',projectId:'nomerki-gam3',storageBucket:'nomerki-gam3.firebasestorage.app',messagingSenderId:'582885790988',appId:'1:582885790988:web:ef8965c63a38da68d82529',measurementId:'G-8EGEPGFF4H'});cloud={...b,db:b.getDatabase(app)};const snap=await cloud.get(cloud.ref(cloud.db,'players/'+myId)),data=snap.val();if(data&&(!data.updatedAt||finite(data.updatedAt)>finite(state.updatedAt))){applyCloud(data);render();persist()}cloudReady=true;cloudMessage('Облачная синхронизация активна.');subscribePayouts();subscribeGifts();queueSync()}catch(e){console.warn('Cloud unavailable',e);cloudMessage('Облако недоступно — используется локальное сохранение.')}}
 async function fetchProfile(id){if(!cloudReady)return null;try{let s=await cloud.get(cloud.ref(cloud.db,'profiles/'+id));if(s.val())return s.val();s=await cloud.get(cloud.ref(cloud.db,'players/'+id));const d=s.val();return d?{...d,invCount:list(d.inventory).length}:null}catch{return null}}
 async function loadLeaders(){const token=++viewToken;if(!cloudReady){leaderCache=[{id:myId,p:publicProfile()}];return renderView()}try{const s=await cloud.get(cloud.ref(cloud.db,'profiles')),d=s.val()||{},rows=Object.entries(d).map(([id,p])=>({id,p}));const i=rows.findIndex(x=>x.id===myId);if(i>=0)rows[i].p=publicProfile();else rows.push({id:myId,p:publicProfile()});if(token!==viewToken||currentView!=='leaders')return;leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50);renderView()}catch{leaderCache=[{id:myId,p:publicProfile()}];if(currentView==='leaders')renderView()}}
 async function loadFriends(){const token=++viewToken;if(!state.friends.length){friendCache=[];return}if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}const rows=await Promise.all(state.friends.map(async id=>({id,p:await fetchProfile(id)})));if(token===viewToken&&currentView==='friends'){friendCache=rows;renderView()}}
@@ -224,12 +224,73 @@ async function buyLot(key){if(marketBusy||!cloudReady)return;marketBusy=true;try
 async function takeLot(key){if(marketBusy||!cloudReady)return;marketBusy=true;try{const preview=(await cloud.get(cloud.ref(cloud.db,'market/'+key))).val();if(!preview||preview.sellerId!==myId)return toast('Лот недоступен');const lot=await claimLot(key);if(!lot)return;state.inventory.push(cleanItem({...lot,price:lot.originalPrice??lot.price}));commit();toast('Лот снят, номер возвращён')}catch{toast('Не удалось снять лот')}finally{marketBusy=false}}
 async function listItem(index){const it=state.inventory[index];if(!it||!cloudReady)return toast('Для рынка нужно подключение к облаку');const raw=prompt(`Цена продажи (вы получите 95%):`,Math.floor(it.price*1.5));if(raw===null)return;const price=Math.floor(finite(raw));if(price<100||price>1e10)return toast('Цена: от 100 ₽ до 10 млрд ₽');const key=`${Date.now()}_${myId}`,lot={...it,price,originalPrice:it.price,sellerId:myId,sellerName:myName,timestamp:Date.now()};try{await cloud.set(cloud.ref(cloud.db,'market/'+key),lot);const i=state.inventory.indexOf(it);if(i>=0)state.inventory.splice(i,1);else{await cloud.remove(cloud.ref(cloud.db,'market/'+key));return toast('Номер уже использован')}enforceProfile();commit();toast('Лот выставлен на рынок')}catch{toast('Не удалось выставить лот — номер остался в рюкзаке')}}
 function subscribePayouts(){unsubPayouts?.();if(!cloudReady)return;const base='payouts/'+myId,inflight=new Set();unsubPayouts=cloud.onValue(cloud.ref(cloud.db,base),snap=>{const d=snap.val()||{};Object.keys(d).forEach(async key=>{if(inflight.has(key))return;inflight.add(key);try{let claim=null;await cloud.runTransaction(cloud.ref(cloud.db,base+'/'+key),cur=>{claim=cur;return null});const amount=Math.floor(finite(claim?.amount));if(amount>0){state.balance+=amount;commit();toast(`Ваш номер купили: +${money(amount)}`)}}catch(e){console.warn(e)}finally{inflight.delete(key)}})})}
-async function syncEmail(){const email=$('#syncEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Введите корректный Email');if(!cloudReady)return toast('Нет подключения к облаку');const id=keySafe('email_'+email);try{const snap=await cloud.get(cloud.ref(cloud.db,'players/'+id)),data=snap.val();myId=id;myName=email.split('@')[0];localStorage.setItem('blum_email_id',id);localStorage.setItem('blum_user_name',myName);if(data)applyCloud(data);cloudReady=true;subscribePayouts();commit();closeScreen();toast(data?'Прогресс загружен':'Email привязан')}catch{toast('Не удалось синхронизировать')}}
+function subscribeGifts(){
+    unsubGifts?.();
+    if(!cloudReady)return;
+    const base='gifts/'+myId, inflight=new Set();
+    unsubGifts=cloud.onValue(cloud.ref(cloud.db,base),snap=>{
+        const d=snap.val()||{};
+        Object.keys(d).forEach(async key=>{
+            if(inflight.has(key))return;
+            inflight.add(key);
+            try{
+                let claimed=null;
+                await cloud.runTransaction(cloud.ref(cloud.db,base+'/'+key),cur=>{claimed=cur;return null});
+                if(claimed && claimed.item){
+                    state.inventory.push(cleanItem(claimed.item));
+                    commit();
+                    toast(`🎁 Подарок от ${claimed.senderName||'Игрока'}: ${claimed.item.phone}`);
+                }
+            }catch(e){console.warn(e)}
+            finally{inflight.delete(key)}
+        });
+    });
+}
+async function syncEmail(){const email=$('#syncEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Введите корректный Email');if(!cloudReady)return toast('Нет подключения к облаку');const id=keySafe('email_'+email);try{const snap=await cloud.get(cloud.ref(cloud.db,'players/'+id)),data=snap.val();myId=id;myName=email.split('@')[0];localStorage.setItem('blum_email_id',id);localStorage.setItem('blum_user_name',myName);if(data)applyCloud(data);cloudReady=true;subscribePayouts();subscribeGifts();commit();closeScreen();toast(data?'Прогресс загружен':'Email привязан')}catch{toast('Не удалось синхронизировать')}}
 function sellAll(){if(!state.inventory.length)return;const total=state.inventory.reduce((s,x)=>s+x.price,0);if(state.settings.warn&&total>=state.settings.warnAt&&!confirm(`Продать все номера за ${money(total)}?`))return;state.balance+=total;state.totalSold+=state.inventory.length;state.inventory=[];enforceProfile();commit();toast(`Получено ${money(total)}`)}
 function slotBuy(i){if(i!==state.wall.slotsUnlocked)return;const cost=i*25000;if(state.balance<cost)return toast('Недостаточно средств');if(!confirm(`Открыть слот за ${money(cost)}?`))return;state.balance-=cost;state.wall.slotsUnlocked++;commit()}
 function slotUpgrade(i){const it=state.wall.items[i];if(!it||it.lvl>=5)return;const cost=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));if(state.balance<cost)return toast('Недостаточно средств');state.balance-=cost;it.lvl++;commit();toast('Номер улучшен')}
 function wallTick(){const now=Date.now();if(state.wall.lastTick>now)state.wall.lastTick=now;const mins=Math.floor((now-state.wall.lastTick)/60000);if(mins>0){const paid=Math.min(mins,1440),income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0)*paid;state.wall.lastTick+=mins*60000;if(income>0){state.balance+=income;toast(`СИМ-стена: +${money(income)}`)}commit()}else if(currentView==='wall')renderView();const left=Math.max(0,Math.ceil((state.boostEnd-now)/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:''}
 async function resetProgress(){if(!confirm('Удалить прогресс Simkarta? Это действие нельзя отменить.'))return;busy=true;try{if(cloudReady){const old=state.username.toLowerCase(),pk=phoneKey(state.profileNumber);await Promise.allSettled([cloud.set(cloud.ref(cloud.db,'players/'+myId),null),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),null),old?cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined):null,pk?cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+pk),cur=>cur===myId?null:undefined):null])}}catch{}try{localStorage.removeItem(STORE);OLD_KEYS.forEach(k=>localStorage.removeItem('blum_'+k))}catch{}location.reload()}
+
+async function giftItem(index) {
+    const it = state.inventory[index];
+    if (!it || !cloudReady) return toast('Для подарка нужно подключение к облаку');
+    
+    const q = prompt(`Кому подарить номер ${it.phone}?\nВведите @юзернейм или номер из профиля друга:`, '');
+    if (!q) return;
+
+    try {
+        const found = await findPlayer(q);
+        if (!found || !found.p) return toast('Игрок не найден');
+        if (found.id === myId) return toast('Нельзя подарить номер самому себе');
+        
+        if (!confirm(`Подарить номер ${it.phone} игроку ${found.p.name || 'Игрок'}?`)) return;
+
+        // Удаляем из своего рюкзака
+        state.inventory.splice(index, 1);
+        enforceProfile();
+        commit();
+
+        // Отправляем через узел подарков
+        const giftKey = `${Date.now()}_${myId}`;
+        await cloud.set(cloud.ref(cloud.db, `gifts/${found.id}/${giftKey}`), {
+            item: it,
+            senderName: myName,
+            ts: Date.now()
+        });
+
+        toast(`🎁 Подарок отправлен игроку ${found.p.name || 'Игрок'}!`);
+        openScreen('inventory');
+    } catch (e) {
+        console.warn(e);
+        toast('Не удалось отправить подарок');
+        state.inventory.push(it);
+        commit();
+        openScreen('inventory');
+    }
+}
+
 $('#infoBtn').addEventListener('click',()=>openScreen('info'));
 $('#buy').addEventListener('click',generate);$('#sellCurrent').addEventListener('click',sellCurrent);$('#keepCurrent').addEventListener('click',keepCurrent);$('#shop').addEventListener('change',render);$('#country').addEventListener('click',()=>toast('Россия · стандартный пул номеров'));$('#bag').addEventListener('click',()=>openScreen('inventory'));$('#menuBtn').addEventListener('click',openMenu);$('#menuClose').addEventListener('click',closeMenu);$('#scrim').addEventListener('click',closeMenu);$('#sheetClose').addEventListener('click',closeScreen);document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#sheet').classList.contains('open'))closeScreen();else closeMenu()}});
 $('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openScreen(b.dataset.open)});
@@ -273,6 +334,7 @@ $('#sheetBody').addEventListener('click',async e=>{
 
     // Regular actions
     if(d.sell!==undefined)return inventorySell(Number(d.sell));
+    if(d.gift!==undefined)return giftItem(Number(d.gift));
     if(d.list!==undefined)return listItem(Number(d.list));
     if(d.slotBuy!==undefined)return slotBuy(Number(d.slotBuy));
     if(d.slotSet!==undefined){pickSlot=Number(d.slotSet);return openScreen('pick')}
