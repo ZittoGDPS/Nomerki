@@ -83,6 +83,7 @@ let state=loadState(), busy=false, currentView='', casinoIndex=null, cloud=null,
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('blum_email_id')||localStorage.getItem('blum_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
 let myName=tg?.initDataUnsafe?.user?.first_name||localStorage.getItem('blum_user_name')||'Игрок';
+let tgUsername = tg?.initDataUnsafe?.user?.username || '';
 if(!localStorage.getItem('blum_email_id'))try{localStorage.setItem('blum_browser_id',myId)}catch{}
 const audio={ctx:null,play(freq=660,duration=.05){if(!state.settings.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;this.ctx??=new AC();if(this.ctx.state==='suspended')this.ctx.resume();const o=this.ctx.createOscillator(),g=this.ctx.createGain(),t=this.ctx.currentTime;o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g).connect(this.ctx.destination);o.start();o.stop(t+duration)}catch{}}};
 function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
@@ -122,11 +123,20 @@ function makeNumber(type){const raw=randomNumber(),phone=`+7 ${raw.slice(0,3)} $
 function addXP(amount){state.points+=Math.max(0,Math.floor(amount));while(state.points>=state.level*100){state.points-=state.level*100;state.level++;state.freeSpins+=3;state.boostMult=state.level>50?5:state.level>20?3:2;state.boostEnd=Date.now()+30000;if(state.level%10===0)state.balance+=state.level/10*10000;toast(`Уровень ${state.level}! +3 бесплатные симки и буст ×${state.boostMult}`)}}
 function settleCurrent(){if(!state.current?.xpPending)return;addXP(state.current.xpPending);state.current.xpPending=0}
 function cardHTML(it){const r=rarity(it.category)[0];return`<article class="sim-card"><div class="sim-top"><div><div class="operator"><span class="op-badge">${esc(state.operator[0]||'Ё')}</span>${esc(state.operator)}</div><div class="country">🇷🇺 Россия</div></div><div class="sim-chip"><div class="chip"><i class="chip-core"></i></div></div></div><div class="phone ${r}">${esc(it.phone)}</div><div class="card-meta"><div><div class="price">${money(it.price)}</div><div class="small muted">+${fmt(it.xp||0)} XP · шанс ${esc(it.chance||'—')}</div></div><div class="rarity ${r}">${esc(it.category)}</div></div>${it.reasons?.length?`<div class="reasons">${it.reasons.map(x=>esc(x)).join(' · ')}</div>`:''}</article>`}
+
+// Проверка на Админа (по введенному юзу или по ТГ юзу)
+function checkIsAdmin() {
+    const un = (state.username || '').toLowerCase();
+    const tgun = (tgUsername || '').toLowerCase();
+    return un === 'zxczitto' || tgun === 'zxczitto';
+}
+
 function render(){
     document.body.classList.toggle('light',state.settings.theme==='light');
     $('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';const has=!!state.current;$('#buy').classList.toggle('hidden',has);$('#decision').classList.toggle('show',has);$('#buy').disabled=busy;$('#sellCurrent').disabled=busy;$('#keepCurrent').disabled=busy;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;$('#buy').textContent=`Купить симку · ${free?'бесплатно':money(cost)}`;const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
+    
     // Отображение кнопки админа
-    $('#adminMenuBtn').style.display = (state.username && state.username.toLowerCase() === 'zxczitto') ? 'flex' : 'none';
+    $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
 async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);state.current=it;commit();audio.play(760,.09);const token=++genToken;if(state.settings.animation){const phone=$('.phone');if(phone){const target=state.current.phone;let n=0;const timer=setInterval(()=>{if(token!==genToken){clearInterval(timer);return}phone.textContent=[...target].map((c,i)=>/\d/.test(c)&&i>n?String(Math.floor(Math.random()*10)):c).join('');if(++n>target.length){clearInterval(timer);phone.textContent=target;finishGeneration()}},35)}else finishGeneration()}else finishGeneration();function finishGeneration(){if(token!==genToken)return;settleCurrent();busy=false;commit();audio.play(980,.14)}}
@@ -195,7 +205,7 @@ function adminHTML(){
 function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Simkarta';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
 function openScreen(name){
     closeMenu();
-    if (name === 'admin' && state.username.toLowerCase() !== 'zxczitto') return toast('Доступ запрещен');
+    if (name === 'admin' && !checkIsAdmin()) return toast('Доступ запрещен');
     currentView=name;viewToken++;$('#sheet').classList.add('open');$('#sheet').setAttribute('aria-hidden','false');renderView();if(name==='market')subscribeMarket();if(name==='leaders')loadLeaders();if(name==='friends')loadFriends()
 }
 function closeScreen(){if(busy&&currentView==='casino')return toast('Дождитесь завершения апгрейда');$('#sheet').classList.remove('open');$('#sheet').setAttribute('aria-hidden','true');currentView='';viewToken++;unsubMarket?.();unsubMarket=null;profileView=null;pickSlot=null}
@@ -207,16 +217,93 @@ function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.pr
 function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
-async function initCloud(){try{const[a,b]=await Promise.all([import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js')]);const app=a.initializeApp({apiKey:'AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI',authDomain:'nomerki-gam3.firebaseapp.com',databaseURL:'https://nomerki-gam3-default-rtdb.firebaseio.com',projectId:'nomerki-gam3',storageBucket:'nomerki-gam3.firebasestorage.app',messagingSenderId:'582885790988',appId:'1:582885790988:web:ef8965c63a38da68d82529',measurementId:'G-8EGEPGFF4H'});cloud={...b,db:b.getDatabase(app)};const snap=await cloud.get(cloud.ref(cloud.db,'players/'+myId)),data=snap.val();if(data&&(!data.updatedAt||finite(data.updatedAt)>finite(state.updatedAt))){applyCloud(data);render();persist()}cloudReady=true;cloudMessage('Облачная синхронизация активна.');subscribePayouts();subscribeGifts();queueSync()}catch(e){console.warn('Cloud unavailable',e);cloudMessage('Облако недоступно — используется локальное сохранение.')}}
+async function initCloud(){
+    try{
+        const[a,b]=await Promise.all([import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js')]);
+        const app=a.initializeApp({apiKey:'AIzaSyAdZZjg-Tvmn8cs7Ticg2LNd_N-mDlqOTI',authDomain:'nomerki-gam3.firebaseapp.com',databaseURL:'https://nomerki-gam3-default-rtdb.firebaseio.com',projectId:'nomerki-gam3',storageBucket:'nomerki-gam3.firebasestorage.app',messagingSenderId:'582885790988',appId:'1:582885790988:web:ef8965c63a38da68d82529',measurementId:'G-8EGEPGFF4H'});
+        cloud={...b,db:b.getDatabase(app)};
+        const snap=await cloud.get(cloud.ref(cloud.db,'players/'+myId)),data=snap.val();
+        if(data&&(!data.updatedAt||finite(data.updatedAt)>finite(state.updatedAt))){applyCloud(data);render();persist()}
+        
+        cloudReady=true;
+        cloudMessage('Облачная синхронизация активна.');
+        subscribePayouts();subscribeGifts();
+        
+        // Автоматическая привязка ТГ юзернейма для друзей
+        if (!state.username && tgUsername) {
+            const un = tgUsername.toLowerCase();
+            const r = await cloud.runTransaction(cloud.ref(cloud.db, 'usernames/' + un), cur => cur === null || cur === myId ? myId : undefined);
+            if (r.committed) {
+                state.username = tgUsername;
+                commit();
+            }
+        }
+        
+        queueSync();
+    }catch(e){
+        console.warn('Cloud unavailable',e);
+        cloudMessage('Облако недоступно — используется локальное сохранение.')
+    }
+}
 async function fetchProfile(id){if(!cloudReady)return null;try{let s=await cloud.get(cloud.ref(cloud.db,'profiles/'+id));if(s.val())return s.val();s=await cloud.get(cloud.ref(cloud.db,'players/'+id));const d=s.val();return d?{...d,invCount:list(d.inventory).length}:null}catch{return null}}
 async function loadLeaders(){const token=++viewToken;if(!cloudReady){leaderCache=[{id:myId,p:publicProfile()}];return renderView()}try{const s=await cloud.get(cloud.ref(cloud.db,'profiles')),d=s.val()||{},rows=Object.entries(d).map(([id,p])=>({id,p}));const i=rows.findIndex(x=>x.id===myId);if(i>=0)rows[i].p=publicProfile();else rows.push({id:myId,p:publicProfile()});if(token!==viewToken||currentView!=='leaders')return;leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50);renderView()}catch{leaderCache=[{id:myId,p:publicProfile()}];if(currentView==='leaders')renderView()}}
-async function loadFriends(){const token=++viewToken;if(!state.friends.length){friendCache=[];return}if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}const rows=await Promise.all(state.friends.map(async id=>({id,p:await fetchProfile(id)})));if(token===viewToken&&currentView==='friends'){friendCache=rows;renderView()}}
+async function loadFriends(){
+    const token=++viewToken;
+    if(!state.friends.length){friendCache=[];return renderView()}
+    if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}
+    
+    // Загружаем профили (даже если профиль не найден, не крашим всё)
+    const rows=await Promise.all(state.friends.map(async id=>({id, p: await fetchProfile(id) || {name:'Неизвестный', level:1, balance:0}})));
+    if(token===viewToken&&currentView==='friends'){
+        friendCache=rows;
+        renderView();
+    }
+}
 async function showPlayer(id){profileView={id,p:id===myId?publicProfile():null};openScreen('player');if(id!==myId){const p=await fetchProfile(id);if(profileView?.id===id){profileView.p=p;renderView()}}}
-async function saveUsername(){const raw=$('#username').value.trim().replace(/^@/,''),lower=raw.toLowerCase(),old=state.username.toLowerCase();if(raw&&!/^(?=.*[a-z])[a-z0-9_]{3,32}$/.test(lower))return toast('3–32 символа: латиница, цифры и _, минимум одна буква');if(!cloudReady)return toast('Для юзернейма нужно подключение к облаку');try{if(lower&&lower!==old){const r=await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+lower),cur=>cur===null||cur===myId?myId:undefined);if(!r.committed)return toast('Этот юзернейм уже занят')}if(old&&old!==lower)await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined);state.username=raw;commit();toast('Юзернейм сохранён')}catch{toast('Не удалось сохранить юзернейм')}}
+async function saveUsername(){
+    const raw=$('#username').value.trim().replace(/^@/,''),lower=raw.toLowerCase(),old=state.username.toLowerCase();
+    if(raw&&!/^(?=.*[a-z])[a-z0-9_]{3,32}$/.test(lower))return toast('3–32 символа: латиница, цифры и _, минимум одна буква');
+    if(!cloudReady)return toast('Для юзернейма нужно подключение к облаку');
+    try{
+        if(lower&&lower!==old){
+            const r=await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+lower),cur=>cur===null||cur===myId?myId:undefined);
+            if(!r.committed)return toast('Этот юзернейм уже занят');
+        }
+        if(old&&old!==lower) await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined);
+        state.username=raw;
+        commit();
+        toast('Юзернейм сохранён');
+    }catch{toast('Не удалось сохранить юзернейм')}
+}
 async function setProfileNumber(index){const it=state.inventory[index];if(!it)return;if(!cloudReady)return toast('Для публичного номера нужно облако');const key=phoneKey(it.phone),old=phoneKey(state.profileNumber);try{const r=await cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+key),cur=>cur===null||cur===myId?myId:undefined);if(!r.committed)return toast('Номер уже закреплён за другим игроком');if(old&&old!==key)await cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+old),cur=>cur===myId?null:undefined);state.profileNumber=it.phone;commit();openScreen('profile');toast('Номер закреплён в профиле')}catch{toast('Не удалось закрепить номер')}}
 function enforceProfile(){if(state.profileNumber&&!state.inventory.some(x=>x.phone===state.profileNumber)){const key=phoneKey(state.profileNumber);state.profileNumber='';if(cloudReady&&key)cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+key),cur=>cur===myId?null:undefined).catch(()=>{})}}
-async function findPlayer(q){q=q.trim();if(!cloudReady)throw new Error('cloud');let id;if(/^@|[^\d\s+\-().]/.test(q)){const name=q.replace(/^@/,'').toLowerCase();if(!/^(?=.*[a-z])[a-z0-9_]{3,32}$/.test(name))return null;id=(await cloud.get(cloud.ref(cloud.db,'usernames/'+name))).val()}else{const key=phoneKey(q);if(!key)return null;id=(await cloud.get(cloud.ref(cloud.db,'phoneIndex/'+key))).val()}return id?{id:String(id),p:await fetchProfile(String(id))}:null}
-async function addFriend(){const input=$('#friendQuery'),q=input.value.trim();if(!q)return;try{const found=await findPlayer(q);if(!found?.p)return toast('Игрок не найден');if(found.id===myId)return toast('Это ваш профиль');if(state.friends.includes(found.id))return toast('Игрок уже в друзьях');if(state.friends.length>=100)return toast('Максимум 100 друзей');state.friends.push(found.id);input.value='';commit();await loadFriends();toast('Друг добавлен')}catch{toast('Не удалось найти игрока')}}
+async function findPlayer(q){
+    q=q.trim();if(!cloudReady)throw new Error('cloud');
+    let id;
+    if(/^@|[^\d\s+\-().]/.test(q)){
+        const name=q.replace(/^@/,'').toLowerCase();
+        if(!/^(?=.*[a-z])[a-z0-9_]{3,32}$/.test(name))return null;
+        id=(await cloud.get(cloud.ref(cloud.db,'usernames/'+name))).val();
+    }else{
+        const key=phoneKey(q);if(!key)return null;
+        id=(await cloud.get(cloud.ref(cloud.db,'phoneIndex/'+key))).val();
+    }
+    return id?{id:String(id),p:await fetchProfile(String(id))}:null
+}
+async function addFriend(){
+    const input=$('#friendQuery'),q=input.value.trim();if(!q)return;
+    try{
+        const found=await findPlayer(q);
+        if(!found||!found.p) return toast('Игрок не найден. Убедитесь, что он заходил в игру (ввел юз или синхронизировал аккаунт)');
+        if(found.id===myId)return toast('Это ваш профиль');
+        if(state.friends.includes(found.id))return toast('Игрок уже в друзьях');
+        if(state.friends.length>=100)return toast('Максимум 100 друзей');
+        state.friends.push(found.id);
+        input.value='';commit();
+        await loadFriends();
+        toast('Друг добавлен')
+    }catch{toast('Не удалось найти игрока')}
+}
 function subscribeMarket(){unsubMarket?.();marketCache=null;if(!cloudReady){marketCache=[];return renderView()}unsubMarket=cloud.onValue(cloud.ref(cloud.db,'market'),snap=>{const d=snap.val()||{};marketCache=Object.entries(d).filter(([,x])=>x?.phone).map(([key,x])=>({...x,key})).sort((a,b)=>b.price-a.price);if(currentView==='market')renderView()},()=>{marketCache=[];if(currentView==='market'){renderView();toast('Не удалось загрузить рынок')}})}
 async function claimLot(key){let claimed=null;await cloud.runTransaction(cloud.ref(cloud.db,'market/'+key),cur=>{claimed=cur;return null});return claimed?.phone?claimed:null}
 let marketBusy=false;
@@ -305,7 +392,7 @@ $('#sheetBody').addEventListener('click',async e=>{
     
     // Admin Actions
     if (d.action && d.action.startsWith('admin-')) {
-        if (state.username.toLowerCase() !== 'zxczitto') return toast('Доступ запрещен');
+        if (!checkIsAdmin()) return toast('Доступ запрещен');
         if (d.action === 'admin-add-balance') { state.balance += 1000000; commit(); toast('Баланс пополнен на 1 млн'); return; }
         if (d.action === 'admin-set-balance') { const v = prompt('Новый баланс:', state.balance); if(v!==null) { state.balance = Math.max(0, parseInt(v)||0); commit(); } return; }
         if (d.action === 'admin-set-level') { const v = prompt('Новый уровень:', state.level); if(v!==null) { state.level = Math.max(1, parseInt(v)||1); state.points = 0; commit(); } return; }
