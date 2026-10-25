@@ -106,11 +106,19 @@ function persist(){state.updatedAt=Date.now();try{localStorage.setItem(STORE,JSO
 function commit(){enforceProfile();state.maxBalance=Math.max(state.maxBalance,state.balance);render();persist();queueSync()}
 function rarity(cat){cat=String(cat||'');if(cat.includes('БРИЛЛИАНТ'))return['rarity-diamond',1000];if(cat.includes('ЗОЛОТ'))return['rarity-gold',150];if(cat.includes('СЕРЕБР'))return['rarity-silver',50];if(cat.includes('БРОНЗ'))return['rarity-bronze',25];if(cat.includes('УДАЧ'))return['rarity-lucky',30];return['rarity-common',cat.includes('КРАСИВ')?10:5]}
 function category(price){return price>=1e9?'БРИЛЛИАНТОВЫЙ':price>=1e6?'ЗОЛОТОЙ':price>=1e5?'СЕРЕБРЯНЫЙ':price>=1e4?'БРОНЗОВЫЙ':price>=1e3?'КРАСИВОЕ ОКОНЧАНИЕ':'Обычный'}
+
 function priceNumber(num,type){
-    const base={1:150,5:1250,20:10000}[type]||150,last2=num.slice(-2),last3=num.slice(-3),last4=num.slice(-4),reasons=[];
+    const base={1:150,5:1250,20:10000}[type]||150;
+    const last2=num.slice(-2),last3=num.slice(-3),last4=num.slice(-4),reasons=[];
     let mult=1;
+    
+    // Проверка топовых паттернов
     const run=num.match(/(\d)\1{2,}/g)?.sort((a,b)=>b.length-a.length)[0];
-    if(run){const n=run.length;mult*=({10:100000,9:10000,8:10000,7:2000,6:300,5:60,4:15,3:3})[n]||1;reasons.push(`${n} одинаковые цифры подряд`)}
+    if(run){
+        const n=run.length;
+        mult*=({10:100000,9:10000,8:10000,7:2000,6:300,5:60,4:15,3:3})[n]||1;
+        reasons.push(`${n} одинаковые цифры подряд`);
+    }
     if(num===[...num].reverse().join('')){mult*=20;reasons.push('Зеркальный номер')}
     const seq=s=>{const d=Number(s[1])-Number(s[0]);return Math.abs(d)===1&&[...s].every((x,i)=>!i||Number(x)-Number(s[i-1])===d)};
     if(seq(last4)){mult*=8;reasons.push(`Последовательность ${last4}`)}else if(seq(last3)){mult*=3;reasons.push(`Последовательность ${last3}`)}
@@ -119,20 +127,35 @@ function priceNumber(num,type){
     if(num.endsWith('000')){mult*=2;reasons.push('Круглое окончание')}else if(num.endsWith('00')){mult*=1.4;reasons.push('Два нуля в конце')}
     if(last2[0]===last2[1]&&!reasons.length){mult*=1.5;reasons.push(`Пара ${last2}`)}
     
-    // +5% шанс удачи на бронзовый/серебряный номер
-    if(Math.random() < 0.05){
-        mult *= (type === 1 ? 100 : type === 5 ? 80 : 10);
-        reasons.push('Бонус удачи (+5%)');
+    let price = Math.max(base, Math.floor(base*mult));
+    
+    // Если номер не дотянул до Золота, применяем новые базовые шансы
+    if (price < 1000000) {
+        const roll = Math.random() * 100;
+        if (roll < 25) { // 25% Бронза (было 15%)
+            price = 10000 + Math.floor(Math.random() * 90000);
+            reasons.push('Бронзовый');
+        } else if (roll < 40) { // 15% Серебро (было 5%)
+            price = 100000 + Math.floor(Math.random() * 900000);
+            reasons.push('Серебряный');
+        } else if (roll < 65) { // 25% Красивое окончание
+            price = 1000 + Math.floor(Math.random() * 9000);
+            reasons.push('Красивое окончание');
+        } else { // 35% Обычный
+            price = Math.max(150, Math.min(999, price));
+            reasons.push('Обычный');
+        }
     }
     
-    if(!reasons.length)reasons.push('Обычный номер без редких паттернов');
-    let price=Math.min(1e9,Math.max(base,Math.floor(base*mult)));
     const seven=new Date().getHours()===19&&num.endsWith('7');
     if(seven){price=Math.min(1e9,price*2);reasons.push('Час семёрок: цена ×2')}
-    const cat=category(price),
-    chance=cat==='Обычный'?'~50%':cat==='КРАСИВОЕ ОКОНЧАНИЕ'?'~30%':cat==='БРОНЗОВЫЙ'?'~20%':cat==='СЕРЕБРЯНЫЙ'?'~10%':cat==='ЗОЛОТОЙ'?'~1%':'< 0.001%';
-    return{price,category:cat,chance,reasons}
+    
+    const cat=category(price);
+    const chance = cat==='Обычный'?'~35%':cat==='КРАСИВОЕ ОКОНЧАНИЕ'?'~25%':cat==='БРОНЗОВЫЙ'?'~25%':cat==='СЕРЕБРЯНЫЙ'?'~15%':cat==='ЗОЛОТОЙ'?'~1%':'< 0.001%';
+    
+    return {price, category: cat, chance, reasons};
 }
+
 function randomNumber(){const a=crypto.getRandomValues(new Uint32Array(10));return[...a].map(x=>x%10).join('')}
 function makeNumber(type){const raw=randomNumber(),phone=`+7 ${raw.slice(0,3)} ${raw.slice(3,6)}-${raw.slice(6,8)}-${raw.slice(8)}`,data=priceNumber(raw,type),operators=[['Ёта',3],['Биглайн',2],['МСТ',1.5],['Могофон',1.2],['Тел 2',1]],op=operators[Math.floor(Math.random()*operators.length)];state.operator=op[0];const xp=Math.floor(rarity(data.category)[1]*op[1]*(Date.now()<state.boostEnd?state.boostMult:1));return{phone,...data,lvl:0,xp,xpPending:xp}}
 function addXP(amount){state.points+=Math.max(0,Math.floor(amount));while(state.points>=state.level*100){state.points-=state.level*100;state.level++;state.freeSpins+=3;state.boostMult=state.level>50?5:state.level>20?3:2;state.boostEnd=Date.now()+30000;if(state.level%10===0)state.balance+=state.level/10*10000;toast(`Уровень ${state.level}! +3 бесплатные симки и буст ×${state.boostMult}`)}}
@@ -218,19 +241,19 @@ function pickHTML(){return`<div class="section">${state.inventory.length?state.i
 function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return`<div class="section"><h3>${esc(p.name||'Игрок')}</h3><div class="row"><span>Уровень</span><span>${p.level||1}</span></div><div class="row"><span>Баланс</span><span>${money(p.balance)}</span></div><div class="row"><span>Сгенерировано</span><span>${fmt(p.totalGenerated)}</span></div><div class="row"><span>Номеров в рюкзаке</span><span>${fmt(p.invCount)}</span></div>${p.profileNumber?`<div class="row"><span>Номер для друзей</span><span>${esc(p.profileNumber)}</span></div>`:''}</div>`}
 
 function infoHTML(){
-    return `<div class="section"><h3>🎲 Шансы выпадения (Базовые)</h3>
+    return `<div class="section"><h3>🎲 Шансы выпадения</h3>
         <div class="row"><span class="rarity-diamond">💎 Бриллиантовый:</span><span>&lt; 0.001%</span></div>
         <div class="row"><span class="rarity-gold">🥇 Золотой:</span><span>~1%</span></div>
-        <div class="row"><span class="rarity-silver">🥈 Серебряный:</span><span>~10%</span></div>
-        <div class="row"><span class="rarity-bronze">🥉 Бронзовый:</span><span>~20%</span></div>
-        <div class="row"><span class="rarity-lucky">✨ Красивое окончание:</span><span>~30%</span></div>
-        <div class="row"><span class="rarity-common">📱 Обычный:</span><span>~50%</span></div>
+        <div class="row"><span class="rarity-silver">🥈 Серебряный:</span><span>~15%</span></div>
+        <div class="row"><span class="rarity-bronze">🥉 Бронзовый:</span><span>~25%</span></div>
+        <div class="row"><span class="rarity-lucky">✨ Красивое окончание:</span><span>~25%</span></div>
+        <div class="row"><span class="rarity-common">📱 Обычный:</span><span>~35%</span></div>
     </div>
     <div class="section"><h3>🏪 Шансы для 3-х ячеек</h3>
-        <div class="small muted" style="margin-bottom:10px;">Бонус удачи (+5%) гарантирует выпадение Бронзы или Серебра в любом магазине.</div>
-        <div class="row"><span>🏪 Ларёк (1к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
-        <div class="row"><span>🏬 Магазин (5к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
-        <div class="row"><span>💎 Ювелирный (20к):</span><span>Бронза ~20%, Серебро ~10%</span></div>
+        <div class="small muted" style="margin-bottom:10px;">Базовые шансы одинаковы для всех магазинов. Топовые паттерны (Зеркальный, 4+ одинаковых) перебивают базовую рулетку.</div>
+        <div class="row"><span>🏪 Ларёк (1к):</span><span>Стандартные</span></div>
+        <div class="row"><span>🏬 Магазин (5к):</span><span>Стандартные</span></div>
+        <div class="row"><span>💎 Ювелирный (20к):</span><span>Стандартные</span></div>
     </div>
     <div class="section"><h3>Особенности</h3>
         <div class="row"><span>Час семёрок:</span><span class="small muted" style="text-align:right">С 19:00 до 20:00 номера с 7 на конце ×2</span></div>
