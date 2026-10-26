@@ -91,10 +91,10 @@ const phoneKey=s=>{let d=digits(s);if(d.length===11&&'78'.includes(d[0]))d=d.sli
 const list=v=>Array.isArray(v)?v:Object.values(v||{});
 function cleanItem(x){if(!x?.phone)return null;return{phone:String(x.phone),price:Math.max(0,Math.floor(finite(x.price))),category:String(x.category||'Обычный'),chance:String(x.chance||''),reasons:Array.isArray(x.reasons)?x.reasons.map(String):[],lvl:Math.max(0,Math.min(5,Math.floor(finite(x.lvl))))}}
 function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(finite(w?.slotsUnlocked,1)))),items:Array.from({length:10},(_,i)=>cleanItem(w?.items?.[i])),lastTick:finite(w?.lastTick,Date.now())}}
-function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~50%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
+function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
 let isNewStarter = false;
 function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
-let state=loadState(), busy=false, currentView='', friendsTab='list', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, unsubFriendReqs=null, unsubFriendAcc=null, genToken=0, currentReqBannerId=null;
+let state=loadState(), busy=false, currentView='', friendsTab='list', leaderboardTab='balance', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, unsubFriendReqs=null, unsubFriendAcc=null, genToken=0, currentReqBannerId=null;
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('blum_email_id')||localStorage.getItem('blum_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
 let myName=tg?.initDataUnsafe?.user?.first_name||localStorage.getItem('blum_user_name')||'Игрок';
@@ -112,7 +112,6 @@ function priceNumber(num,type){
     const last2=num.slice(-2),last3=num.slice(-3),last4=num.slice(-4),reasons=[];
     let mult=1;
     
-    // Проверка топовых паттернов
     const run=num.match(/(\d)\1{2,}/g)?.sort((a,b)=>b.length-a.length)[0];
     if(run){
         const n=run.length;
@@ -129,21 +128,27 @@ function priceNumber(num,type){
     
     let price = Math.max(base, Math.floor(base*mult));
     
-    // Если номер не дотянул до Золота, применяем новые базовые шансы
     if (price < 1000000) {
         const roll = Math.random() * 100;
-        if (roll < 25) { // 25% Бронза (было 15%)
-            price = 10000 + Math.floor(Math.random() * 90000);
-            reasons.push('Бронзовый');
-        } else if (roll < 40) { // 15% Серебро (было 5%)
-            price = 100000 + Math.floor(Math.random() * 900000);
-            reasons.push('Серебряный');
-        } else if (roll < 65) { // 25% Красивое окончание
-            price = 1000 + Math.floor(Math.random() * 9000);
-            reasons.push('Красивое окончание');
-        } else { // 35% Обычный
-            price = Math.max(150, Math.min(999, price));
-            reasons.push('Обычный');
+        
+        if (type === 1) { // Ларёк 1к
+            if (roll < 5) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (5%)'); }
+            else if (roll < 20) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (15%)'); }
+            else if (roll < 45) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (25%)'); }
+            else if (roll < 70) { price = 1000 + Math.random()*9000; reasons.push('Красивое (25%)'); }
+            else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (30%)'); }
+        } else if (type === 5) { // Магазин 5к
+            if (roll < 5) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (5%)'); }
+            else if (roll < 25) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (20%)'); }
+            else if (roll < 55) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (30%)'); }
+            else if (roll < 85) { price = 1000 + Math.random()*9000; reasons.push('Красивое (30%)'); }
+            else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (15%)'); }
+        } else if (type === 20) { // Ювелирный 20к
+            if (roll < 7) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (7%)'); }
+            else if (roll < 32) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (25%)'); }
+            else if (roll < 67) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (35%)'); }
+            else if (roll < 97) { price = 1000 + Math.random()*9000; reasons.push('Красивое (30%)'); }
+            else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (3%)'); }
         }
     }
     
@@ -151,7 +156,13 @@ function priceNumber(num,type){
     if(seven){price=Math.min(1e9,price*2);reasons.push('Час семёрок: цена ×2')}
     
     const cat=category(price);
-    const chance = cat==='Обычный'?'~35%':cat==='КРАСИВОЕ ОКОНЧАНИЕ'?'~25%':cat==='БРОНЗОВЫЙ'?'~25%':cat==='СЕРЕБРЯНЫЙ'?'~15%':cat==='ЗОЛОТОЙ'?'~1%':'< 0.001%';
+    let chance = 'Зависит от режима';
+    if(cat==='БРИЛЛИАНТОВЫЙ') chance = '< 0.001%';
+    else if(cat==='ЗОЛОТОЙ') chance = type===20?'~7%':'~5%';
+    else if(cat==='СЕРЕБРЯНЫЙ') chance = type===1?'~15%':type===5?'~20%':'~25%';
+    else if(cat==='БРОНЗОВЫЙ') chance = type===1?'~25%':type===5?'~30%':'~35%';
+    else if(cat==='КРАСИВОЕ ОКОНЧАНИЕ') chance = type===1?'~25%':type===5?'~30%':'~30%';
+    else if(cat==='Обычный') chance = type===1?'~30%':type===5?'~15%':'~3%';
     
     return {price, category: cat, chance, reasons};
 }
@@ -162,7 +173,6 @@ function addXP(amount){state.points+=Math.max(0,Math.floor(amount));while(state.
 function settleCurrent(){if(!state.current?.xpPending)return;addXP(state.current.xpPending);state.current.xpPending=0}
 function cardHTML(it){const r=rarity(it.category)[0];return`<article class="sim-card"><div class="sim-top"><div><div class="operator"><span class="op-badge">${esc(state.operator[0]||'Ё')}</span>${esc(state.operator)}</div><div class="country">🇷🇺 Россия</div></div><div class="sim-chip"><div class="chip"><i class="chip-core"></i></div></div></div><div class="phone ${r}">${esc(it.phone)}</div><div class="card-meta"><div><div class="price">${money(it.price)}</div><div class="small muted">+${fmt(it.xp||0)} XP · шанс ${esc(it.chance||'—')}</div></div><div class="rarity ${r}">${esc(it.category)}</div></div>${it.reasons?.length?`<div class="reasons">${it.reasons.map(x=>esc(x)).join(' · ')}</div>`:''}</article>`}
 
-// Проверка на Админа (по введенному юзу или по ТГ юзу)
 function checkIsAdmin() {
     const un = (state.username || '').toLowerCase();
     const tgun = (tgUsername || '').toLowerCase();
@@ -173,7 +183,6 @@ function render(){
     document.body.classList.toggle('light',state.settings.theme==='light');
     $('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';const has=!!state.current;$('#buy').classList.toggle('hidden',has);$('#decision').classList.toggle('show',has);$('#buy').disabled=busy;$('#sellCurrent').disabled=busy;$('#keepCurrent').disabled=busy;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;$('#buy').textContent=`Купить симку · ${free?'бесплатно':money(cost)}`;const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
     
-    // Отображение кнопки админа
     $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
@@ -191,7 +200,7 @@ function casinoHTML(){const it=state.inventory[casinoIndex];return`<div class="s
 function bestBlock(){const b=state.bestNumber;return b?`<div class="section"><h3>Лучший номер</h3>${itemRow(b,0)}</div>`:''}
 function profileHTML(){const inv=state.inventory.reduce((s,x)=>s+x.price,0);return`${bestBlock()}<div class="section"><h3>Прогресс</h3>${[['Уровень',state.level],['Опыт',`${state.points} / ${state.level*100}`],['Баланс',money(state.balance)],['Максимальный баланс',money(state.maxBalance)],['Сгенерировано',fmt(state.totalGenerated)],['Продано',fmt(state.totalSold)],['Стоимость рюкзака',money(inv)]].map(x=>`<div class="row"><span>${x[0]}</span><span>${x[1]}</span></div>`).join('')}</div><div class="section"><h3>Публичный профиль</h3><label class="small muted">Юзернейм</label><input class="input" id="username" value="${esc(state.username)}" placeholder="@username" maxlength="33" autocomplete="off"><button class="wide" data-action="save-username">Сохранить юзернейм</button><p class="small muted">Номер, по которому друзья смогут найти вас:</p><button class="wide green" data-action="profile-number">Выбрать из рюкзака</button>${state.profileNumber?`<div class="row"><span>${esc(state.profileNumber)}</span><button class="mini red" data-action="clear-profile-number">Убрать</button></div>`:''}</div>`}
 function settingsHTML(){const s=state.settings;return`<div class="section"><h3>Интерфейс</h3><label class="row"><span>Светлая тема</span><span class="switch"><input id="setTheme" type="checkbox" ${s.theme==='light'?'checked':''}></span></label><label class="row"><span>Анимация</span><span class="switch"><input id="setAnimation" type="checkbox" ${s.animation?'checked':''}></span></label><label class="row"><span>Звуки</span><span class="switch"><input id="setSound" type="checkbox" ${s.sound?'checked':''}></span></label></div><div class="section"><h3>Продажа</h3><label class="row"><span>Предупреждать о дорогих номерах</span><input id="setWarn" type="checkbox" ${s.warn?'checked':''}></label><label class="small muted">Порог предупреждения, ₽</label><input class="input" id="setWarnAt" type="number" min="0" value="${s.warnAt}"></div><div class="section"><h3>Синхронизация по Email</h3><p class="small muted">Email используется как идентификатор сохранения. Это не парольная авторизация.</p><input class="input" id="syncEmail" type="email" placeholder="your@mail.com" autocomplete="email"><button class="wide" data-action="sync-email">Загрузить / привязать</button></div><div class="section"><button class="wide red" data-action="reset">Сбросить прогресс</button></div>`}
-function personRow(id,p,i=0,showRemove=false){const rc=i===1?'top1':i===2?'top2':i===3?'top3':'';return`<div class="list-item ${rc}"><button class="item-main" style="background:none;color:inherit;text-align:left" data-player="${esc(id)}"><b>${i?`#${i} `:''}${esc(p?.name||'Игрок')}${id===myId?' (Вы)':''}</b><div class="small muted">${p?.username?'@'+esc(p.username)+' · ':''}ур. ${p?.level||1}</div></button><div class="item-price">${money(p?.balance)}</div>${showRemove&&id!==myId?`<button class="mini red" data-friend-remove="${esc(id)}">✕</button>`:''}</div>`}
+function personRow(id,p,i=0,showRemove=false,customValue=null){const rc=i===1?'top1':i===2?'top2':i===3?'top3':'';const val=customValue!==null?customValue:money(p?.balance);return`<div class="list-item ${rc}"><button class="item-main" style="background:none;color:inherit;text-align:left" data-player="${esc(id)}"><b>${i?`#${i} `:''}${esc(p?.name||'Игрок')}${id===myId?' (Вы)':''}</b><div class="small muted">${p?.username?'@'+esc(p.username)+' · ':''}ур. ${p?.level||1}</div></button><div class="item-price" style="text-align:right;">${val}</div>${showRemove&&id!==myId?`<button class="mini red" data-friend-remove="${esc(id)}">✕</button>`:''}</div>`}
 
 function friendsHTML(){
     let html = `<div class="tabs-row">
@@ -236,24 +245,49 @@ function friendsHTML(){
 }
 
 function marketHTML(){return`<div id="marketList">${marketCache===null?'<div class="empty-hint">Загрузка…</div>':marketCache.length?marketCache.map(it=>`<div class="section">${itemRow(it,0,it.sellerId===myId?`<button class="mini red" data-market-take="${esc(it.key)}">Снять</button>`:`<button class="mini green" data-market-buy="${esc(it.key)}">Купить</button>`)}<div class="small muted">Продавец: ${esc(it.sellerName||'Игрок')}</div></div>`).join(''):'<div class="empty-hint">На рынке пока нет лотов.</div>'}</div>`}
-function leadersHTML(){return`<div class="section" id="leaderList">${leaderCache.length?leaderCache.map((x,i)=>personRow(x.id,x.p,i+1, false)).join(''):'<div class="empty-hint">Загрузка…</div>'}</div>`}
+function leadersHTML(){
+    let html = `<div class="tabs-row">
+        <button class="tab-btn ${leaderboardTab==='balance'?'active':''}" onclick="setLeaderboardTab('balance')">💰 По балансу</button>
+        <button class="tab-btn ${leaderboardTab==='best'?'active':''}" onclick="setLeaderboardTab('best')">🏅 По лучшему номеру</button>
+    </div>`;
+    
+    html += `<div class="section" id="leaderList">`;
+    if (leaderCache.length) {
+        html += leaderCache.map((x,i) => {
+            if (leaderboardTab === 'best') {
+                const bn = x.p.bestNumber;
+                const numHtml = bn ? `<span class="${rarity(bn.category)[0]}" style="font-family:monospace;">${esc(bn.phone)}</span><br><span class="small muted">${money(bn.price)}</span>` : 'Нет';
+                return personRow(x.id, x.p, i+1, false, numHtml);
+            } else {
+                return personRow(x.id, x.p, i+1, false);
+            }
+        }).join('');
+    } else {
+        html += '<div class="empty-hint">Загрузка…</div>';
+    }
+    html += `</div>`;
+    return html;
+}
 function pickHTML(){return`<div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-pick="${i}">Выбрать</button>`)).join(''):'<div class="empty-hint">В рюкзаке нет номеров.</div>'}</div>`}
 function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return`<div class="section"><h3>${esc(p.name||'Игрок')}</h3><div class="row"><span>Уровень</span><span>${p.level||1}</span></div><div class="row"><span>Баланс</span><span>${money(p.balance)}</span></div><div class="row"><span>Сгенерировано</span><span>${fmt(p.totalGenerated)}</span></div><div class="row"><span>Номеров в рюкзаке</span><span>${fmt(p.invCount)}</span></div>${p.profileNumber?`<div class="row"><span>Номер для друзей</span><span>${esc(p.profileNumber)}</span></div>`:''}</div>`}
 
 function infoHTML(){
-    return `<div class="section"><h3>🎲 Шансы выпадения</h3>
-        <div class="row"><span class="rarity-diamond">💎 Бриллиантовый:</span><span>&lt; 0.001%</span></div>
-        <div class="row"><span class="rarity-gold">🥇 Золотой:</span><span>~1%</span></div>
-        <div class="row"><span class="rarity-silver">🥈 Серебряный:</span><span>~15%</span></div>
-        <div class="row"><span class="rarity-bronze">🥉 Бронзовый:</span><span>~25%</span></div>
-        <div class="row"><span class="rarity-lucky">✨ Красивое окончание:</span><span>~25%</span></div>
-        <div class="row"><span class="rarity-common">📱 Обычный:</span><span>~35%</span></div>
-    </div>
-    <div class="section"><h3>🏪 Шансы для 3-х ячеек</h3>
-        <div class="small muted" style="margin-bottom:10px;">Базовые шансы одинаковы для всех магазинов. Топовые паттерны (Зеркальный, 4+ одинаковых) перебивают базовую рулетку.</div>
-        <div class="row"><span>🏪 Ларёк (1к):</span><span>Стандартные</span></div>
-        <div class="row"><span>🏬 Магазин (5к):</span><span>Стандартные</span></div>
-        <div class="row"><span>💎 Ювелирный (20к):</span><span>Стандартные</span></div>
+    return `<div class="section"><h3>🎲 Шансы выпадения по режимам</h3>
+        <div class="small muted" style="margin-bottom:10px;">Топовые паттерны (Зеркальный, 4+ одинаковых) перебивают базовую рулетку.</div>
+        
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px; font-weight:bold; font-size:13px; color:var(--muted);">
+            <span>Редкость</span>
+            <span>1к</span>
+            <span>5к</span>
+            <span>20к</span>
+        </div>
+        
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-diamond">💎 Бриллиант:</span><span>< 0.001%</span><span>< 0.001%</span><span>< 0.001%</span></div>
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-gold">🥇 Золото:</span><span>5%</span><span>5%</span><span style="color:var(--green)">7%</span></div>
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-silver">🥈 Серебро:</span><span>15%</span><span>20%</span><span style="color:var(--green)">25%</span></div>
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-bronze">🥉 Бронза:</span><span>25%</span><span>30%</span><span style="color:var(--green)">35%</span></div>
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-lucky">✨ Красивое:</span><span>25%</span><span>30%</span><span>30%</span></div>
+        <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-common">📱 Обычный:</span><span>30%</span><span>15%</span><span>3%</span></div>
     </div>
     <div class="section"><h3>Особенности</h3>
         <div class="row"><span>Час семёрок:</span><span class="small muted" style="text-align:right">С 19:00 до 20:00 номера с 7 на конце ×2</span></div>
@@ -287,6 +321,11 @@ window.setFriendsTab = function(tab) {
     renderView();
 };
 
+window.setLeaderboardTab = function(tab) {
+    leaderboardTab = tab;
+    loadLeaders();
+};
+
 function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Simkarta';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
 function openScreen(name){
     closeMenu();
@@ -314,7 +353,6 @@ async function initCloud(){
         cloudMessage('Облачная синхронизация активна.');
         subscribePayouts();subscribeGifts();subscribeFriendReqs();
         
-        // Автоматическая привязка ТГ юзернейма для друзей
         if (!state.username && tgUsername) {
             const un = tgUsername.toLowerCase();
             const r = await cloud.runTransaction(cloud.ref(cloud.db, 'usernames/' + un), cur => cur === null || cur === myId ? myId : undefined);
@@ -331,13 +369,32 @@ async function initCloud(){
     }
 }
 async function fetchProfile(id){if(!cloudReady)return null;try{let s=await cloud.get(cloud.ref(cloud.db,'profiles/'+id));if(s.val())return s.val();s=await cloud.get(cloud.ref(cloud.db,'players/'+id));const d=s.val();return d?{...d,invCount:list(d.inventory).length}:null}catch{return null}}
-async function loadLeaders(){const token=++viewToken;if(!cloudReady){leaderCache=[{id:myId,p:publicProfile()}];return renderView()}try{const s=await cloud.get(cloud.ref(cloud.db,'profiles')),d=s.val()||{},rows=Object.entries(d).map(([id,p])=>({id,p}));const i=rows.findIndex(x=>x.id===myId);if(i>=0)rows[i].p=publicProfile();else rows.push({id:myId,p:publicProfile()});if(token!==viewToken||currentView!=='leaders')return;leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50);renderView()}catch{leaderCache=[{id:myId,p:publicProfile()}];if(currentView==='leaders')renderView()}}
+async function loadLeaders(){
+    const token=++viewToken;
+    if(!cloudReady){leaderCache=[{id:myId,p:publicProfile()}];return renderView()}
+    try{
+        const s=await cloud.get(cloud.ref(cloud.db,'profiles')),d=s.val()||{},rows=Object.entries(d).map(([id,p])=>({id,p}));
+        const i=rows.findIndex(x=>x.id===myId);
+        if(i>=0)rows[i].p=publicProfile();else rows.push({id:myId,p:publicProfile()});
+        
+        if(token!==viewToken||currentView!=='leaders')return;
+        
+        if (leaderboardTab === 'balance') {
+            leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50);
+        } else {
+            leaderCache=rows.sort((a,b)=> (b.p.bestNumber?.price || 0) - (a.p.bestNumber?.price || 0)).slice(0,50);
+        }
+        renderView();
+    }catch{
+        leaderCache=[{id:myId,p:publicProfile()}];
+        if(currentView==='leaders')renderView()
+    }
+}
 async function loadFriends(){
     const token=++viewToken;
     if(!state.friends.length){friendCache=[];return renderView()}
     if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}
     
-    // Загружаем профили
     const rows=await Promise.all(state.friends.map(async id=>({id, p: await fetchProfile(id) || {name:'Неизвестный', level:1, balance:0}})));
     if(token===viewToken&&currentView==='friends'){
         friendCache=rows;
@@ -384,7 +441,6 @@ async function addFriend(){
         if(found.id===myId)return toast('Это ваш профиль');
         if(state.friends.includes(found.id))return toast('Игрок уже в друзьях');
         
-        // Отправляем заявку
         await cloud.set(cloud.ref(cloud.db, 'friendRequests/' + found.id + '/' + myId), {
             senderName: myName,
             ts: Date.now()
@@ -543,12 +599,10 @@ async function giftItem(index) {
         
         if (!confirm(`Подарить номер ${it.phone} игроку ${found.p.name || 'Игрок'}?`)) return;
 
-        // Удаляем из своего рюкзака
         state.inventory.splice(index, 1);
         enforceProfile();
         commit();
 
-        // Отправляем через узел подарков
         const giftKey = `${Date.now()}_${myId}`;
         await cloud.set(cloud.ref(cloud.db, `gifts/${found.id}/${giftKey}`), {
             item: it,
@@ -579,7 +633,6 @@ $('#sheetBody').addEventListener('click',async e=>{
     audio.play();
     const d=b.dataset;
     
-    // Admin Actions
     if (d.action && d.action.startsWith('admin-')) {
         if (!checkIsAdmin()) return toast('Доступ запрещен');
         if (d.action === 'admin-add-balance') { state.balance += 1000000; commit(); toast('Баланс пополнен на 1 млн'); return; }
@@ -592,7 +645,7 @@ $('#sheetBody').addEventListener('click',async e=>{
             commit(); closeScreen(); return; 
         }
         if (d.action === 'admin-spawn-gold') { 
-            state.current = { phone: '+7 888 888-88-88', price: 1000000, category: 'ЗОЛОТОЙ', chance: '~1%', reasons: ['Админ подарок'], lvl: 0, xp: 150, xpPending: 150 };
+            state.current = { phone: '+7 888 888-88-88', price: 1000000, category: 'ЗОЛОТОЙ', chance: '~5%', reasons: ['Админ подарок'], lvl: 0, xp: 150, xpPending: 150 };
             commit(); closeScreen(); return; 
         }
         if (d.action === 'admin-spawn-custom') {
@@ -608,7 +661,6 @@ $('#sheetBody').addEventListener('click',async e=>{
         return;
     }
 
-    // Regular actions
     if(d.sell!==undefined)return inventorySell(Number(d.sell));
     if(d.gift!==undefined)return giftItem(Number(d.gift));
     if(d.list!==undefined)return listItem(Number(d.list));
