@@ -108,6 +108,30 @@
             margin-top: 3px;
         }
 
+        /* Вкладки */
+        .tabs-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 15px 0 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: #0088cc;
+            color: white;
+        }
+
         /* Список */
         #leaderboard-list {
             flex: 1;
@@ -166,14 +190,35 @@
             white-space: nowrap;
             font-size: 15px;
         }
+        .leader-val-box {
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
         .leader-balance {
             font-weight: bold;
             color: #28a745;
             font-size: 15px;
-            flex-shrink: 0;
-            margin-left: 10px;
         }
         .leader-item.is-me .leader-balance { color: #1e7e34; }
+
+        .best-num-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .best-num-phone {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .best-num-price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 13px;
+        }
 
         /* ТОП 3 */
         .leader-item.top1 {
@@ -197,6 +242,14 @@
             box-shadow: 0 0 10px rgba(205, 127, 50, 0.6);
         }
         .leader-item.top3 .leader-avatar { background: #8b4513; }
+
+        /* Редкости для номеров */
+        .rarity-diamond { color: #00ffff !important; text-shadow: 0 0 5px rgba(0,255,255,0.5); }
+        .rarity-gold { color: #ffd700 !important; }
+        .rarity-silver { color: #b0b0b0 !important; }
+        .rarity-bronze { color: #cd7f32 !important; }
+        .rarity-common { color: var(--text-main) !important; }
+        .rarity-lucky { color: #ff007f !important; }
 
         /* Состояния */
         .loading-state, .empty-state, .error-state {
@@ -236,6 +289,7 @@
         }
         #my-position-inner .leader-rank { color: white !important; }
         #my-position-inner .leader-balance { color: #ffcc00 !important; }
+        #my-position-inner .best-num-phone, #my-position-inner .best-num-price { color: #ffcc00 !important; }
         #my-position-inner .leader-avatar { background: rgba(255,255,255,0.25); }
     </style>
 </head>
@@ -259,6 +313,11 @@
             <div class="stat-value" id="stat-my-rank">—</div>
             <div class="stat-label">Моя позиция</div>
         </div>
+    </div>
+
+    <div class="tabs-row">
+        <button class="tab-btn active" id="tab-balance" onclick="switchTab('balance')">💰 По балансу</button>
+        <button class="tab-btn" id="tab-best" onclick="switchTab('best')">🏅 По лучшему номеру</button>
     </div>
 
     <div id="leaderboard-list">
@@ -298,11 +357,43 @@
             const listEl = document.getElementById('leaderboard-list');
             const refreshBtn = document.getElementById('btn-refresh');
             let currentPlayers = [];
+            let currentTab = 'balance'; // 'balance' | 'best'
 
             function escapeHtml(str) {
                 const div = document.createElement('div');
                 div.textContent = str == null ? '' : String(str);
                 return div.innerHTML;
+            }
+
+            function getRarityClass(category) {
+                const cat = String(category || '').toUpperCase();
+                if (cat.includes('БРИЛЛИАНТ')) return 'rarity-diamond';
+                if (cat.includes('ЗОЛОТ')) return 'rarity-gold';
+                if (cat.includes('СЕРЕБР')) return 'rarity-silver';
+                if (cat.includes('БРОНЗ')) return 'rarity-bronze';
+                if (cat.includes('КРАСИВ') || cat.includes('УДАЧ') || cat.includes('ЗЕРКАЛЬ')) return 'rarity-lucky';
+                return 'rarity-common';
+            }
+
+            function formatNumber(val) {
+                return (val || 0).toLocaleString('ru-RU');
+            }
+
+            function getValueHtml(p) {
+                if (currentTab === 'balance') {
+                    return `<div class="leader-balance">${formatNumber(p.balance)} ₽</div>`;
+                } else {
+                    if (!p.bestNumber || !p.bestNumber.phone) {
+                        return `<div class="leader-val-box" style="color: var(--text-sub); font-size: 13px;">Нет</div>`;
+                    }
+                    const rClass = getRarityClass(p.bestNumber.category);
+                    return `
+                        <div class="best-num-box">
+                            <div class="best-num-phone ${rClass}">${escapeHtml(p.bestNumber.phone)}</div>
+                            <div class="best-num-price">${formatNumber(p.bestNumber.price)} ₽</div>
+                        </div>
+                    `;
+                }
             }
 
             function renderPlayers(players) {
@@ -312,7 +403,16 @@
                     return;
                 }
 
-                const top = players.slice(0, 50);
+                // Сортируем в зависимости от вкладки
+                const sorted = [...players].sort((a, b) => {
+                    if (currentTab === 'balance') {
+                        return b.balance - a.balance;
+                    } else {
+                        return (b.bestNumber?.price || 0) - (a.bestNumber?.price || 0);
+                    }
+                });
+
+                const top = sorted.slice(0, 50);
 
                 listEl.innerHTML = '';
                 top.forEach((p, i) => {
@@ -324,27 +424,31 @@
                         <div class="leader-rank ${rankClass}">#${i + 1}</div>
                         <div class="leader-avatar">${escapeHtml(p.avatar)}</div>
                         <div class="leader-name">${escapeHtml(p.name)}${isMe ? ' (Вы)' : ''}</div>
-                        <div class="leader-balance">${p.balance.toLocaleString('ru-RU')} ₽</div>
+                        <div class="leader-val-box">
+                            ${getValueHtml(p)}
+                        </div>
                     `;
                     listEl.appendChild(div);
                 });
 
                 // Находим мою позицию
-                const myIndex = players.findIndex(p => p.id === myId);
+                const myIndex = sorted.findIndex(p => p.id === myId);
                 const myPosBox = document.getElementById('my-position');
                 const myRankEl = document.getElementById('stat-my-rank');
 
                 if (myIndex !== -1) {
                     myRankEl.innerText = `#${myIndex + 1}`;
                     if (myIndex >= 50) {
-                        const me = players[myIndex];
+                        const me = sorted[myIndex];
                         myPosBox.style.display = 'block';
                         myPosBox.innerHTML = `
                             <div id="my-position-inner">
                                 <div class="leader-rank">#${myIndex + 1}</div>
                                 <div class="leader-avatar">${escapeHtml(me.avatar)}</div>
                                 <div class="leader-name">${escapeHtml(me.name)} (Вы)</div>
-                                <div class="leader-balance">${me.balance.toLocaleString('ru-RU')} ₽</div>
+                                <div class="leader-val-box">
+                                    ${getValueHtml(me)}
+                                </div>
                             </div>
                         `;
                     } else {
@@ -354,6 +458,13 @@
                     myRankEl.innerText = '—';
                     myPosBox.style.display = 'none';
                 }
+            }
+
+            function switchTab(tab) {
+                currentTab = tab;
+                document.getElementById('tab-balance').classList.toggle('active', tab === 'balance');
+                document.getElementById('tab-best').classList.toggle('active', tab === 'best');
+                renderPlayers(currentPlayers);
             }
 
             function loadLeaderboard() {
@@ -380,12 +491,12 @@
                                 id,
                                 name,
                                 balance: Number(p.balance) || 0,
-                                avatar: name.charAt(0).toUpperCase() || '?'
+                                avatar: name.charAt(0).toUpperCase() || '?',
+                                bestNumber: p.bestNumber || null // Добавляем лучший номер
                             });
                         }
                     }
 
-                    players.sort((a, b) => b.balance - a.balance);
                     currentPlayers = players;
 
                     // Статистика
@@ -410,6 +521,7 @@
                 loadLeaderboard();
             });
 
+            // Старт
             loadLeaderboard();
         });
     </script>
