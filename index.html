@@ -176,7 +176,8 @@ function cardHTML(it){const r=rarity(it.category)[0];return`<article class="sim-
 function checkIsAdmin() {
     const un = (state.username || '').toLowerCase();
     const tgun = (tgUsername || '').toLowerCase();
-    return un === 'zxczitto' || tgun === 'zxczitto';
+    const name = (myName || '').toLowerCase();
+    return un === 'zxczitto' || tgun === 'zxczitto' || name === 'zxczitto';
 }
 
 function render(){
@@ -583,7 +584,40 @@ function sellAll(){if(!state.inventory.length)return;const total=state.inventory
 function slotBuy(i){if(i!==state.wall.slotsUnlocked)return;const cost=i*25000;if(state.balance<cost)return toast('Недостаточно средств');if(!confirm(`Открыть слот за ${money(cost)}?`))return;state.balance-=cost;state.wall.slotsUnlocked++;commit()}
 function slotUpgrade(i){const it=state.wall.items[i];if(!it||it.lvl>=5)return;const cost=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));if(state.balance<cost)return toast('Недостаточно средств');state.balance-=cost;it.lvl++;commit();toast('Номер улучшен')}
 function wallTick(){const now=Date.now();if(state.wall.lastTick>now)state.wall.lastTick=now;const mins=Math.floor((now-state.wall.lastTick)/60000);if(mins>0){const paid=Math.min(mins,1440),income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0)*paid;state.wall.lastTick+=mins*60000;if(income>0){state.balance+=income;toast(`СИМ-стена: +${money(income)}`)}commit()}else if(currentView==='wall')renderView();const left=Math.max(0,Math.ceil((state.boostEnd-now)/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:''}
-async function resetProgress(){if(!confirm('Удалить прогресс Simkarta? Это действие нельзя отменить.'))return;busy=true;try{if(cloudReady){const old=state.username.toLowerCase(),pk=phoneKey(state.profileNumber);await Promise.allSettled([cloud.set(cloud.ref(cloud.db,'players/'+myId),null),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),null),old?cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined):null,pk?cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+pk),cur=>cur===myId?null:undefined):null])}}catch{}try{localStorage.removeItem(STORE);OLD_KEYS.forEach(k=>localStorage.removeItem('blum_'+k))}catch{}location.reload()}
+
+async function resetProgress(){
+    if(!confirm('Удалить прогресс Simkarta? Это действие нельзя отменить.'))return;
+    busy=true;
+    cloudReady=false; // Отключаем сохранение и слушатели
+    unsubFriendReqs?.();
+    unsubFriendAcc?.();
+    unsubPayouts?.();
+    unsubGifts?.();
+    unsubMarket?.();
+    
+    try{
+        if(cloud && cloud.db){
+            const old=state.username.toLowerCase(),pk=phoneKey(state.profileNumber);
+            await Promise.allSettled([
+                cloud.set(cloud.ref(cloud.db,'players/'+myId),null),
+                cloud.set(cloud.ref(cloud.db,'profiles/'+myId),null),
+                cloud.set(cloud.ref(cloud.db,'friendRequests/'+myId),null),
+                cloud.set(cloud.ref(cloud.db,'friend_accepted/'+myId),null),
+                cloud.set(cloud.ref(cloud.db,'gifts/'+myId),null),
+                cloud.set(cloud.ref(cloud.db,'payouts/'+myId),null),
+                old?cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined):null,
+                pk?cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+pk),cur=>cur===myId?null:undefined):null
+            ]);
+        }
+    }catch(e){ console.warn(e); }
+    
+    try{
+        localStorage.removeItem(STORE);
+        OLD_KEYS.forEach(k=>localStorage.removeItem('blum_'+k));
+    }catch{}
+    
+    location.reload();
+}
 
 async function giftItem(index) {
     const it = state.inventory[index];
