@@ -27,6 +27,21 @@
 .tabs-row{display:flex;gap:8px;margin-bottom:12px}
 .tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:var(--panel);color:var(--text);font-weight:bold;cursor:pointer;font-size:13px;border:1px solid var(--line);}
 .tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* Стили для профиля */
+.profile-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.profile-stat-box{background:var(--panel);border-radius:12px;padding:15px 10px;text-align:center;border:1px solid var(--line)}
+.profile-stat-val{font-size:18px;font-weight:bold;color:#fff;margin-bottom:5px;word-break:break-all;}
+.profile-stat-lbl{font-size:11px;color:var(--muted)}
+.rarity-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-weight:bold}
+.rarity-row:last-child{border:0}
+.rarity-bar-container{flex:1;height:6px;background:#333;margin:0 15px;border-radius:3px;overflow:hidden}
+.rarity-bar{height:100%;background:currentColor;border-radius:3px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:#11131a;border:1px solid var(--line);border-radius:12px;padding:15px;text-align:center}
+.stat-card .val{font-size:20px;font-weight:bold;color:#fff;margin-bottom:5px}
+.stat-card .lbl{font-size:12px;color:var(--muted)}
+
 .light{--bg:#eef1f5;--panel:#fff;--panel2:#f3f4f7;--text:#171922;--muted:#697080;--line:#dfe3e9}.light .pill,.light .empty{background:var(--panel)}.light .menu,.light .input{background:var(--panel)}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}@keyframes sheetIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media(max-width:390px){.app{padding-left:13px;padding-right:13px}.balance{font-size:29px}.pill{padding:8px;font-size:12px}.sim-card{padding:23px 19px}.sim-chip{width:91px;height:82px}.phone{font-size:25px}.operator{font-size:24px}.game{min-height:310px}.bag{width:61px}.buy,.sell,.keep{font-size:15px}}
@@ -91,9 +106,9 @@ const phoneKey=s=>{let d=digits(s);if(d.length===11&&'78'.includes(d[0]))d=d.sli
 const list=v=>Array.isArray(v)?v:Object.values(v||{});
 function cleanItem(x){if(!x?.phone)return null;return{phone:String(x.phone),price:Math.max(0,Math.floor(finite(x.price))),category:String(x.category||'Обычный'),chance:String(x.chance||''),reasons:Array.isArray(x.reasons)?x.reasons.map(String):[],lvl:Math.max(0,Math.min(5,Math.floor(finite(x.lvl))))}}
 function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(finite(w?.slotsUnlocked,1)))),items:Array.from({length:10},(_,i)=>cleanItem(w?.items?.[i])),lastTick:finite(w?.lastTick,Date.now())}}
-function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
+function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},rarityStats:{'Обычный':0,'КРАСИВОЕ ОКОНЧАНИЕ':0,'БРОНЗОВЫЙ':0,'СЕРЕБРЯНЫЙ':0,'ЗОЛОТОЙ':0,'БРИЛЛИАНТОВЫЙ':0},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
 let isNewStarter = false;
-function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
+function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.rarityStats={...d.rarityStats,...(s.rarityStats||{})};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
 let state=loadState(), busy=false, resetting=false, currentView='', friendsTab='list', leaderboardTab='balance', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, unsubFriendReqs=null, unsubFriendAcc=null, genToken=0, currentReqBannerId=null;
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('nomerki_email_id')||localStorage.getItem('nomerki_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
@@ -105,6 +120,7 @@ function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('
 function persist(){if(resetting)return;state.updatedAt=Date.now();try{localStorage.setItem(STORE,JSON.stringify(state))}catch{toast('Не удалось сохранить прогресс на устройстве')}}
 function commit(){enforceProfile();state.maxBalance=Math.max(state.maxBalance,state.balance);render();persist();queueSync()}
 function rarity(cat){cat=String(cat||'');if(cat.includes('БРИЛЛИАНТ'))return['rarity-diamond',1000];if(cat.includes('ЗОЛОТ'))return['rarity-gold',150];if(cat.includes('СЕРЕБР'))return['rarity-silver',50];if(cat.includes('БРОНЗ'))return['rarity-bronze',25];if(cat.includes('УДАЧ'))return['rarity-lucky',30];return['rarity-common',cat.includes('КРАСИВ')?10:5]}
+function getRarityColor(cat){cat=String(cat||'');if(cat.includes('БРИЛЛИАНТ'))return'#00ffff';if(cat.includes('ЗОЛОТ'))return'#ffd700';if(cat.includes('СЕРЕБР'))return'#b0b0b0';if(cat.includes('БРОНЗ'))return'#cd7f32';if(cat.includes('УДАЧ')||cat.includes('КРАСИВ'))return'#ff007f';return'#fff'}
 function category(price){return price>=1e9?'БРИЛЛИАНТОВЫЙ':price>=1e6?'ЗОЛОТОЙ':price>=1e5?'СЕРЕБРЯНЫЙ':price>=1e4?'БРОНЗОВЫЙ':price>=1e3?'КРАСИВОЕ ОКОНЧАНИЕ':'Обычный'}
 
 function priceNumber(num,type){
@@ -187,7 +203,14 @@ function render(){
     $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
-async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);state.current=it;commit();audio.play(760,.09);const token=++genToken;if(state.settings.animation){const phone=$('.phone');if(phone){const target=state.current.phone;let n=0;const timer=setInterval(()=>{if(token!==genToken){clearInterval(timer);return}phone.textContent=[...target].map((c,i)=>/\d/.test(c)&&i>n?String(Math.floor(Math.random()*10)):c).join('');if(++n>target.length){clearInterval(timer);phone.textContent=target;finishGeneration()}},35)}else finishGeneration()}else finishGeneration();function finishGeneration(){if(token!==genToken)return;settleCurrent();busy=false;commit();audio.play(980,.14)}}
+async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);
+    
+    // Учёт статистики редкостей
+    if(!state.rarityStats) state.rarityStats = {};
+    const cat = it.category;
+    state.rarityStats[cat] = (state.rarityStats[cat] || 0) + 1;
+    
+    state.current=it;commit();audio.play(760,.09);const token=++genToken;if(state.settings.animation){const phone=$('.phone');if(phone){const target=state.current.phone;let n=0;const timer=setInterval(()=>{if(token!==genToken){clearInterval(timer);return}phone.textContent=[...target].map((c,i)=>/\d/.test(c)&&i>n?String(Math.floor(Math.random()*10)):c).join('');if(++n>target.length){clearInterval(timer);phone.textContent=target;finishGeneration()}},35)}else finishGeneration()}else finishGeneration();function finishGeneration(){if(token!==genToken)return;settleCurrent();busy=false;commit();audio.play(980,.14)}}
 function sellCurrent(){const it=state.current;if(!it||busy)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;genToken++;state.balance+=it.price;state.totalSold++;state.current=null;commit();audio.play(1100,.12)}
 function keepCurrent(){if(!state.current||busy)return;genToken++;state.inventory.push(cleanItem(state.current));state.current=null;commit();audio.play(840,.1)}
 function inventorySell(index){const it=state.inventory[index];if(!it)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;state.balance+=it.price;state.totalSold++;state.inventory.splice(index,1);commit();toast(`Получено ${money(it.price)}`)}
@@ -198,8 +221,90 @@ function inventoryHTML(){const total=state.inventory.reduce((s,x)=>s+x.price,0);
 function wallIncome(it){if(!it)return 0;const cat=it.category,m=cat.includes('БРИЛЛИАНТ')?10:cat.includes('ЗОЛОТ')?5:cat.includes('СЕРЕБР')?2:cat.includes('БРОНЗ')?1.5:1;return Math.floor(it.price*.01*m*(1+.3*it.lvl))}
 function wallHTML(){const income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0),left=Math.max(0,Math.ceil((60000-(Date.now()-state.wall.lastTick))/1000));return`<div class="section"><div class="row"><span>Доход</span><span class="item-price">+${money(income)}/мин</span></div><div class="row"><span>Следующее начисление</span><span>${left} с</span></div></div><div class="wall-grid">${state.wall.items.map((it,i)=>{const unlocked=i<state.wall.slotsUnlocked;if(!unlocked){const cost=i*25000,can=i===state.wall.slotsUnlocked;return`<div class="slot"><small>Слот ${i+1}</small><b>🔒 Закрыт</b>${can?`<button class="mini blue" data-slot-buy="${i}">Открыть · ${money(cost)}</button>`:'<small>Откройте предыдущий слот</small>'}</div>`}if(!it)return`<div class="slot empty"><small>Слот ${i+1}</small><b>Пусто</b><button class="mini green" data-slot-set="${i}">Установить</button></div>`;const up=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));return`<div class="slot"><small>Слот ${i+1}</small><div class="item-phone small">${esc(it.phone)}</div><div class="item-price">+${money(wallIncome(it))}/мин</div><small>${'★'.repeat(it.lvl)}${'☆'.repeat(5-it.lvl)}</small>${it.lvl<5?`<button class="mini" data-slot-up="${i}">Улучшить · ${money(up)}</button>`:'<small>Максимальный уровень</small>'}<button class="mini red" data-slot-remove="${i}">Снять</button></div>`}).join('')}</div>`}
 function casinoHTML(){const it=state.inventory[casinoIndex];return`<div class="section"><h3>1. Выберите номер</h3>${state.inventory.length?state.inventory.map((x,i)=>itemRow(x,i,`<button class="mini ${i===casinoIndex?'green':'blue'}" data-casino="${i}">${i===casinoIndex?'Выбран':'Выбрать'}</button>`)).join(''):'<div class="empty-hint">Рюкзак пуст.</div>'}</div>${it?`<div class="section"><h3>2. Укажите новую стоимость</h3><div class="small muted">${esc(it.phone)} · сейчас ${money(it.price)}</div><input class="input" id="casinoTarget" type="number" min="${it.price+1}" max="1000000000" value="${Math.min(1e9,it.price*2)}" inputmode="numeric"><div class="row"><span>Шанс успеха</span><span id="casinoChance"></span></div><button class="wide red" data-action="upgrade" ${busy?'disabled':''}>Апгрейд</button><p class="small muted">При неудаче номер сгорает. Максимальная цена — 1 млрд ₽.</p></div>`:''}<div id="casinoMessage"></div>`}
-function bestBlock(){const b=state.bestNumber;return b?`<div class="section"><h3>Лучший номер</h3>${itemRow(b,0)}</div>`:''}
-function profileHTML(){const inv=state.inventory.reduce((s,x)=>s+x.price,0);return`${bestBlock()}<div class="section"><h3>Прогресс</h3>${[['Уровень',state.level],['Опыт',`${state.points} / ${state.level*100}`],['Баланс',money(state.balance)],['Максимальный баланс',money(state.maxBalance)],['Сгенерировано',fmt(state.totalGenerated)],['Продано',fmt(state.totalSold)],['Стоимость рюкзака',money(inv)]].map(x=>`<div class="row"><span>${x[0]}</span><span>${x[1]}</span></div>`).join('')}</div><div class="section"><h3>Публичный профиль</h3><label class="small muted">Юзернейм</label><input class="input" id="username" value="${esc(state.username)}" placeholder="@username" maxlength="33" autocomplete="off"><button class="wide" data-action="save-username">Сохранить юзернейм</button><p class="small muted">Номер, по которому друзья смогут найти вас:</p><button class="wide green" data-action="profile-number">Выбрать из рюкзака</button>${state.profileNumber?`<div class="row"><span>${esc(state.profileNumber)}</span><button class="mini red" data-action="clear-profile-number">Убрать</button></div>`:''}</div>`}
+
+function renderFullProfile(p, isMe) {
+    const rs = p.rarityStats || { 'Обычный': 0, 'КРАСИВОЕ ОКОНЧАНИЕ': 0, 'БРОНЗОВЫЙ': 0, 'СЕРЕБРЯНЫЙ': 0, 'ЗОЛОТОЙ': 0, 'БРИЛЛИАНТОВЫЙ': 0 };
+    const maxHits = Math.max(1, ...Object.values(rs));
+
+    let html = `
+    <div style="text-align:center; padding: 20px 0;">
+        <div style="font-size: 26px; font-weight: 900; display:flex; justify-content:center; align-items:center; gap:10px;">
+            ${esc(p.name || 'Игрок')} ${isMe ? '(Вы)' : ''}
+        </div>
+        <div style="color: var(--muted); margin-top: 5px;">Уровень ${p.level || 1}</div>
+        ${!isMe ? `<button class="wide" style="background: #f59e0b; margin-top: 15px; color:#000; font-weight:900;" onclick="toast('Обмен в разработке')">🔄 Предложить обмен</button>` : ''}
+    </div>
+    
+    <div class="profile-stats-row">
+        <div class="profile-stat-box">
+            <div class="profile-stat-val">${fmt(p.invCount)}</div>
+            <div class="profile-stat-lbl">номеров</div>
+        </div>
+        <div class="profile-stat-box">
+            <div class="profile-stat-val ${p.bestNumber ? getRarityColorClass(p.bestNumber.category) : ''}" style="font-size:14px; margin-top:4px;">${p.bestNumber ? money(p.bestNumber.price) : '0 ₽'}</div>
+            <div class="profile-stat-lbl">лучшая</div>
+        </div>
+        <div class="profile-stat-box">
+            <div class="profile-stat-val" style="font-size:14px; margin-top:4px;">${money(p.balance + (p.invValue || 0))}</div>
+            <div class="profile-stat-lbl">капитал</div>
+        </div>
+    </div>
+    `;
+
+    if (p.bestNumber) {
+        html += `<div class="section" style="background: linear-gradient(135deg, #1e1e24, #111); border: 1px solid ${getRarityColor(p.bestNumber.category)}40;"><h3 style="color: ${getRarityColor(p.bestNumber.category)}; text-align:center; margin-bottom:0;">Основной номер</h3>`;
+        html += cardHTML({...p.bestNumber, xp: 0, reasons: []});
+        html += `</div>`;
+    }
+
+    html += `<div class="section"><h3>По редкости</h3>`;
+    const rarities = [
+        ['Обычный', 'var(--muted)'],
+        ['КРАСИВОЕ ОКОНЧАНИЕ', '#ff007f'],
+        ['БРОНЗОВЫЙ', '#cd7f32'],
+        ['СЕРЕБРЯНЫЙ', '#b0b0b0'],
+        ['ЗОЛОТОЙ', '#ffd700'],
+        ['БРИЛЛИАНТОВЫЙ', '#00ffff']
+    ];
+    rarities.forEach(([name, color]) => {
+        const count = rs[name] || 0;
+        const pct = (count / maxHits) * 100;
+        html += `<div class="rarity-row">
+            <span style="width: 140px; font-size:13px; color:${color};">${name}</span>
+            <div class="rarity-bar-container"><div class="rarity-bar" style="width: ${pct}%; background: ${color};"></div></div>
+            <span style="font-size: 14px;">${count}</span>
+        </div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="section"><h3>Статистика</h3>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="val">${fmt(p.totalGenerated)}</div><div class="lbl">симок открыто</div></div>
+            <div class="stat-card"><div class="val">${fmt(p.totalSold)}</div><div class="lbl">продано</div></div>
+            <div class="stat-card"><div class="val">${money(p.balance)}</div><div class="lbl">на балансе</div></div>
+            <div class="stat-card"><div class="val">${fmt(p.friendsCount || 0)}</div><div class="lbl">друзей</div></div>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+function getRarityColorClass(cat) { return rarity(cat)[0]; }
+
+function profileHTML(){
+    const p = publicProfile();
+    let html = renderFullProfile(p, true);
+    html += `<div class="section"><h3>Настройки профиля</h3>
+        <label class="small muted">Юзернейм</label>
+        <input class="input" id="username" value="${esc(state.username)}" placeholder="@username" maxlength="33" autocomplete="off">
+        <button class="wide" data-action="save-username">Сохранить</button>
+        <p class="small muted">Номер для друзей:</p>
+        <button class="wide green" data-action="profile-number">Выбрать из рюкзака</button>
+        ${state.profileNumber?`<div class="row"><span>${esc(state.profileNumber)}</span><button class="mini red" data-action="clear-profile-number">Убрать</button></div>`:''}
+    </div>`;
+    return html;
+}
+
 function settingsHTML(){const s=state.settings;return`<div class="section"><h3>Интерфейс</h3><label class="row"><span>Светлая тема</span><span class="switch"><input id="setTheme" type="checkbox" ${s.theme==='light'?'checked':''}></span></label><label class="row"><span>Анимация</span><span class="switch"><input id="setAnimation" type="checkbox" ${s.animation?'checked':''}></span></label><label class="row"><span>Звуки</span><span class="switch"><input id="setSound" type="checkbox" ${s.sound?'checked':''}></span></label></div><div class="section"><h3>Продажа</h3><label class="row"><span>Предупреждать о дорогих номерах</span><input id="setWarn" type="checkbox" ${s.warn?'checked':''}></label><label class="small muted">Порог предупреждения, ₽</label><input class="input" id="setWarnAt" type="number" min="0" value="${s.warnAt}"></div><div class="section"><h3>Синхронизация по Email</h3><p class="small muted">Email используется как идентификатор сохранения. Это не парольная авторизация.</p><input class="input" id="syncEmail" type="email" placeholder="your@mail.com" autocomplete="email"><button class="wide" data-action="sync-email">Загрузить / привязать</button></div><div class="section"><button class="wide red" data-action="reset">Сбросить прогресс</button></div>`}
 function personRow(id,p,i=0,showRemove=false,customValue=null){const rc=i===1?'top1':i===2?'top2':i===3?'top3':'';const val=customValue!==null?customValue:money(p?.balance);return`<div class="list-item ${rc}"><button class="item-main" style="background:none;color:inherit;text-align:left" data-player="${esc(id)}"><b>${i?`#${i} `:''}${esc(p?.name||'Игрок')}${id===myId?' (Вы)':''}</b><div class="small muted">${p?.username?'@'+esc(p.username)+' · ':''}ур. ${p?.level||1}</div></button><div class="item-price" style="text-align:right;">${val}</div>${showRemove&&id!==myId?`<button class="mini red" data-friend-remove="${esc(id)}">✕</button>`:''}</div>`}
 
@@ -270,7 +375,7 @@ function leadersHTML(){
     return html;
 }
 function pickHTML(){return`<div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini green" data-pick="${i}">Выбрать</button>`)).join(''):'<div class="empty-hint">В рюкзаке нет номеров.</div>'}</div>`}
-function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return`<div class="section"><h3>${esc(p.name||'Игрок')}</h3><div class="row"><span>Уровень</span><span>${p.level||1}</span></div><div class="row"><span>Баланс</span><span>${money(p.balance)}</span></div><div class="row"><span>Сгенерировано</span><span>${fmt(p.totalGenerated)}</span></div><div class="row"><span>Номеров в рюкзаке</span><span>${fmt(p.invCount)}</span></div>${p.profileNumber?`<div class="row"><span>Номер для друзей</span><span>${esc(p.profileNumber)}</span></div>`:''}</div>`}
+function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint">Загрузка…</div>';return renderFullProfile(p, false);}
 
 function infoHTML(){
     return `<div class="section"><h3>🎲 Шансы выпадения по режимам</h3>
@@ -338,8 +443,8 @@ function openMenu(){$('#menu').classList.add('open');$('#scrim').classList.add('
 function closeMenu(){$('#menu').classList.remove('open');$('#scrim').classList.remove('open')}
 function updateChance(){const input=$('#casinoTarget'),out=$('#casinoChance'),it=state.inventory[casinoIndex];if(!input||!out||!it)return;const target=Math.floor(finite(input.value)),chance=Math.min(95,it.price/target*95);if(target<=it.price||target>1e9){out.textContent='Недопустимая цена';out.style.color='var(--red)'}else{out.textContent=(chance<.01?'<0,01':chance.toFixed(2).replace('.',','))+'%';out.style.color='var(--green)'}}
 function doUpgrade(){const it=state.inventory[casinoIndex],target=Math.floor(finite($('#casinoTarget')?.value));if(!it||busy||target<=it.price||target>1e9)return toast('Введите цену выше текущей, но не более 1 млрд ₽');const chance=Math.min(95,it.price/target*95);busy=true;render();toast('Проверяем удачу…');setTimeout(()=>{const i=state.inventory.indexOf(it);if(i<0){busy=false;casinoIndex=null;return render()}if(Math.random()*100<chance){it.price=target;it.category=category(target);toast(`Успех! Новая цена: ${money(target)}`);audio.play(1200,.2)}else{state.inventory.splice(i,1);toast('Не повезло: номер сгорел');audio.play(150,.25)}casinoIndex=null;busy=false;commit()},850)}
-function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.price);return{name:myName,username:state.username,level:state.level,balance:state.balance,maxBalance:state.maxBalance,totalGenerated:state.totalGenerated,totalSold:state.totalSold,invCount:inv.length,invValue:inv.reduce((s,x)=>s+x.price,0),wallIncome:state.wall.items.reduce((s,x)=>s+wallIncome(x),0),bestNumber:state.bestNumber,top3:inv.slice(0,3),profileNumber:state.profileNumber,lastSeen:Date.now(),updatedAt:state.updatedAt}}
-function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
+function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.price);return{name:myName,username:state.username,level:state.level,balance:state.balance,maxBalance:state.maxBalance,totalGenerated:state.totalGenerated,totalSold:state.totalSold,invCount:inv.length,invValue:inv.reduce((s,x)=>s+x.price,0),wallIncome:state.wall.items.reduce((s,x)=>s+wallIncome(x),0),bestNumber:state.bestNumber,top3:inv.slice(0,3),profileNumber:state.profileNumber,lastSeen:Date.now(),updatedAt:state.updatedAt, rarityStats: state.rarityStats, friendsCount: state.friends.length}}
+function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.rarityStats={...fresh().rarityStats,...(d.rarityStats||{})};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(resetting||!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
 async function initCloud(){
