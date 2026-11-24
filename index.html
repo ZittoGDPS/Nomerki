@@ -8,7 +8,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#08090d;--panel:#15171f;--panel2:#1d202b;--text:#fafafa;--muted:#9296a3;--line:#292c38;--blue:#38acfb;--green:#35c875;--red:#ff5d68;--gold:#ffd34e;--card:#fff;--ink:#111318;--ease:cubic-bezier(.32,.72,0,1)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overscroll-behavior:none}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}button{border:0}.app{width:min(100%,540px);min-height:100dvh;margin:auto;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));position:relative;overflow:hidden}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{font-size:23px;font-weight:800;letter-spacing:-.6px}.top-actions{display:flex;gap:10px;align-items:center}.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--panel);color:var(--text);display:grid;place-items:center}.icon-btn svg{width:21px;height:21px}.icon-btn.info{font-family:serif;font-style:italic;font-size:22px;font-weight:900;padding-bottom:2px}.balance-label{font-size:15px;color:var(--muted);margin-bottom:2px}.stats{display:flex;align-items:center;justify-content:space-between;gap:12px}.balance{font-size:clamp(30px,8vw,39px);font-weight:850;letter-spacing:-1.5px;white-space:nowrap}.stat-pills{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.pill{border:1px solid var(--line);background:#11131a;border-radius:999px;padding:9px 12px;font-size:13px;font-weight:750;white-space:nowrap}.xp{height:7px;background:#20222c;border-radius:99px;margin:15px 0 19px;overflow:hidden}.xp>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38acfb,#985cff);border-radius:inherit;transition:width .35s var(--ease)}.game{flex:1;min-height:330px;display:flex;flex-direction:column;padding-top:26px}.result{flex:1;display:flex;align-items:center;justify-content:center;min-height:285px}.empty{width:100%;align-self:flex-start;background:#111218;border:1px solid #1c1e27;border-radius:20px;padding:25px 20px;color:var(--muted);font-size:22px;font-weight:750}.skeleton{display:flex;gap:9px;margin-top:22px}.skeleton i{width:29px;height:5px;border-radius:5px;background:#2a2c35}.sim-card{width:100%;background:var(--card);color:var(--ink);border-radius:34px;padding:27px 25px 23px;box-shadow:0 20px 70px #0008;position:relative;animation:cardIn .45s var(--ease)}.sim-top{display:flex;justify-content:space-between;gap:15px}.operator{display:flex;align-items:center;gap:13px;font-size:27px;font-weight:850;letter-spacing:-.8px}.op-badge{width:47px;height:47px;border-radius:14px;background:#22b5e9;color:white;display:grid;place-items:center;font-size:26px}.country{font-size:15px;color:#777d88;font-weight:650;margin:9px 0 0 60px}.sim-chip{width:112px;height:95px;border:1px dashed #ccd0d5;border-radius:25px;display:grid;place-items:center;flex-shrink:0}.chip{width:75px;height:61px;border-radius:15px;background:linear-gradient(145deg,#f7e6af,#d7b768);border:2px solid #fff;box-shadow:0 2px 9px #7c633540;position:relative;overflow:hidden}.chip:before,.chip:after{content:"";position:absolute;background:#b89b5590}.chip:before{width:100%;height:1px;top:29px}.chip:after{height:100%;width:1px;left:36px}.chip-core{position:absolute;inset:16px 23px;border:1px solid #b89b55;border-radius:7px}.phone{font-size:clamp(25px,6.7vw,35px);font-weight:900;letter-spacing:-1.2px;margin-top:48px;white-space:nowrap}.card-meta{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-top:10px}.rarity{color:#777d88;font-weight:700;text-align:right}.price{font-size:20px;font-weight:850;color:#168b55}.reasons{margin-top:15px;padding-top:13px;border-top:1px solid #e7e8eb;color:#666c77;font-size:12px;line-height:1.5}.rarity-gold{color:#b17a00}.rarity-diamond{color:#008b9c}.rarity-silver{color:#788494}.rarity-bronze{color:#a85e32}.rarity-lucky{color:#c22e74}.boost-line{font-size:13px;color:var(--gold);min-height:20px;margin:4px 0 8px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px}.control{height:57px;background:var(--panel);border:1px solid var(--line);border-radius:17px;color:var(--text);padding:0 16px;font-weight:750;text-align:left}.control-wrap{position:relative}.control-wrap:after{content:"⌄";position:absolute;right:15px;top:15px;color:var(--muted);pointer-events:none}.control select{width:100%;height:100%;appearance:none;border:0;background:transparent;color:inherit;font-weight:750;outline:0}.control select option{background:var(--panel);color:var(--text)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overscroll-behavior:none}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}button{border:0}.app{width:min(100%,540px);min-height:100dvh;margin:auto;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));position:relative;overflow:hidden}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{font-size:23px;font-weight:800;letter-spacing:-.6px}.top-actions{display:flex;gap:10px;align-items:center}.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--panel);color:var(--text);display:grid;place-items:center}.icon-btn svg{width:21px;height:21px}.icon-btn.info{font-family:serif;font-style:italic;font-size:22px;font-weight:900;padding-bottom:2px}.balance-label{font-size:15px;color:var(--muted);margin-bottom:2px}.stats{display:flex;align-items:center;justify-content:space-between;gap:12px}.balance{font-size:clamp(30px,8vw,39px);font-weight:850;letter-spacing:-1.5px;white-space:nowrap}.stat-pills{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.pill{border:1px solid var(--line);background:#11131a;border-radius:999px;padding:9px 12px;font-size:13px;font-weight:750;white-space:nowrap}.xp{height:7px;background:#20222c;border-radius:99px;margin:15px 0 19px;overflow:hidden}.xp>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38acfb,#985cff);border-radius:inherit;transition:width .35s var(--ease)}.game{flex:1;min-height:330px;display:flex;flex-direction:column;padding-top:26px;position:relative}.result{flex:1;display:flex;align-items:center;justify-content:center;min-height:285px}.empty{width:100%;align-self:flex-start;background:#111218;border:1px solid #1c1e27;border-radius:20px;padding:25px 20px;color:var(--muted);font-size:22px;font-weight:750}.skeleton{display:flex;gap:9px;margin-top:22px}.skeleton i{width:29px;height:5px;border-radius:5px;background:#2a2c35}.sim-card{width:100%;background:var(--card);color:var(--ink);border-radius:34px;padding:27px 25px 23px;box-shadow:0 20px 70px #0008;position:relative;animation:cardIn .45s var(--ease)}.sim-top{display:flex;justify-content:space-between;gap:15px}.operator{display:flex;align-items:center;gap:13px;font-size:27px;font-weight:850;letter-spacing:-.8px}.op-badge{width:47px;height:47px;border-radius:14px;background:#22b5e9;color:white;display:grid;place-items:center;font-size:26px}.country{font-size:15px;color:#777d88;font-weight:650;margin:9px 0 0 60px}.sim-chip{width:112px;height:95px;border:1px dashed #ccd0d5;border-radius:25px;display:grid;place-items:center;flex-shrink:0}.chip{width:75px;height:61px;border-radius:15px;background:linear-gradient(145deg,#f7e6af,#d7b768);border:2px solid #fff;box-shadow:0 2px 9px #7c633540;position:relative;overflow:hidden}.chip:before,.chip:after{content:"";position:absolute;background:#b89b5590}.chip:before{width:100%;height:1px;top:29px}.chip:after{height:100%;width:1px;left:36px}.chip-core{position:absolute;inset:16px 23px;border:1px solid #b89b55;border-radius:7px}.phone{font-size:clamp(25px,6.7vw,35px);font-weight:900;letter-spacing:-1.2px;margin-top:48px;white-space:nowrap}.card-meta{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-top:10px}.rarity{color:#777d88;font-weight:700;text-align:right}.price{font-size:20px;font-weight:850;color:#168b55}.reasons{margin-top:15px;padding-top:13px;border-top:1px solid #e7e8eb;color:#666c77;font-size:12px;line-height:1.5}.rarity-gold{color:#b17a00}.rarity-diamond{color:#008b9c}.rarity-silver{color:#788494}.rarity-bronze{color:#a85e32}.rarity-lucky{color:#c22e74}.boost-line{font-size:13px;color:var(--gold);min-height:20px;margin:4px 0 8px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px}.control{height:57px;background:var(--panel);border:1px solid var(--line);border-radius:17px;color:var(--text);padding:0 16px;font-weight:750;text-align:left}.control-wrap{position:relative}.control-wrap:after{content:"⌄";position:absolute;right:15px;top:15px;color:var(--muted);pointer-events:none}.control select{width:100%;height:100%;appearance:none;border:0;background:transparent;color:inherit;font-weight:750;outline:0}.control select option{background:var(--panel);color:var(--text)}
 .bottom{display:flex;gap:10px;align-items:stretch}
 .bag{height:64px;border-radius:18px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:70px;flex-shrink:0}
 .bag svg{width:24px;height:24px}
@@ -27,7 +27,6 @@
 .tabs-row{display:flex;gap:8px;margin-bottom:12px}
 .tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:var(--panel);color:var(--text);font-weight:bold;cursor:pointer;font-size:13px;border:1px solid var(--line);}
 .tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-
 .profile-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .profile-stat-box{background:var(--panel);border-radius:12px;padding:15px 10px;text-align:center;border:1px solid var(--line)}
 .profile-stat-val{font-size:18px;font-weight:bold;color:#fff;margin-bottom:5px;word-break:break-all;}
@@ -41,21 +40,58 @@
 .stat-card .val{font-size:20px;font-weight:bold;color:#fff;margin-bottom:5px}
 .stat-card .lbl{font-size:12px;color:var(--muted)}
 
-/* === Телефоны === */
-.active-phones{display:flex;gap:6px;padding:0 0 12px;overflow-x:auto;scrollbar-width:none;min-height:0}
-.active-phones::-webkit-scrollbar{display:none}
-.phone-mini{display:flex;flex-direction:column;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:7px 9px;min-width:64px;gap:2px;flex-shrink:0;animation:floatPhone 3s ease-in-out infinite}
-.phone-mini:nth-child(2){animation-delay:.3s}.phone-mini:nth-child(3){animation-delay:.6s}.phone-mini:nth-child(4){animation-delay:.9s}.phone-mini:nth-child(5){animation-delay:1.2s}
-.phone-mini .emoji{font-size:22px;line-height:1;filter:drop-shadow(0 2px 4px #0008)}
-.phone-mini .pname{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;font-weight:700}
-.phone-mini .income{color:var(--green);font-size:10px;font-weight:800}
-@keyframes floatPhone{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+/* === Телефоны: орбита вокруг карточки === */
+.phone-orbit{
+  position:absolute;
+  width:0;height:0;
+  z-index:10;
+  pointer-events:none;
+}
+.phone-orbit .phone-mini{
+  position:absolute;
+  left:0;top:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:6px 8px;
+  min-width:52px;
+  gap:1px;
+  box-shadow:0 4px 14px #0009;
+  offset-path:ellipse(var(--orbit-rx,240px) var(--orbit-ry,160px) at 0 0);
+  offset-rotate:0deg;
+  animation:orbit 16s linear infinite;
+  will-change:offset-distance;
+}
+.phone-orbit .phone-mini:nth-child(1){animation-delay:0s}
+.phone-orbit .phone-mini:nth-child(2){animation-delay:-3.2s}
+.phone-orbit .phone-mini:nth-child(3){animation-delay:-6.4s}
+.phone-orbit .phone-mini:nth-child(4){animation-delay:-9.6s}
+.phone-orbit .phone-mini:nth-child(5){animation-delay:-12.8s}
+.phone-orbit .phone-mini .emoji{font-size:22px;line-height:1;filter:drop-shadow(0 2px 4px #0008)}
+.phone-orbit .phone-mini .pname{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:58px;font-weight:700}
+.phone-orbit .phone-mini .income{color:var(--green);font-size:10px;font-weight:800}
+@keyframes orbit{from{offset-distance:0%}to{offset-distance:100%}}
+
+@supports not (offset-path: circle(100px)){
+  .phone-orbit .phone-mini{
+    animation:orbitFallback 16s linear infinite;
+  }
+  @keyframes orbitFallback{
+    from{transform:rotate(0deg) translateX(var(--orbit-rx,240px)) rotate(0deg)}
+    to{transform:rotate(360deg) translateX(var(--orbit-rx,240px)) rotate(-360deg)}
+  }
+}
+
 .phone-card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
 .phone-card .pc-emoji{font-size:28px;flex-shrink:0}
 .phone-card .pc-info{flex:1;min-width:0}
 .phone-card .pc-info b{display:block;font-size:14px}
 .phone-card .pc-info small{color:var(--muted);font-size:12px}
 .phone-card.active-slot{border-color:var(--green)}
+.phone-card.owned{border-color:var(--blue);opacity:.7}
 .phone-card .pc-actions{display:flex;gap:6px;flex-shrink:0}
 
 .light{--bg:#eef1f5;--panel:#fff;--panel2:#f3f4f7;--text:#171922;--muted:#697080;--line:#dfe3e9}.light .pill,.light .empty{background:var(--panel)}.light .menu,.light .input{background:var(--panel)}
@@ -83,8 +119,8 @@
   </div>
   <div class="xp"><i id="xpFill"></i></div>
   <section class="game">
-    <div class="active-phones" id="activePhones"></div>
     <div class="result" id="result"></div>
+    <div class="phone-orbit" id="activePhones"></div>
     <div class="boost-line" id="boost"></div>
   </section>
   
@@ -131,22 +167,26 @@ const list=v=>Array.isArray(v)?v:Object.values(v||{});
 function cleanItem(x){if(!x?.phone)return null;return{phone:String(x.phone),price:Math.max(0,Math.floor(finite(x.price))),category:String(x.category||'Обычный'),chance:String(x.chance||''),reasons:Array.isArray(x.reasons)?x.reasons.map(String):[],lvl:Math.max(0,Math.min(5,Math.floor(finite(x.lvl))))}}
 function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(finite(w?.slotsUnlocked,1)))),items:Array.from({length:10},(_,i)=>cleanItem(w?.items?.[i])),lastTick:finite(w?.lastTick,Date.now())}}
 
-// ===== Модели телефонов =====
+// ===== Пародийные бренды телефонов =====
 const PHONE_MODELS = {
-  nokia:     { name:'Кнопочный',  emoji:'📞', price:25000,      income:100 },
-  budget:    { name:'Бюджетный',  emoji:'📱', price:100000,     income:500 },
-  middle:    { name:'Средний',    emoji:'📲', price:500000,     income:3000 },
-  flagship:  { name:'Флагман',    emoji:'📱', price:2000000,    income:15000 },
-  premium:   { name:'Премиум',    emoji:'💎', price:10000000,   income:90000 },
-  luxury:    { name:'Роскошь',    emoji:'👑', price:50000000,   income:550000 },
-  exclusive: { name:'Эксклюзив',  emoji:'🌟', price:250000000,  income:3500000 },
-  legend:    { name:'Легенда',    emoji:'🏆', price:1000000000, income:20000000 },
+  nokia:   { name:'Нокла 3310',        emoji:'📞', price:25000,      income:100 },
+  huawei:  { name:'Хуавек',            emoji:'📱', price:100000,     income:500 },
+  xiaomi:  { name:'Сиями Редми',       emoji:'📲', price:500000,     income:3000 },
+  samsung: { name:'Самаснуг Гэлэкси',  emoji:'📱', price:2000000,    income:15000 },
+  iphone:  { name:'Сифон 15 Про',      emoji:'💎', price:10000000,   income:90000 },
+  oneplus: { name:'Одинплас',          emoji:'👑', price:50000000,   income:550000 },
+  sony:    { name:'Соня Экспирия',     emoji:'🌟', price:250000000,  income:3500000 },
+  google:  { name:'Гугл Пихель',       emoji:'🏆', price:1000000000, income:20000000 },
 };
+const MODEL_MIGRATE = { budget:'huawei', middle:'xiaomi', flagship:'samsung', premium:'iphone', luxury:'oneplus', exclusive:'sony', legend:'google' };
 
 function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},rarityStats:{'Обычный':0,'КРАСИВОЕ ОКОНЧАНИЕ':0,'БРОНЗОВЫЙ':0,'СЕРЕБРЯНЫЙ':0,'ЗОЛОТОЙ':0,'БРИЛЛИАНТОВЫЙ':0},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},phones:[],activePhones:[],lastPhoneTick:Date.now(),updatedAt:Date.now()}}
 let isNewStarter = false;
 function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.rarityStats={...d.rarityStats,...(s.rarityStats||{})};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));
-out.phones = list(s.phones).filter(x=>x&&x.modelId&&PHONE_MODELS[x.modelId]).map(x=>({uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))),modelId:String(x.modelId)}));
+out.phones = list(s.phones).filter(x=>x&&x.modelId).map(x=>{
+  const mid = MODEL_MIGRATE[x.modelId] || x.modelId;
+  return {uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))), modelId: mid};
+}).filter(x => PHONE_MODELS[x.modelId]);
 out.activePhones = list(s.activePhones).map(String).filter(uid=>out.phones.some(p=>p.uid===uid)).slice(0,5);
 out.lastPhoneTick = finite(s.lastPhoneTick, Date.now());
 return out}
@@ -168,13 +208,8 @@ function priceNumber(num,type){
     const base={1:150,5:1250,20:10000}[type]||150;
     const last2=num.slice(-2),last3=num.slice(-3),last4=num.slice(-4),reasons=[];
     let mult=1;
-    
     const run=num.match(/(\d)\1{2,}/g)?.sort((a,b)=>b.length-a.length)[0];
-    if(run){
-        const n=run.length;
-        mult*=({10:100000,9:10000,8:10000,7:2000,6:300,5:60,4:15,3:3})[n]||1;
-        reasons.push(`${n} одинаковые цифры подряд`);
-    }
+    if(run){const n=run.length;mult*=({10:100000,9:10000,8:10000,7:2000,6:300,5:60,4:15,3:3})[n]||1;reasons.push(`${n} одинаковые цифры подряд`)}
     if(num===[...num].reverse().join('')){mult*=20;reasons.push('Зеркальный номер')}
     const seq=s=>{const d=Number(s[1])-Number(s[0]);return Math.abs(d)===1&&[...s].every((x,i)=>!i||Number(x)-Number(s[i-1])===d)};
     if(seq(last4)){mult*=8;reasons.push(`Последовательность ${last4}`)}else if(seq(last3)){mult*=3;reasons.push(`Последовательность ${last3}`)}
@@ -182,12 +217,9 @@ function priceNumber(num,type){
     if(last4[0]===last4[2]&&last4[1]===last4[3]&&last4[0]!==last4[1]){mult*=3;reasons.push(`Чередование ${last4}`)}
     if(num.endsWith('000')){mult*=2;reasons.push('Круглое окончание')}else if(num.endsWith('00')){mult*=1.4;reasons.push('Два нуля в конце')}
     if(last2[0]===last2[1]&&!reasons.length){mult*=1.5;reasons.push(`Пара ${last2}`)}
-    
     let price = Math.max(base, Math.floor(base*mult));
-    
     if (price < 1000000) {
         const roll = Math.random() * 100;
-        
         if (type === 1) {
             if (roll < 5) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (5%)'); }
             else if (roll < 20) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (15%)'); }
@@ -208,7 +240,6 @@ function priceNumber(num,type){
             else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (3%)'); }
         }
     }
-    
     const cat=category(price);
     let chance = 'Зависит от режима';
     if(cat==='БРИЛЛИАНТОВЫЙ') chance = '< 0.001%';
@@ -217,7 +248,6 @@ function priceNumber(num,type){
     else if(cat==='БРОНЗОВЫЙ') chance = type===1?'~25%':type===5?'~30%':'~35%';
     else if(cat==='КРАСИВОЕ ОКОНЧАНИЕ') chance = type===1?'~25%':type===5?'~30%':'~30%';
     else if(cat==='Обычный') chance = type===1?'~30%':type===5?'~15%':'~3%';
-    
     return {price, category: cat, chance, reasons};
 }
 
@@ -251,53 +281,70 @@ function checkIsAdmin() {
     return un === 'zxczitto' || tgun === 'zxczitto' || name === 'zxczitto';
 }
 
+// === Позиционирование орбиты вокруг карточки ===
+function positionOrbit(){
+    const game = document.querySelector('.game');
+    const orbit = document.querySelector('.phone-orbit');
+    if(!game || !orbit) return;
+    const gameRect = game.getBoundingClientRect();
+    const card = game.querySelector('.sim-card') || game.querySelector('.empty');
+    let cx, cy, rx, ry;
+    if(card){
+        const cr = card.getBoundingClientRect();
+        cx = cr.left + cr.width/2 - gameRect.left;
+        cy = cr.top + cr.height/2 - gameRect.top;
+        rx = Math.min(cr.width/2 + 50, gameRect.width/2 - 20);
+        ry = Math.min(cr.height/2 + 40, gameRect.height/2 - 20);
+    } else {
+        cx = gameRect.width/2;
+        cy = gameRect.height/2;
+        rx = Math.min(gameRect.width/2 - 40, 200);
+        ry = Math.min(gameRect.height/2 - 40, 150);
+    }
+    orbit.style.left = cx + 'px';
+    orbit.style.top = cy + 'px';
+    orbit.style.setProperty('--orbit-rx', Math.max(80, rx) + 'px');
+    orbit.style.setProperty('--orbit-ry', Math.max(60, ry) + 'px');
+}
+
 function renderActivePhones(){
     const el = $('#activePhones'); if(!el) return;
     const active = state.activePhones.map(uid=>state.phones.find(p=>p.uid===uid)).filter(Boolean);
     if(!active.length){ el.style.display='none'; el.innerHTML=''; return; }
-    el.style.display='flex';
+    el.style.display='block';
     el.innerHTML = active.map(p=>{
         const m = PHONE_MODELS[p.modelId];
-        return `<div class="phone-mini" title="${esc(m.name)}"><span class="emoji">${m.emoji}</span><span class="pname">${esc(m.name)}</span><span class="income">+${fmt(m.income)}₽</span></div>`;
+        return `<div class="phone-mini" title="${esc(m.name)} · +${fmt(m.income)}₽/10с"><span class="emoji">${m.emoji}</span><span class="pname">${esc(m.name)}</span><span class="income">+${fmt(m.income)}₽</span></div>`;
     }).join('');
+    positionOrbit();
+    setTimeout(positionOrbit, 500);
 }
 
 function render(){
     document.body.classList.toggle('light',state.settings.theme==='light');
     $('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';
-    
     const has=!!state.current;
     $('#buy').classList.toggle('hidden',has);
     $('#decision').classList.toggle('show',has);
     $('#buy').disabled=busy;
     $('#sellCurrent').disabled=busy;
     $('#keepCurrent').disabled=busy;
-    
     const type=Number($('#shop').value);
     let buyText = '';
-    if (type === 1) {
-        buyText = state.freeSpins > 0 ? `Купить симку · Бесплатно (🍀 ${state.freeSpins})` : `Купить симку · 1 000 ₽`;
-    } else if (type === 5) {
-        buyText = `Купить симку · 5 000 ₽`;
-    } else {
-        buyText = `Купить симку · 20 000 ₽`;
-    }
+    if (type === 1) { buyText = state.freeSpins > 0 ? `Купить симку · Бесплатно (🍀 ${state.freeSpins})` : `Купить симку · 1 000 ₽`; }
+    else if (type === 5) { buyText = `Купить симку · 5 000 ₽`; }
+    else { buyText = `Купить симку · 20 000 ₽`; }
     $('#buy').textContent = buyText;
-    
     const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));
     $('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
-    
     renderActivePhones();
-    
     $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
 async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);
-    
     if(!state.rarityStats) state.rarityStats = {};
     const cat = it.category;
     state.rarityStats[cat] = (state.rarityStats[cat] || 0) + 1;
-    
     state.current=it;commit();audio.play(760,.09);const token=++genToken;if(state.settings.animation){const phone=$('.phone');if(phone){const target=state.current.phone;let n=0;const timer=setInterval(()=>{if(token!==genToken){clearInterval(timer);return}phone.textContent=[...target].map((c,i)=>/\d/.test(c)&&i>n?String(Math.floor(Math.random()*10)):c).join('');if(++n>target.length){clearInterval(timer);phone.textContent=target;finishGeneration()}},35)}else finishGeneration()}else finishGeneration();function finishGeneration(){if(token!==genToken)return;settleCurrent();busy=false;commit();audio.play(980,.14)}}
 function sellCurrent(){const it=state.current;if(!it||busy)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;genToken++;state.balance+=it.price;state.totalSold++;state.current=null;commit();audio.play(1100,.12)}
 function keepCurrent(){if(!state.current||busy)return;genToken++;state.inventory.push(cleanItem(state.current));state.current=null;commit();audio.play(840,.1)}
@@ -359,13 +406,17 @@ function phonesHTML(){
   html += `</div>`;
   
   html += `<div class="section"><h3>🛒 Магазин телефонов</h3>`;
+  html += `<p class="small muted" style="margin:0 0 10px;">Каждую модель можно купить только один раз. Продайте её, чтобы купить заново.</p>`;
   Object.entries(PHONE_MODELS).forEach(([id,m])=>{
-    const canBuy = state.phones.length < 10 && state.balance >= m.price;
+    const alreadyOwns = state.phones.some(p => p.modelId === id);
+    const canBuy = !alreadyOwns && state.phones.length < 10 && state.balance >= m.price;
     const roi = Math.max(1, Math.round(m.price / (m.income * 6)));
-    html += `<div class="phone-card">
+    const btnText = alreadyOwns ? '✓ Куплен' : money(m.price);
+    const btnClass = alreadyOwns ? 'blue' : (canBuy ? 'green' : 'red');
+    html += `<div class="phone-card ${alreadyOwns?'owned':''}">
       <span class="pc-emoji">${m.emoji}</span>
       <div class="pc-info"><b>${esc(m.name)}</b><small>+${money(m.income)} / 10с · ROI ~${roi} мин</small></div>
-      <div class="pc-actions"><button class="mini ${canBuy?'green':'red'}" data-buyphone="${esc(id)}" ${!canBuy?'disabled':''}>${money(m.price)}</button></div>
+      <div class="pc-actions"><button class="mini ${btnClass}" data-buyphone="${esc(id)}" ${!canBuy?'disabled':''}>${btnText}</button></div>
     </div>`;
   });
   html += `</div>`;
@@ -376,7 +427,6 @@ function phonesHTML(){
 function renderFullProfile(p, isMe) {
     const rs = p.rarityStats || { 'Обычный': 0, 'КРАСИВОЕ ОКОНЧАНИЕ': 0, 'БРОНЗОВЫЙ': 0, 'СЕРЕБРЯНЫЙ': 0, 'ЗОЛОТОЙ': 0, 'БРИЛЛИАНТОВЫЙ': 0 };
     const maxHits = Math.max(1, ...Object.values(rs));
-
     let html = `
     <div style="text-align:center; padding: 20px 0;">
         <div style="font-size: 26px; font-weight: 900; display:flex; justify-content:center; align-items:center; gap:10px;">
@@ -385,49 +435,24 @@ function renderFullProfile(p, isMe) {
         <div style="color: var(--muted); margin-top: 5px;">Уровень ${p.level || 1}</div>
         ${!isMe ? `<button class="wide" style="background: #f59e0b; margin-top: 15px; color:#000; font-weight:900;" onclick="toast('Обмен в разработке')">🔄 Предложить обмен</button>` : ''}
     </div>
-    
     <div class="profile-stats-row">
-        <div class="profile-stat-box">
-            <div class="profile-stat-val">${fmt(p.invCount)}</div>
-            <div class="profile-stat-lbl">номеров</div>
-        </div>
-        <div class="profile-stat-box">
-            <div class="profile-stat-val ${p.bestNumber ? getRarityColorClass(p.bestNumber.category) : ''}" style="font-size:14px; margin-top:4px;">${p.bestNumber ? money(p.bestNumber.price) : '0 ₽'}</div>
-            <div class="profile-stat-lbl">лучшая</div>
-        </div>
-        <div class="profile-stat-box">
-            <div class="profile-stat-val" style="font-size:14px; margin-top:4px;">${money(p.balance + (p.invValue || 0))}</div>
-            <div class="profile-stat-lbl">капитал</div>
-        </div>
-    </div>
-    `;
-
+        <div class="profile-stat-box"><div class="profile-stat-val">${fmt(p.invCount)}</div><div class="profile-stat-lbl">номеров</div></div>
+        <div class="profile-stat-box"><div class="profile-stat-val ${p.bestNumber ? getRarityColorClass(p.bestNumber.category) : ''}" style="font-size:14px; margin-top:4px;">${p.bestNumber ? money(p.bestNumber.price) : '0 ₽'}</div><div class="profile-stat-lbl">лучшая</div></div>
+        <div class="profile-stat-box"><div class="profile-stat-val" style="font-size:14px; margin-top:4px;">${money(p.balance + (p.invValue || 0))}</div><div class="profile-stat-lbl">капитал</div></div>
+    </div>`;
     if (p.bestNumber) {
         html += `<div class="section" style="background: linear-gradient(135deg, #1e1e24, #111); border: 1px solid ${getRarityColor(p.bestNumber.category)}40;"><h3 style="color: ${getRarityColor(p.bestNumber.category)}; text-align:center; margin-bottom:0;">Основной номер</h3>`;
         html += cardHTML({...p.bestNumber, xp: 0, reasons: []});
         html += `</div>`;
     }
-
     html += `<div class="section"><h3>По редкости</h3>`;
-    const rarities = [
-        ['Обычный', 'var(--muted)'],
-        ['КРАСИВОЕ ОКОНЧАНИЕ', '#ff007f'],
-        ['БРОНЗОВЫЙ', '#cd7f32'],
-        ['СЕРЕБРЯНЫЙ', '#b0b0b0'],
-        ['ЗОЛОТОЙ', '#ffd700'],
-        ['БРИЛЛИАНТОВЫЙ', '#00ffff']
-    ];
+    const rarities = [['Обычный', 'var(--muted)'],['КРАСИВОЕ ОКОНЧАНИЕ', '#ff007f'],['БРОНЗОВЫЙ', '#cd7f32'],['СЕРЕБРЯНЫЙ', '#b0b0b0'],['ЗОЛОТОЙ', '#ffd700'],['БРИЛЛИАНТОВЫЙ', '#00ffff']];
     rarities.forEach(([name, color]) => {
         const count = rs[name] || 0;
         const pct = (count / maxHits) * 100;
-        html += `<div class="rarity-row">
-            <span style="width: 140px; font-size:13px; color:${color};">${name}</span>
-            <div class="rarity-bar-container"><div class="rarity-bar" style="width: ${pct}%; background: ${color};"></div></div>
-            <span style="font-size: 14px;">${count}</span>
-        </div>`;
+        html += `<div class="rarity-row"><span style="width: 140px; font-size:13px; color:${color};">${name}</span><div class="rarity-bar-container"><div class="rarity-bar" style="width: ${pct}%; background: ${color};"></div></div><span style="font-size: 14px;">${count}</span></div>`;
     });
     html += `</div>`;
-
     html += `<div class="section"><h3>Статистика</h3>
         <div class="stats-grid">
             <div class="stat-card"><div class="val">${fmt(p.totalGenerated)}</div><div class="lbl">симок открыто</div></div>
@@ -436,7 +461,6 @@ function renderFullProfile(p, isMe) {
             <div class="stat-card"><div class="val">${fmt(p.friendsCount || 0)}</div><div class="lbl">друзей</div></div>
         </div>
     </div>`;
-
     return html;
 }
 
@@ -465,35 +489,22 @@ function friendsHTML(){
         <button class="tab-btn ${friendsTab==='leaderboard'?'active':''}" onclick="setFriendsTab('leaderboard')">🏆 Рейтинг</button>
         <button class="tab-btn ${friendsTab==='requests'?'active':''}" onclick="setFriendsTab('requests')">📩 Заявки ${Object.keys(state.incomingReqs||{}).length ? '('+Object.keys(state.incomingReqs||{}).length+')' : ''}</button>
     </div>`;
-
     if (friendsTab === 'list') {
         html += `<div class="section"><label class="small muted">@юзернейм или номер из профиля</label><input class="input" id="friendQuery" placeholder="@username"><button class="wide" data-action="friend-add">Отправить заявку</button></div>`;
         html += `<div class="section">${state.friends.length?friendCache.map(x=>personRow(x.id,x.p, 0, true)).join(''):'<div class="empty-hint">Добавьте друга, чтобы сравнивать прогресс.</div>'}</div>`;
     } else if (friendsTab === 'leaderboard') {
         let all = friendCache.filter(x=>x.p).map(x=>({id:x.id, p:x.p}));
-        if (!all.find(x=>x.id === myId)) {
-            all.push({ id: myId, p: publicProfile() });
-        }
+        if (!all.find(x=>x.id === myId)) { all.push({ id: myId, p: publicProfile() }); }
         all.sort((a,b) => (b.p.balance||0) - (a.p.balance||0));
         html += `<div class="section">${all.map((x,i) => personRow(x.id, x.p, i+1, false)).join('')}</div>`;
     } else if (friendsTab === 'requests') {
         const reqIds = Object.keys(state.incomingReqs || {});
-        if (reqIds.length === 0) {
-            html += `<div class="empty-hint">Нет входящих заявок.</div>`;
-        } else {
+        if (reqIds.length === 0) { html += `<div class="empty-hint">Нет входящих заявок.</div>`; }
+        else {
             html += `<div class="section">`;
             reqIds.forEach(id => {
                 const req = state.incomingReqs[id];
-                html += `<div class="list-item">
-                    <div class="item-main">
-                        <b>@${esc(req.senderName)}</b>
-                        <div class="small muted">Хочет добавить вас в друзья</div>
-                    </div>
-                    <div class="actions">
-                        <button class="mini green" onclick="approveRequest('${id}')">✅</button>
-                        <button class="mini red" onclick="declineRequest('${id}')">❌</button>
-                    </div>
-                </div>`;
+                html += `<div class="list-item"><div class="item-main"><b>@${esc(req.senderName)}</b><div class="small muted">Хочет добавить вас в друзья</div></div><div class="actions"><button class="mini green" onclick="approveRequest('${id}')">✅</button><button class="mini red" onclick="declineRequest('${id}')">❌</button></div></div>`;
             });
             html += `</div>`;
         }
@@ -507,7 +518,6 @@ function leadersHTML(){
         <button class="tab-btn ${leaderboardTab==='balance'?'active':''}" onclick="setLeaderboardTab('balance')">💰 По балансу</button>
         <button class="tab-btn ${leaderboardTab==='best'?'active':''}" onclick="setLeaderboardTab('best')">🏅 По лучшему номеру</button>
     </div>`;
-    
     html += `<div class="section" id="leaderList">`;
     if (leaderCache.length) {
         html += leaderCache.map((x,i) => {
@@ -515,13 +525,9 @@ function leadersHTML(){
                 const bn = x.p.bestNumber;
                 const numHtml = bn ? `<span class="${rarity(bn.category)[0]}" style="font-family:monospace;">${esc(bn.phone)}</span><br><span class="small muted">${money(bn.price)}</span>` : 'Нет';
                 return personRow(x.id, x.p, i+1, false, numHtml);
-            } else {
-                return personRow(x.id, x.p, i+1, false);
-            }
+            } else { return personRow(x.id, x.p, i+1, false); }
         }).join('');
-    } else {
-        html += '<div class="empty-hint">Загрузка…</div>';
-    }
+    } else { html += '<div class="empty-hint">Загрузка…</div>'; }
     html += `</div>`;
     return html;
 }
@@ -531,14 +537,7 @@ function playerHTML(){const p=profileView?.p;if(!p)return'<div class="empty-hint
 function infoHTML(){
     return `<div class="section"><h3>🎲 Шансы выпадения по режимам</h3>
         <div class="small muted" style="margin-bottom:10px;">Топовые паттерны (Зеркальный, 4+ одинаковых) перебивают базовую рулетку.</div>
-        
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px; font-weight:bold; font-size:13px; color:var(--muted);">
-            <span>Редкость</span>
-            <span>1к</span>
-            <span>5к</span>
-            <span>20к</span>
-        </div>
-        
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:8px; font-weight:bold; font-size:13px; color:var(--muted);"><span>Редкость</span><span>1к</span><span>5к</span><span>20к</span></div>
         <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-diamond">💎 Бриллиант:</span><span>< 0.001%</span><span>< 0.001%</span><span>< 0.001%</span></div>
         <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-gold">🥇 Золото:</span><span>5%</span><span>5%</span><span style="color:var(--green)">7%</span></div>
         <div class="row" style="font-size:13px; padding:6px 0;"><span class="rarity-silver">🥈 Серебро:</span><span>15%</span><span>20%</span><span style="color:var(--green)">25%</span></div>
@@ -569,20 +568,14 @@ function adminHTML(){
         <h3>Система</h3>
         <button class="wide red" data-action="admin-reset-boost">Сбросить кулдаун буста</button>
         <button class="wide" data-action="admin-force-sync">Принудительная синхронизация</button>
+        <button class="wide red" data-action="admin-clear-phones">Сбросить телефоны</button>
     </div>`;
 }
 
-window.setFriendsTab = function(tab) {
-    friendsTab = tab;
-    renderView();
-};
+window.setFriendsTab = function(tab) { friendsTab = tab; renderView(); };
+window.setLeaderboardTab = function(tab) { leaderboardTab = tab; loadLeaders(); };
 
-window.setLeaderboardTab = function(tab) {
-    leaderboardTab = tab;
-    loadLeaders();
-};
-
-function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,phones:phonesHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Nomerki';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
+function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,phones:phonesHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Nomerki';$('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
 function openScreen(name){
     closeMenu();
     if (name === 'admin' && !checkIsAdmin()) return toast('Доступ запрещен');
@@ -594,7 +587,7 @@ function closeMenu(){$('#menu').classList.remove('open');$('#scrim').classList.r
 function updateChance(){const input=$('#casinoTarget'),out=$('#casinoChance'),it=state.inventory[casinoIndex];if(!input||!out||!it)return;const target=Math.floor(finite(input.value)),chance=Math.min(95,it.price/target*95);if(target<=it.price||target>1e9){out.textContent='Недопустимая цена';out.style.color='var(--red)'}else{out.textContent=(chance<.01?'<0,01':chance.toFixed(2).replace('.',','))+'%';out.style.color='var(--green)'}}
 function doUpgrade(){const it=state.inventory[casinoIndex],target=Math.floor(finite($('#casinoTarget')?.value));if(!it||busy||target<=it.price||target>1e9)return toast('Введите цену выше текущей, но не более 1 млрд ₽');const chance=Math.min(95,it.price/target*95);busy=true;render();toast('Проверяем удачу…');setTimeout(()=>{const i=state.inventory.indexOf(it);if(i<0){busy=false;casinoIndex=null;return render()}if(Math.random()*100<chance){it.price=target;it.category=category(target);toast(`Успех! Новая цена: ${money(target)}`);audio.play(1200,.2)}else{state.inventory.splice(i,1);toast('Не повезло: номер сгорел');audio.play(150,.25)}casinoIndex=null;busy=false;commit()},850)}
 function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.price);return{name:myName,username:state.username,level:state.level,balance:state.balance,maxBalance:state.maxBalance,totalGenerated:state.totalGenerated,totalSold:state.totalSold,invCount:inv.length,invValue:inv.reduce((s,x)=>s+x.price,0),wallIncome:state.wall.items.reduce((s,x)=>s+wallIncome(x),0),bestNumber:state.bestNumber,top3:inv.slice(0,3),profileNumber:state.profileNumber,lastSeen:Date.now(),updatedAt:state.updatedAt, rarityStats: state.rarityStats, friendsCount: state.friends.length}}
-function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.phones=list(d.phones).filter(x=>x&&x.modelId&&PHONE_MODELS[x.modelId]).map(x=>({uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))),modelId:String(x.modelId)}));state.activePhones=list(d.activePhones).map(String).filter(uid=>state.phones.some(p=>p.uid===uid)).slice(0,5);state.lastPhoneTick=finite(d.lastPhoneTick,Date.now());state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.rarityStats={...fresh().rarityStats,...(d.rarityStats||{})};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
+function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.phones=list(d.phones).filter(x=>x&&x.modelId).map(x=>{const mid=MODEL_MIGRATE[x.modelId]||x.modelId;return{uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))),modelId:mid}}).filter(x=>PHONE_MODELS[x.modelId]);state.activePhones=list(d.activePhones).map(String).filter(uid=>state.phones.some(p=>p.uid===uid)).slice(0,5);state.lastPhoneTick=finite(d.lastPhoneTick,Date.now());state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.rarityStats={...fresh().rarityStats,...(d.rarityStats||{})};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(resetting||!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
 async function initCloud(){
@@ -604,20 +597,14 @@ async function initCloud(){
         cloud={...b,db:b.getDatabase(app)};
         const snap=await cloud.get(cloud.ref(cloud.db,'players/'+myId)),data=snap.val();
         if(data&&(!data.updatedAt||finite(data.updatedAt)>finite(state.updatedAt))){applyCloud(data);render();persist()}
-        
         cloudReady=true;
         cloudMessage('Облачная синхронизация активна.');
         subscribePayouts();subscribeGifts();subscribeFriendReqs();
-        
         if (!state.username && tgUsername) {
             const un = tgUsername.toLowerCase();
             const r = await cloud.runTransaction(cloud.ref(cloud.db, 'usernames/' + un), cur => cur === null || cur === myId ? myId : undefined);
-            if (r.committed) {
-                state.username = tgUsername;
-                commit();
-            }
+            if (r.committed) { state.username = tgUsername; commit(); }
         }
-        
         queueSync();
     }catch(e){
         console.warn('Cloud unavailable',e);
@@ -632,30 +619,18 @@ async function loadLeaders(){
         const s=await cloud.get(cloud.ref(cloud.db,'profiles')),d=s.val()||{},rows=Object.entries(d).map(([id,p])=>({id,p}));
         const i=rows.findIndex(x=>x.id===myId);
         if(i>=0)rows[i].p=publicProfile();else rows.push({id:myId,p:publicProfile()});
-        
         if(token!==viewToken||currentView!=='leaders')return;
-        
-        if (leaderboardTab === 'balance') {
-            leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50);
-        } else {
-            leaderCache=rows.sort((a,b)=> (b.p.bestNumber?.price || 0) - (a.p.bestNumber?.price || 0)).slice(0,50);
-        }
+        if (leaderboardTab === 'balance') { leaderCache=rows.sort((a,b)=>finite(b.p.balance)-finite(a.p.balance)).slice(0,50); }
+        else { leaderCache=rows.sort((a,b)=> (b.p.bestNumber?.price || 0) - (a.p.bestNumber?.price || 0)).slice(0,50); }
         renderView();
-    }catch{
-        leaderCache=[{id:myId,p:publicProfile()}];
-        if(currentView==='leaders')renderView()
-    }
+    }catch{ leaderCache=[{id:myId,p:publicProfile()}]; if(currentView==='leaders')renderView() }
 }
 async function loadFriends(){
     const token=++viewToken;
     if(!state.friends.length){friendCache=[];return renderView()}
     if(!cloudReady){friendCache=state.friends.map(id=>({id,p:null}));return renderView()}
-    
     const rows=await Promise.all(state.friends.map(async id=>({id, p: await fetchProfile(id) || {name:'Неизвестный', level:1, balance:0}})));
-    if(token===viewToken&&currentView==='friends'){
-        friendCache=rows;
-        renderView();
-    }
+    if(token===viewToken&&currentView==='friends'){ friendCache=rows; renderView(); }
 }
 async function showPlayer(id){profileView={id,p:id===myId?publicProfile():null};openScreen('player');if(id!==myId){const p=await fetchProfile(id);if(profileView?.id===id){profileView.p=p;renderView()}}}
 async function saveUsername(){
@@ -663,14 +638,9 @@ async function saveUsername(){
     if(raw&&!/^(?=.*[a-z])[a-z0-9_]{3,32}$/.test(lower))return toast('3–32 символа: латиница, цифры и _, минимум одна буква');
     if(!cloudReady)return toast('Для юзернейма нужно подключение к облаку');
     try{
-        if(lower&&lower!==old){
-            const r=await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+lower),cur=>cur===null||cur===myId?myId:undefined);
-            if(!r.committed)return toast('Этот юзернейм уже занят');
-        }
+        if(lower&&lower!==old){const r=await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+lower),cur=>cur===null||cur===myId?myId:undefined);if(!r.committed)return toast('Этот юзернейм уже занят');}
         if(old&&old!==lower) await cloud.runTransaction(cloud.ref(cloud.db,'usernames/'+old),cur=>cur===myId?null:undefined);
-        state.username=raw;
-        commit();
-        toast('Юзернейм сохранён');
+        state.username=raw;commit();toast('Юзернейм сохранён');
     }catch{toast('Не удалось сохранить юзернейм')}
 }
 async function setProfileNumber(index){const it=state.inventory[index];if(!it)return;if(!cloudReady)return toast('Для публичного номера нужно облако');const key=phoneKey(it.phone),old=phoneKey(state.profileNumber);try{const r=await cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+key),cur=>cur===null||cur===myId?myId:undefined);if(!r.committed)return toast('Номер уже закреплён за другим игроком');if(old&&old!==key)await cloud.runTransaction(cloud.ref(cloud.db,'phoneIndex/'+old),cur=>cur===myId?null:undefined);state.profileNumber=it.phone;commit();openScreen('profile');toast('Номер закреплён в профиле')}catch{toast('Не удалось закрепить номер')}}
@@ -688,7 +658,6 @@ async function findPlayer(q){
     }
     return id?{id:String(id),p:await fetchProfile(String(id))}:null
 }
-
 async function addFriend(){
     const input=$('#friendQuery'),q=input.value.trim();if(!q)return;
     try{
@@ -696,115 +665,58 @@ async function addFriend(){
         if(!found||!found.p) return toast('Игрок не найден.');
         if(found.id===myId)return toast('Это ваш профиль');
         if(state.friends.includes(found.id))return toast('Игрок уже в друзьях');
-        
-        await cloud.set(cloud.ref(cloud.db, 'friendRequests/' + found.id + '/' + myId), {
-            senderName: myName,
-            ts: Date.now()
-        });
-        
+        await cloud.set(cloud.ref(cloud.db, 'friendRequests/' + found.id + '/' + myId), { senderName: myName, ts: Date.now() });
         input.value='';
         toast('📩 Заявка в друзья отправлена!');
-    }catch(e){
-        console.warn(e);
-        toast('Не удалось отправить заявку');
-    }
+    }catch(e){ console.warn(e); toast('Не удалось отправить заявку'); }
 }
-
 window.approveRequest = async function(senderId) {
     if (!state.friends.includes(senderId)) {
         state.friends.push(senderId);
-        await cloud.set(cloud.ref(cloud.db, 'friend_accepted/' + senderId + '/' + myId), {
-            name: myName, ts: Date.now()
-        });
+        await cloud.set(cloud.ref(cloud.db, 'friend_accepted/' + senderId + '/' + myId), { name: myName, ts: Date.now() });
     }
     await cloud.remove(cloud.ref(cloud.db, 'friendRequests/' + myId + '/' + senderId));
     delete state.incomingReqs[senderId];
-    commit();
-    toast('✅ Заявка одобрена');
+    commit(); toast('✅ Заявка одобрена');
     if (currentView === 'friends') loadFriends();
     showRequestBanner();
 };
-
 window.declineRequest = async function(senderId) {
     await cloud.remove(cloud.ref(cloud.db, 'friendRequests/' + myId + '/' + senderId));
     delete state.incomingReqs[senderId];
-    commit();
-    toast('❌ Заявка отклонена');
+    commit(); toast('❌ Заявка отклонена');
     if (currentView === 'friends') loadFriends();
     showRequestBanner();
 };
-
-window.approveFirstRequest = function() {
-    if (currentReqBannerId) {
-        approveRequest(currentReqBannerId);
-        currentReqBannerId = null;
-        $('#reqBanner').style.display = 'none';
-    }
-};
-
-window.declineFirstRequest = function() {
-    if (currentReqBannerId) {
-        declineRequest(currentReqBannerId);
-        currentReqBannerId = null;
-        $('#reqBanner').style.display = 'none';
-    }
-};
-
+window.approveFirstRequest = function() { if (currentReqBannerId) { approveRequest(currentReqBannerId); currentReqBannerId = null; $('#reqBanner').style.display = 'none'; } };
+window.declineFirstRequest = function() { if (currentReqBannerId) { declineRequest(currentReqBannerId); currentReqBannerId = null; $('#reqBanner').style.display = 'none'; } };
 function showRequestBanner() {
     const reqIds = Object.keys(state.incomingReqs || {});
-    if (reqIds.length === 0) {
-        $('#reqBanner').style.display = 'none';
-        return;
-    }
+    if (reqIds.length === 0) { $('#reqBanner').style.display = 'none'; return; }
     currentReqBannerId = reqIds[0];
     const req = state.incomingReqs[currentReqBannerId];
     $('#reqBannerText').innerHTML = `Игрок <b>@${esc(req.senderName)}</b> хочет добавить вас в друзья.`;
     $('#reqBanner').style.display = 'block';
 }
-
 function subscribeFriendReqs() {
     if (!cloudReady) return;
-    unsubFriendReqs?.();
-    unsubFriendAcc?.();
-    
+    unsubFriendReqs?.(); unsubFriendAcc?.();
     unsubFriendReqs = cloud.onValue(cloud.ref(cloud.db, 'friendRequests/' + myId), snap => {
-        const reqs = snap.val() || {};
-        const oldReqs = state.incomingReqs || {};
+        const reqs = snap.val() || {}, oldReqs = state.incomingReqs || {};
         let hasNew = false;
-        
-        for (let id in reqs) {
-            if (!oldReqs[id]) hasNew = true;
-        }
-        
-        state.incomingReqs = reqs;
-        persist();
-        
-        if (hasNew) {
-            showRequestBanner();
-            if (currentView === 'friends') renderView();
-        }
+        for (let id in reqs) { if (!oldReqs[id]) hasNew = true; }
+        state.incomingReqs = reqs; persist();
+        if (hasNew) { showRequestBanner(); if (currentView === 'friends') renderView(); }
     });
-
     unsubFriendAcc = cloud.onValue(cloud.ref(cloud.db, 'friend_accepted/' + myId), snap => {
-        const acc = snap.val() || {};
-        let added = false;
-        
+        const acc = snap.val() || {}; let added = false;
         Object.keys(acc).forEach(async key => {
-            if (!state.friends.includes(key)) {
-                state.friends.push(key);
-                added = true;
-                toast(`🎉 ${acc[key].name || 'Игрок'} принял вашу заявку в друзья!`);
-            }
+            if (!state.friends.includes(key)) { state.friends.push(key); added = true; toast(`🎉 ${acc[key].name || 'Игрок'} принял вашу заявку в друзья!`); }
             await cloud.remove(cloud.ref(cloud.db, 'friend_accepted/' + myId + '/' + key));
         });
-        
-        if (added) {
-            commit();
-            if (currentView === 'friends') loadFriends();
-        }
+        if (added) { commit(); if (currentView === 'friends') loadFriends(); }
     });
 }
-
 function subscribeMarket(){unsubMarket?.();marketCache=null;if(!cloudReady){marketCache=[];return renderView()}unsubMarket=cloud.onValue(cloud.ref(cloud.db,'market'),snap=>{const d=snap.val()||{};marketCache=Object.entries(d).filter(([,x])=>x?.phone).map(([key,x])=>({...x,key})).sort((a,b)=>b.price-a.price);if(currentView==='market')renderView()},()=>{marketCache=[];if(currentView==='market'){renderView();toast('Не удалось загрузить рынок')}})}
 async function claimLot(key){let claimed=null;await cloud.runTransaction(cloud.ref(cloud.db,'market/'+key),cur=>{claimed=cur;return null});return claimed?.phone?claimed:null}
 let marketBusy=false;
@@ -843,6 +755,7 @@ function wallTick(){const now=Date.now();if(state.wall.lastTick>now)state.wall.l
 // ===== Телефоны =====
 function buyPhone(modelId){
   const m = PHONE_MODELS[modelId]; if(!m) return;
+  if(state.phones.some(p => p.modelId === modelId)) return toast('Этот телефон уже есть. Продайте его, чтобы купить заново.');
   if(state.phones.length >= 10) return toast('Максимум 10 телефонов');
   if(state.balance < m.price) return toast('Недостаточно средств');
   state.balance -= m.price;
@@ -878,13 +791,13 @@ function sellPhone(uid){
   const p = state.phones.find(x=>x.uid===uid); if(!p) return;
   const m = PHONE_MODELS[p.modelId];
   const sellPrice = Math.floor(m.price * 0.5);
-  if(!confirm(`Продать ${m.name} за ${money(sellPrice)}?`)) return;
+  if(!confirm(`Продать ${m.name} за ${money(sellPrice)}? После продажи модель снова станет доступна для покупки.`)) return;
   state.phones = state.phones.filter(x=>x.uid!==uid);
   state.activePhones = state.activePhones.filter(x=>x!==uid);
   state.balance += sellPrice;
   commit();
   if(currentView==='phones') renderView();
-  toast(`Продано за ${money(sellPrice)}`);
+  toast(`Продано за ${money(sellPrice)} · модель снова доступна`);
 }
 
 function phoneTick(){
@@ -915,15 +828,8 @@ function phoneTick(){
 
 async function resetProgress(){
     if(!confirm('Удалить прогресс Nomerki? Это действие нельзя отменить.'))return;
-    resetting=true;
-    busy=true;
-    cloudReady=false;
-    unsubFriendReqs?.();
-    unsubFriendAcc?.();
-    unsubPayouts?.();
-    unsubGifts?.();
-    unsubMarket?.();
-    
+    resetting=true; busy=true; cloudReady=false;
+    unsubFriendReqs?.(); unsubFriendAcc?.(); unsubPayouts?.(); unsubGifts?.(); unsubMarket?.();
     try{
         if(cloud && cloud.db){
             const old=state.username.toLowerCase(),pk=phoneKey(state.profileNumber);
@@ -939,48 +845,29 @@ async function resetProgress(){
             ]);
         }
     }catch(e){ console.warn(e); }
-    
-    try{
-        localStorage.removeItem(STORE);
-        OLD_KEYS.forEach(k=>localStorage.removeItem('nomerki_'+k));
-    }catch{}
-    
+    try{ localStorage.removeItem(STORE); OLD_KEYS.forEach(k=>localStorage.removeItem('nomerki_'+k)); }catch{}
     location.reload();
 }
 
 async function giftItem(index) {
     const it = state.inventory[index];
     if (!it || !cloudReady) return toast('Для подарка нужно подключение к облаку');
-    
     const q = prompt(`Кому подарить номер ${it.phone}?\nВведите @юзернейм или номер из профиля друга:`, '');
     if (!q) return;
-
     try {
         const found = await findPlayer(q);
         if (!found || !found.p) return toast('Игрок не найден');
         if (found.id === myId) return toast('Нельзя подарить номер самому себе');
-        
         if (!confirm(`Подарить номер ${it.phone} игроку ${found.p.name || 'Игрок'}?`)) return;
-
         state.inventory.splice(index, 1);
-        enforceProfile();
-        commit();
-
+        enforceProfile(); commit();
         const giftKey = `${Date.now()}_${myId}`;
-        await cloud.set(cloud.ref(cloud.db, `gifts/${found.id}/${giftKey}`), {
-            item: it,
-            senderName: myName,
-            ts: Date.now()
-        });
-
+        await cloud.set(cloud.ref(cloud.db, `gifts/${found.id}/${giftKey}`), { item: it, senderName: myName, ts: Date.now() });
         toast(`🎁 Подарок отправлен игроку ${found.p.name || 'Игрок'}!`);
         openScreen('inventory');
     } catch (e) {
-        console.warn(e);
-        toast('Не удалось отправить подарок');
-        state.inventory.push(it);
-        commit();
-        openScreen('inventory');
+        console.warn(e); toast('Не удалось отправить подарок');
+        state.inventory.push(it); commit(); openScreen('inventory');
     }
 }
 
@@ -995,40 +882,29 @@ $('#sheetBody').addEventListener('click',async e=>{
     if(!b||b.disabled)return;
     audio.play();
     const d=b.dataset;
-    
     if (d.action && d.action.startsWith('admin-')) {
         if (!checkIsAdmin()) return toast('Доступ запрещен');
         if (d.action === 'admin-add-balance') { state.balance += 1000000; commit(); toast('Баланс пополнен на 1 млн'); return; }
         if (d.action === 'admin-set-balance') { const v = prompt('Новый баланс:', state.balance); if(v!==null) { state.balance = Math.max(0, parseInt(v)||0); commit(); } return; }
         if (d.action === 'admin-set-level') { const v = prompt('Новый уровень:', state.level); if(v!==null) { state.level = Math.max(1, parseInt(v)||1); state.points = 0; commit(); } return; }
         if (d.action === 'admin-add-spins') { state.freeSpins += 100; commit(); toast('+100 спинов'); return; }
-        
-        if (d.action === 'admin-spawn-diamond') { 
-            state.current = { phone: '+7 999 999-99-99', price: 1000000000, category: 'БРИЛЛИАНТОВЫЙ', chance: '< 0.001%', reasons: ['Админ подарок'], lvl: 0, xp: 1000, xpPending: 1000 };
-            commit(); closeScreen(); return; 
-        }
-        if (d.action === 'admin-spawn-gold') { 
-            state.current = { phone: '+7 888 888-88-88', price: 1000000, category: 'ЗОЛОТОЙ', chance: '~5%', reasons: ['Админ подарок'], lvl: 0, xp: 150, xpPending: 150 };
-            commit(); closeScreen(); return; 
-        }
+        if (d.action === 'admin-spawn-diamond') { state.current = { phone: '+7 999 999-99-99', price: 1000000000, category: 'БРИЛЛИАНТОВЫЙ', chance: '< 0.001%', reasons: ['Админ подарок'], lvl: 0, xp: 1000, xpPending: 1000 }; commit(); closeScreen(); return; }
+        if (d.action === 'admin-spawn-gold') { state.current = { phone: '+7 888 888-88-88', price: 1000000, category: 'ЗОЛОТОЙ', chance: '~5%', reasons: ['Админ подарок'], lvl: 0, xp: 150, xpPending: 150 }; commit(); closeScreen(); return; }
         if (d.action === 'admin-spawn-custom') {
-            const phone = prompt('Введите номер (например +7 999 123-45-67):');
-            if(!phone) return;
-            const priceStr = prompt('Цена номера:');
-            const price = Math.floor(finite(priceStr));
+            const phone = prompt('Введите номер (например +7 999 123-45-67):'); if(!phone) return;
+            const priceStr = prompt('Цена номера:'); const price = Math.floor(finite(priceStr));
             state.current = { phone, price, category: category(price), chance: '100%', reasons: ['Админ подарок'], lvl: 0, xp: 50, xpPending: 50 };
             commit(); closeScreen(); return;
         }
         if (d.action === 'admin-reset-boost') { state.boostEnd = 0; state.boostMult = 1; commit(); toast('Буст сброшен'); return; }
         if (d.action === 'admin-force-sync') { queueSync(); toast('Синхронизация запущена'); return; }
+        if (d.action === 'admin-clear-phones') { if(confirm('Сбросить все телефоны?')) { state.phones=[]; state.activePhones=[]; commit(); toast('Телефоны сброшены'); } return; }
         return;
     }
-
     if(d.buyphone!==undefined) return buyPhone(d.buyphone);
     if(d.activate!==undefined) return activatePhone(d.activate);
     if(d.deactivate!==undefined) return deactivatePhone(d.deactivate);
     if(d.sellphone!==undefined) return sellPhone(d.sellphone);
-
     if(d.sell!==undefined)return inventorySell(Number(d.sell));
     if(d.gift!==undefined)return giftItem(Number(d.gift));
     if(d.list!==undefined)return listItem(Number(d.list));
@@ -1062,7 +938,9 @@ $('#sheetBody').addEventListener('click',async e=>{
         case'reset':resetProgress();break;
     }
 });
-window.addEventListener('beforeunload',persist);document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()});
+window.addEventListener('beforeunload',persist);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()});
+window.addEventListener('resize',()=>requestAnimationFrame(positionOrbit));
 settleCurrent();render();persist();initCloud();setInterval(()=>{wallTick();phoneTick();},1000);
 if (isNewStarter) setTimeout(() => toast('🎁 Стартовый набор: +100 000 ₽!'), 500);
 </script>
