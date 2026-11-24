@@ -40,6 +40,24 @@
 .stat-card .val{font-size:20px;font-weight:bold;color:#fff;margin-bottom:5px}
 .stat-card .lbl{font-size:12px;color:var(--muted)}
 
+/* === Строка дохода на главном === */
+.income-line{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px 12px;
+  background:linear-gradient(90deg,rgba(53,200,117,.12),rgba(53,200,117,.18),rgba(53,200,117,.12));
+  border:1px solid rgba(53,200,117,.35);
+  border-radius:12px;
+  margin:-6px 0 14px;
+  font-size:13px;font-weight:750;
+  animation:incomePulse 3s ease-in-out infinite;
+}
+.income-line .income-total{color:var(--green);font-weight:900}
+.income-line .income-breakdown{color:var(--muted);font-size:11px;font-weight:600}
+@keyframes incomePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(53,200,117,0)}
+  50%{box-shadow:0 0 0 4px rgba(53,200,117,.08)}
+}
+
 /* === Телефоны: орбита вокруг карточки === */
 .phone-orbit{
   position:absolute;
@@ -118,6 +136,11 @@
     </div>
   </div>
   <div class="xp"><i id="xpFill"></i></div>
+  <div class="income-line" id="incomeLine" style="display:none">
+    <span>💸</span>
+    <span class="income-total" id="incomeTotal">+0 ₽/мин</span>
+    <span class="income-breakdown" id="incomeBreakdown"></span>
+  </div>
   <section class="game">
     <div class="result" id="result"></div>
     <div class="phone-orbit" id="activePhones"></div>
@@ -320,6 +343,21 @@ function renderActivePhones(){
     setTimeout(positionOrbit, 500);
 }
 
+function updateIncomeLine(){
+  const wallPerMin = state.wall.items.reduce((s,x)=>s+wallIncome(x),0);
+  const phonesPerMin = state.activePhones
+    .map(uid=>state.phones.find(p=>p.uid===uid))
+    .filter(Boolean)
+    .reduce((s,p)=>s+(PHONE_MODELS[p.modelId]?.income||0)*6,0);
+  const total = wallPerMin + phonesPerMin;
+  const line = $('#incomeLine');
+  if(!line) return;
+  if(total <= 0){ line.style.display='none'; return; }
+  line.style.display='flex';
+  $('#incomeTotal').textContent = `+${money(total)}/мин`;
+  $('#incomeBreakdown').textContent = `(📱 +${fmt(wallPerMin)} · 📞 +${fmt(phonesPerMin)})`;
+}
+
 function render(){
     document.body.classList.toggle('light',state.settings.theme==='light');
     $('#balance').textContent=money(state.balance);$('#level').textContent=`Ур. ${state.level}`;$('#xpFill').style.width=Math.min(100,state.points/(state.level*100)*100)+'%';$('#bagCount').textContent=state.inventory.length;$('#result').innerHTML=state.current?cardHTML(state.current):'<div class="empty">Купите симку<div class="skeleton">'+ '<i></i>'.repeat(9)+'</div></div>';
@@ -338,6 +376,7 @@ function render(){
     const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));
     $('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
     renderActivePhones();
+    updateIncomeLine();
     $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
