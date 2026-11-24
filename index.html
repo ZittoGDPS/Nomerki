@@ -28,7 +28,6 @@
 .tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:var(--panel);color:var(--text);font-weight:bold;cursor:pointer;font-size:13px;border:1px solid var(--line);}
 .tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-/* Стили для профиля */
 .profile-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .profile-stat-box{background:var(--panel);border-radius:12px;padding:15px 10px;text-align:center;border:1px solid var(--line)}
 .profile-stat-val{font-size:18px;font-weight:bold;color:#fff;margin-bottom:5px;word-break:break-all;}
@@ -41,6 +40,23 @@
 .stat-card{background:#11131a;border:1px solid var(--line);border-radius:12px;padding:15px;text-align:center}
 .stat-card .val{font-size:20px;font-weight:bold;color:#fff;margin-bottom:5px}
 .stat-card .lbl{font-size:12px;color:var(--muted)}
+
+/* === Телефоны === */
+.active-phones{display:flex;gap:6px;padding:0 0 12px;overflow-x:auto;scrollbar-width:none;min-height:0}
+.active-phones::-webkit-scrollbar{display:none}
+.phone-mini{display:flex;flex-direction:column;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:7px 9px;min-width:64px;gap:2px;flex-shrink:0;animation:floatPhone 3s ease-in-out infinite}
+.phone-mini:nth-child(2){animation-delay:.3s}.phone-mini:nth-child(3){animation-delay:.6s}.phone-mini:nth-child(4){animation-delay:.9s}.phone-mini:nth-child(5){animation-delay:1.2s}
+.phone-mini .emoji{font-size:22px;line-height:1;filter:drop-shadow(0 2px 4px #0008)}
+.phone-mini .pname{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;font-weight:700}
+.phone-mini .income{color:var(--green);font-size:10px;font-weight:800}
+@keyframes floatPhone{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.phone-card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
+.phone-card .pc-emoji{font-size:28px;flex-shrink:0}
+.phone-card .pc-info{flex:1;min-width:0}
+.phone-card .pc-info b{display:block;font-size:14px}
+.phone-card .pc-info small{color:var(--muted);font-size:12px}
+.phone-card.active-slot{border-color:var(--green)}
+.phone-card .pc-actions{display:flex;gap:6px;flex-shrink:0}
 
 .light{--bg:#eef1f5;--panel:#fff;--panel2:#f3f4f7;--text:#171922;--muted:#697080;--line:#dfe3e9}.light .pill,.light .empty{background:var(--panel)}.light .menu,.light .input{background:var(--panel)}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}@keyframes sheetIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -66,7 +82,11 @@
     </div>
   </div>
   <div class="xp"><i id="xpFill"></i></div>
-  <section class="game"><div class="result" id="result"></div><div class="boost-line" id="boost"></div></section>
+  <section class="game">
+    <div class="active-phones" id="activePhones"></div>
+    <div class="result" id="result"></div>
+    <div class="boost-line" id="boost"></div>
+  </section>
   
   <div class="controls"><div class="control control-wrap"><select id="shop" aria-label="Магазин"><option value="1">🏪 Ларёк · 1к ₽</option><option value="5">🏬 Магазин · 5к ₽</option><option value="20">💎 Ювелирный · 20к ₽</option></select></div><button class="control" id="country">🇷🇺 Стандарт <span class="muted" style="float:right">⌄</span></button></div>
   
@@ -80,13 +100,12 @@
 </main>
 <div class="scrim" id="scrim"></div>
 <aside class="menu" id="menu" aria-label="Меню"><div class="menu-head"><b>Nomerki</b><button class="icon-btn" id="menuClose" aria-label="Закрыть">✕</button></div>
-<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Топ игроков</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button>
+<button data-open="wall"><span>📱</span>СИМ-стена</button><button data-open="market"><span>🌍</span>Рынок игроков</button><button data-open="phones"><span>📞</span>Телефоны</button><button data-open="casino"><span>🎰</span>Апгрейдер</button><button data-open="profile"><span>👤</span>Статистика</button><button data-open="leaders"><span>🏆</span>Топ игроков</button><button data-open="friends"><span>👥</span>Друзья</button><button data-open="settings"><span>⚙️</span>Настройки</button>
 <button data-open="admin" id="adminMenuBtn" style="display:none; color: var(--gold);"><span>👑</span>Админ-панель</button>
 <div class="cloud-status" id="cloudStatus">Локальное сохранение включено.</div></aside>
 <section class="sheet" id="sheet" aria-hidden="true"><header class="sheet-head"><h2 id="sheetTitle"></h2><button class="close" id="sheetClose">Закрыть</button></header><div class="sheet-body" id="sheetBody"></div></section>
 <div class="toast" id="toast" role="status"></div>
 
-<!-- Баннер входящей заявки -->
 <div id="reqBanner" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--blue); color:white; padding:15px; border-radius:15px; z-index:1000; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.5); text-align:center;">
     <div style="font-weight:bold; margin-bottom:10px;">Заявка в друзья</div>
     <div id="reqBannerText" style="margin-bottom:15px;"></div>
@@ -111,9 +130,26 @@ const phoneKey=s=>{let d=digits(s);if(d.length===11&&'78'.includes(d[0]))d=d.sli
 const list=v=>Array.isArray(v)?v:Object.values(v||{});
 function cleanItem(x){if(!x?.phone)return null;return{phone:String(x.phone),price:Math.max(0,Math.floor(finite(x.price))),category:String(x.category||'Обычный'),chance:String(x.chance||''),reasons:Array.isArray(x.reasons)?x.reasons.map(String):[],lvl:Math.max(0,Math.min(5,Math.floor(finite(x.lvl))))}}
 function cleanWall(w){return{slotsUnlocked:Math.max(1,Math.min(10,Math.floor(finite(w?.slotsUnlocked,1)))),items:Array.from({length:10},(_,i)=>cleanItem(w?.items?.[i])),lastTick:finite(w?.lastTick,Date.now())}}
-function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},rarityStats:{'Обычный':0,'КРАСИВОЕ ОКОНЧАНИЕ':0,'БРОНЗОВЫЙ':0,'СЕРЕБРЯНЫЙ':0,'ЗОЛОТОЙ':0,'БРИЛЛИАНТОВЫЙ':0},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},updatedAt:Date.now()}}
+
+// ===== Модели телефонов =====
+const PHONE_MODELS = {
+  nokia:     { name:'Кнопочный',  emoji:'📞', price:25000,      income:100 },
+  budget:    { name:'Бюджетный',  emoji:'📱', price:100000,     income:500 },
+  middle:    { name:'Средний',    emoji:'📲', price:500000,     income:3000 },
+  flagship:  { name:'Флагман',    emoji:'📱', price:2000000,    income:15000 },
+  premium:   { name:'Премиум',    emoji:'💎', price:10000000,   income:90000 },
+  luxury:    { name:'Роскошь',    emoji:'👑', price:50000000,   income:550000 },
+  exclusive: { name:'Эксклюзив',  emoji:'🌟', price:250000000,  income:3500000 },
+  legend:    { name:'Легенда',    emoji:'🏆', price:1000000000, income:20000000 },
+};
+
+function fresh(){return{balance:100000,inventory:[],current:{phone:'+7 921 509-91-20',price:150,category:'Обычный',chance:'~30%',reasons:['Обычный номер без редких паттернов'],lvl:0,xp:0,xpPending:0},level:1,points:0,totalGenerated:0,totalSold:0,maxBalance:100000,bestNumber:null,freeSpins:10,operator:'Ёта',boostMult:1,boostEnd:0,wall:cleanWall(),username:'',profileNumber:'',friends:[],incomingReqs:{},rarityStats:{'Обычный':0,'КРАСИВОЕ ОКОНЧАНИЕ':0,'БРОНЗОВЫЙ':0,'СЕРЕБРЯНЫЙ':0,'ЗОЛОТОЙ':0,'БРИЛЛИАНТОВЫЙ':0},settings:{theme:'dark',animation:true,sound:true,warn:false,warnAt:100000},phones:[],activePhones:[],lastPhoneTick:Date.now(),updatedAt:Date.now()}}
 let isNewStarter = false;
-function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.rarityStats={...d.rarityStats,...(s.rarityStats||{})};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));return out}
+function loadState(){let s=read(STORE,null);if(!s){const hasOld=localStorage.getItem('blum_balance')!==null;if(!hasOld) isNewStarter = true;s=fresh();if(hasOld){Object.assign(s,{balance:finite(localStorage.getItem('blum_balance'),100000),points:finite(localStorage.getItem('blum_points')),level:Math.max(1,finite(localStorage.getItem('blum_level'),1)),totalGenerated:finite(localStorage.getItem('blum_total_generated')),totalSold:finite(localStorage.getItem('blum_total_sold')),maxBalance:finite(localStorage.getItem('blum_max_balance')),freeSpins:finite(localStorage.getItem('blum_free_spins'),10),inventory:list(read('blum_inventory',[])).map(cleanItem).filter(Boolean),current:cleanItem(read('blum_current_gen',null)),bestNumber:cleanItem(read('blum_best_number',null)),wall:cleanWall(read('blum_simwall',null)),username:localStorage.getItem('blum_username')||'',profileNumber:localStorage.getItem('blum_profile_number')||'',friends:read('blum_friends',[])});s.settings.theme=localStorage.getItem('blum_theme')==='light'?'light':'dark';s.settings.animation=localStorage.getItem('blum_animation')!=='false';s.settings.warn=localStorage.getItem('blum_use_warning')==='true';s.settings.warnAt=finite(localStorage.getItem('blum_warn_threshold'),100000)}return s}const d=fresh(),out={...d,...s,settings:{...d.settings,...s.settings}};out.inventory=list(s.inventory).map(cleanItem).filter(Boolean);out.current=cleanItem(s.current);if(s.current){out.current.xp=Math.max(0,finite(s.current.xp));out.current.xpPending=Math.max(0,finite(s.current.xpPending))}out.bestNumber=cleanItem(s.bestNumber);out.wall=cleanWall(s.wall);out.friends=[...new Set(list(s.friends).map(String))];out.incomingReqs=s.incomingReqs||{};out.rarityStats={...d.rarityStats,...(s.rarityStats||{})};out.level=Math.max(1,Math.floor(finite(out.level,1)));out.points=Math.max(0,Math.floor(finite(out.points)));out.balance=Math.max(0,Math.floor(finite(out.balance)));out.maxBalance=Math.max(out.balance,Math.floor(finite(out.maxBalance)));out.freeSpins=Math.max(0,Math.floor(finite(out.freeSpins,10)));
+out.phones = list(s.phones).filter(x=>x&&x.modelId&&PHONE_MODELS[x.modelId]).map(x=>({uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))),modelId:String(x.modelId)}));
+out.activePhones = list(s.activePhones).map(String).filter(uid=>out.phones.some(p=>p.uid===uid)).slice(0,5);
+out.lastPhoneTick = finite(s.lastPhoneTick, Date.now());
+return out}
 let state=loadState(), busy=false, resetting=false, currentView='', friendsTab='list', leaderboardTab='balance', casinoIndex=null, cloud=null, cloudReady=false, syncTimer=null, toastTimer=null, unsubMarket=null, unsubPayouts=null, unsubGifts=null, unsubFriendReqs=null, unsubFriendAcc=null, genToken=0, currentReqBannerId=null;
 const tg=window.Telegram?.WebApp||null;if(tg){tg.ready();tg.expand()}
 let myId=keySafe(new URLSearchParams(location.search).get('user_id')||tg?.initDataUnsafe?.user?.id||localStorage.getItem('nomerki_email_id')||localStorage.getItem('nomerki_browser_id')||('browser_'+crypto.getRandomValues(new Uint32Array(1))[0]));
@@ -152,19 +188,19 @@ function priceNumber(num,type){
     if (price < 1000000) {
         const roll = Math.random() * 100;
         
-        if (type === 1) { // Ларёк 1к
+        if (type === 1) {
             if (roll < 5) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (5%)'); }
             else if (roll < 20) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (15%)'); }
             else if (roll < 45) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (25%)'); }
             else if (roll < 70) { price = 1000 + Math.random()*9000; reasons.push('Красивое (25%)'); }
             else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (30%)'); }
-        } else if (type === 5) { // Магазин 5к
+        } else if (type === 5) {
             if (roll < 5) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (5%)'); }
             else if (roll < 25) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (20%)'); }
             else if (roll < 55) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (30%)'); }
             else if (roll < 85) { price = 1000 + Math.random()*9000; reasons.push('Красивое (30%)'); }
             else { price = Math.max(150, Math.floor(Math.random()*850)); reasons.push('Обычный (15%)'); }
-        } else if (type === 20) { // Ювелирный 20к
+        } else if (type === 20) {
             if (roll < 7) { price = 1000000 + Math.random()*900000; reasons.push('Золотой (7%)'); }
             else if (roll < 32) { price = 100000 + Math.random()*900000; reasons.push('Серебряный (25%)'); }
             else if (roll < 67) { price = 10000 + Math.random()*90000; reasons.push('Бронзовый (35%)'); }
@@ -194,8 +230,6 @@ function addXP(amount){
         state.points-=state.level*100;
         state.level++;
         state.freeSpins+=3;
-        
-        // Буст и бонус только каждые 10 уровней
         if(state.level%10===0){
             state.boostMult=state.level>50?5:state.level>20?3:2;
             state.boostEnd=Date.now()+30000;
@@ -215,6 +249,17 @@ function checkIsAdmin() {
     const tgun = (tgUsername || '').toLowerCase();
     const name = (myName || '').toLowerCase();
     return un === 'zxczitto' || tgun === 'zxczitto' || name === 'zxczitto';
+}
+
+function renderActivePhones(){
+    const el = $('#activePhones'); if(!el) return;
+    const active = state.activePhones.map(uid=>state.phones.find(p=>p.uid===uid)).filter(Boolean);
+    if(!active.length){ el.style.display='none'; el.innerHTML=''; return; }
+    el.style.display='flex';
+    el.innerHTML = active.map(p=>{
+        const m = PHONE_MODELS[p.modelId];
+        return `<div class="phone-mini" title="${esc(m.name)}"><span class="emoji">${m.emoji}</span><span class="pname">${esc(m.name)}</span><span class="income">+${fmt(m.income)}₽</span></div>`;
+    }).join('');
 }
 
 function render(){
@@ -242,12 +287,13 @@ function render(){
     const left=Math.max(0,Math.ceil((state.boostEnd-Date.now())/1000));
     $('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:'';
     
+    renderActivePhones();
+    
     $('#adminMenuBtn').style.display = checkIsAdmin() ? 'flex' : 'none';
     if(currentView)renderView(false)
 }
 async function generate(){if(busy||state.current)return;busy=true;const type=Number($('#shop').value),free=type===1&&state.freeSpins>0?1:0,cost=(1-free)*type*1000;if(state.balance<cost){busy=false;render();audio.play(180,.15);return toast('Недостаточно средств')}state.balance-=cost;if(free)state.freeSpins--;const it=makeNumber(type);state.totalGenerated++;if(!state.bestNumber||it.price>state.bestNumber.price)state.bestNumber=cleanItem(it);
     
-    // Учёт статистики редкостей
     if(!state.rarityStats) state.rarityStats = {};
     const cat = it.category;
     state.rarityStats[cat] = (state.rarityStats[cat] || 0) + 1;
@@ -256,13 +302,76 @@ async function generate(){if(busy||state.current)return;busy=true;const type=Num
 function sellCurrent(){const it=state.current;if(!it||busy)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;genToken++;state.balance+=it.price;state.totalSold++;state.current=null;commit();audio.play(1100,.12)}
 function keepCurrent(){if(!state.current||busy)return;genToken++;state.inventory.push(cleanItem(state.current));state.current=null;commit();audio.play(840,.1)}
 function inventorySell(index){const it=state.inventory[index];if(!it)return;if(state.settings.warn&&it.price>=state.settings.warnAt&&!confirm(`Продать за ${money(it.price)}?`))return;state.balance+=it.price;state.totalSold++;state.inventory.splice(index,1);commit();toast(`Получено ${money(it.price)}`)}
-const titles={inventory:'Мои симки',wall:'СИМ-стена',market:'Рынок игроков',casino:'Апгрейдер',profile:'Статистика',leaders:'Топ игроков',friends:'Друзья',settings:'Настройки',player:'Профиль игрока',pick:'Выберите номер',info:'Шансы выпадения',admin:'👑 Админ-панель'};
+const titles={inventory:'Мои симки',wall:'СИМ-стена',market:'Рынок игроков',phones:'📞 Телефоны',casino:'Апгрейдер',profile:'Статистика',leaders:'Топ игроков',friends:'Друзья',settings:'Настройки',player:'Профиль игрока',pick:'Выберите номер',info:'Шансы выпадения',admin:'👑 Админ-панель'};
 let marketCache=null,friendCache=[],leaderCache=[],viewToken=0,profileView=null,pickSlot=null;
 function itemRow(it,i,actions=''){return`<div class="list-item"><div class="item-main"><div class="item-phone ${rarity(it.category)[0]}">${esc(it.phone)}${it.lvl?` · ⭐${it.lvl}`:''}</div><div class="item-price">${money(it.price)}</div></div><div class="actions">${actions}</div></div>`}
 function inventoryHTML(){const total=state.inventory.reduce((s,x)=>s+x.price,0);return`<div class="section"><div class="row"><span>Номеров</span><span>${state.inventory.length}</span></div><div class="row"><span>Общая стоимость</span><span>${money(total)}</span></div><button class="wide green" data-action="sell-all" ${!state.inventory.length?'disabled':''}>Продать все</button></div><div class="section">${state.inventory.length?state.inventory.map((it,i)=>itemRow(it,i,`<button class="mini blue" data-gift="${i}">🎁</button><button class="mini green" data-sell="${i}">Продать</button><button class="mini" data-list="${i}">Рынок</button>`)).join(''):'<div class="empty-hint">Пока пусто. Купите симку и нажмите «Оставить».</div>'}</div>`}
 function wallIncome(it){if(!it)return 0;const cat=it.category,m=cat.includes('БРИЛЛИАНТ')?10:cat.includes('ЗОЛОТ')?5:cat.includes('СЕРЕБР')?2:cat.includes('БРОНЗ')?1.5:1;return Math.floor(it.price*.01*m*(1+.3*it.lvl))}
 function wallHTML(){const income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0),left=Math.max(0,Math.ceil((60000-(Date.now()-state.wall.lastTick))/1000));return`<div class="section"><div class="row"><span>Доход</span><span class="item-price">+${money(income)}/мин</span></div><div class="row"><span>Следующее начисление</span><span>${left} с</span></div></div><div class="wall-grid">${state.wall.items.map((it,i)=>{const unlocked=i<state.wall.slotsUnlocked;if(!unlocked){const cost=i*25000,can=i===state.wall.slotsUnlocked;return`<div class="slot"><small>Слот ${i+1}</small><b>🔒 Закрыт</b>${can?`<button class="mini blue" data-slot-buy="${i}">Открыть · ${money(cost)}</button>`:'<small>Откройте предыдущий слот</small>'}</div>`}if(!it)return`<div class="slot empty"><small>Слот ${i+1}</small><b>Пусто</b><button class="mini green" data-slot-set="${i}">Установить</button></div>`;const up=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));return`<div class="slot"><small>Слот ${i+1}</small><div class="item-phone small">${esc(it.phone)}</div><div class="item-price">+${money(wallIncome(it))}/мин</div><small>${'★'.repeat(it.lvl)}${'☆'.repeat(5-it.lvl)}</small>${it.lvl<5?`<button class="mini" data-slot-up="${i}">Улучшить · ${money(up)}</button>`:'<small>Максимальный уровень</small>'}<button class="mini red" data-slot-remove="${i}">Снять</button></div>`}).join('')}</div>`}
 function casinoHTML(){const it=state.inventory[casinoIndex];return`<div class="section"><h3>1. Выберите номер</h3>${state.inventory.length?state.inventory.map((x,i)=>itemRow(x,i,`<button class="mini ${i===casinoIndex?'green':'blue'}" data-casino="${i}">${i===casinoIndex?'Выбран':'Выбрать'}</button>`)).join(''):'<div class="empty-hint">Рюкзак пуст.</div>'}</div>${it?`<div class="section"><h3>2. Укажите новую стоимость</h3><div class="small muted">${esc(it.phone)} · сейчас ${money(it.price)}</div><input class="input" id="casinoTarget" type="number" min="${it.price+1}" max="1000000000" value="${Math.min(1e9,it.price*2)}" inputmode="numeric"><div class="row"><span>Шанс успеха</span><span id="casinoChance"></span></div><button class="wide red" data-action="upgrade" ${busy?'disabled':''}>Апгрейд</button><p class="small muted">При неудаче номер сгорает. Максимальная цена — 1 млрд ₽.</p></div>`:''}<div id="casinoMessage"></div>`}
+
+function phonesHTML(){
+  const active = state.activePhones.map(uid=>state.phones.find(p=>p.uid===uid)).filter(Boolean);
+  const inactive = state.phones.filter(p=>!state.activePhones.includes(p.uid));
+  const totalIncome = active.reduce((s,p)=>s+PHONE_MODELS[p.modelId].income,0);
+  
+  let html = `<div class="section">
+    <div class="row"><span>Активных телефонов</span><span>${active.length} / 5</span></div>
+    <div class="row"><span>Всего куплено</span><span>${state.phones.length} / 10</span></div>
+    <div class="row"><span>Доход</span><span class="item-price">+${money(totalIncome)} / 10с</span></div>
+    <div class="row"><span>В час</span><span>${money(totalIncome*360)}</span></div>
+  </div>`;
+  
+  html += `<div class="section"><h3>Активные слоты (5 макс)</h3>`;
+  for(let i=0;i<5;i++){
+    const uid = state.activePhones[i];
+    const p = uid ? state.phones.find(x=>x.uid===uid) : null;
+    if(p){
+      const m = PHONE_MODELS[p.modelId];
+      html += `<div class="phone-card active-slot">
+        <span class="pc-emoji">${m.emoji}</span>
+        <div class="pc-info"><b>${esc(m.name)}</b><small>+${money(m.income)} каждые 10с</small></div>
+        <div class="pc-actions"><button class="mini red" data-deactivate="${esc(p.uid)}">Снять</button></div>
+      </div>`;
+    }else{
+      html += `<div class="phone-card" style="opacity:.5"><span class="pc-emoji">➕</span><div class="pc-info"><b>Слот ${i+1}</b><small>Пусто</small></div></div>`;
+    }
+  }
+  html += `</div>`;
+  
+  html += `<div class="section"><h3>Мои телефоны</h3>`;
+  if(!inactive.length){
+    html += `<div class="empty-hint">${state.phones.length?'Все телефоны уже активированы.':'Пока нет телефонов — купите ниже.'}</div>`;
+  }else{
+    html += inactive.map(p=>{
+      const m = PHONE_MODELS[p.modelId];
+      const canAct = active.length < 5;
+      return `<div class="phone-card">
+        <span class="pc-emoji">${m.emoji}</span>
+        <div class="pc-info"><b>${esc(m.name)}</b><small>+${money(m.income)} / 10с</small></div>
+        <div class="pc-actions">
+          <button class="mini green" data-activate="${esc(p.uid)}" ${!canAct?'disabled':''}>Включить</button>
+          <button class="mini red" data-sellphone="${esc(p.uid)}">Продать</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  html += `</div>`;
+  
+  html += `<div class="section"><h3>🛒 Магазин телефонов</h3>`;
+  Object.entries(PHONE_MODELS).forEach(([id,m])=>{
+    const canBuy = state.phones.length < 10 && state.balance >= m.price;
+    const roi = Math.max(1, Math.round(m.price / (m.income * 6)));
+    html += `<div class="phone-card">
+      <span class="pc-emoji">${m.emoji}</span>
+      <div class="pc-info"><b>${esc(m.name)}</b><small>+${money(m.income)} / 10с · ROI ~${roi} мин</small></div>
+      <div class="pc-actions"><button class="mini ${canBuy?'green':'red'}" data-buyphone="${esc(id)}" ${!canBuy?'disabled':''}>${money(m.price)}</button></div>
+    </div>`;
+  });
+  html += `</div>`;
+  
+  return html;
+}
 
 function renderFullProfile(p, isMe) {
     const rs = p.rarityStats || { 'Обычный': 0, 'КРАСИВОЕ ОКОНЧАНИЕ': 0, 'БРОНЗОВЫЙ': 0, 'СЕРЕБРЯНЫЙ': 0, 'ЗОЛОТОЙ': 0, 'БРИЛЛИАНТОВЫЙ': 0 };
@@ -473,7 +582,7 @@ window.setLeaderboardTab = function(tab) {
     loadLeaders();
 };
 
-function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Nomerki';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
+function renderView(update=true){if(!currentView)return;const html={inventory:inventoryHTML,wall:wallHTML,phones:phonesHTML,casino:casinoHTML,profile:profileHTML,settings:settingsHTML,friends:friendsHTML,market:marketHTML,leaders:leadersHTML,pick:pickHTML,player:playerHTML,info:infoHTML,admin:adminHTML}[currentView]?.()||'';$('#sheetTitle').textContent=titles[currentView]||'Nomerki';if(update||!$('#sheetBody').innerHTML)$('#sheetBody').innerHTML=html;else $('#sheetBody').innerHTML=html;if(currentView==='casino')updateChance()}
 function openScreen(name){
     closeMenu();
     if (name === 'admin' && !checkIsAdmin()) return toast('Доступ запрещен');
@@ -485,7 +594,7 @@ function closeMenu(){$('#menu').classList.remove('open');$('#scrim').classList.r
 function updateChance(){const input=$('#casinoTarget'),out=$('#casinoChance'),it=state.inventory[casinoIndex];if(!input||!out||!it)return;const target=Math.floor(finite(input.value)),chance=Math.min(95,it.price/target*95);if(target<=it.price||target>1e9){out.textContent='Недопустимая цена';out.style.color='var(--red)'}else{out.textContent=(chance<.01?'<0,01':chance.toFixed(2).replace('.',','))+'%';out.style.color='var(--green)'}}
 function doUpgrade(){const it=state.inventory[casinoIndex],target=Math.floor(finite($('#casinoTarget')?.value));if(!it||busy||target<=it.price||target>1e9)return toast('Введите цену выше текущей, но не более 1 млрд ₽');const chance=Math.min(95,it.price/target*95);busy=true;render();toast('Проверяем удачу…');setTimeout(()=>{const i=state.inventory.indexOf(it);if(i<0){busy=false;casinoIndex=null;return render()}if(Math.random()*100<chance){it.price=target;it.category=category(target);toast(`Успех! Новая цена: ${money(target)}`);audio.play(1200,.2)}else{state.inventory.splice(i,1);toast('Не повезло: номер сгорел');audio.play(150,.25)}casinoIndex=null;busy=false;commit()},850)}
 function publicProfile(){const inv=[...state.inventory].sort((a,b)=>b.price-a.price);return{name:myName,username:state.username,level:state.level,balance:state.balance,maxBalance:state.maxBalance,totalGenerated:state.totalGenerated,totalSold:state.totalSold,invCount:inv.length,invValue:inv.reduce((s,x)=>s+x.price,0),wallIncome:state.wall.items.reduce((s,x)=>s+wallIncome(x),0),bestNumber:state.bestNumber,top3:inv.slice(0,3),profileNumber:state.profileNumber,lastSeen:Date.now(),updatedAt:state.updatedAt, rarityStats: state.rarityStats, friendsCount: state.friends.length}}
-function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.rarityStats={...fresh().rarityStats,...(d.rarityStats||{})};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
+function applyCloud(d){const settings=state.settings;state={...fresh(),...d,settings};state.inventory=list(d.inventory).map(cleanItem).filter(Boolean);state.current=cleanItem(d.current);if(d.current){state.current.xp=finite(d.current.xp);state.current.xpPending=finite(d.current.xpPending)}state.bestNumber=cleanItem(d.bestNumber);state.wall=cleanWall(d.wall);state.phones=list(d.phones).filter(x=>x&&x.modelId&&PHONE_MODELS[x.modelId]).map(x=>({uid:String(x.uid||('p_'+Math.random().toString(36).slice(2,10))),modelId:String(x.modelId)}));state.activePhones=list(d.activePhones).map(String).filter(uid=>state.phones.some(p=>p.uid===uid)).slice(0,5);state.lastPhoneTick=finite(d.lastPhoneTick,Date.now());state.friends=[...new Set(list(d.friends).map(String))];state.incomingReqs=d.incomingReqs||{};state.rarityStats={...fresh().rarityStats,...(d.rarityStats||{})};state.maxBalance=Math.max(state.balance,finite(state.maxBalance));settleCurrent()}
 function cloudMessage(text){$('#cloudStatus').textContent=text}
 function queueSync(){if(resetting||!cloudReady||!cloud)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await Promise.all([cloud.set(cloud.ref(cloud.db,'players/'+myId),JSON.parse(JSON.stringify({...state,name:myName}))),cloud.set(cloud.ref(cloud.db,'profiles/'+myId),JSON.parse(JSON.stringify(publicProfile())))]);cloudMessage('Облачная синхронизация активна.')}catch(e){console.warn(e);cloudMessage('Облако недоступно — прогресс сохранён на устройстве.')}},450)}
 async function initCloud(){
@@ -731,6 +840,79 @@ function slotBuy(i){if(i!==state.wall.slotsUnlocked)return;const cost=i*25000;if
 function slotUpgrade(i){const it=state.wall.items[i];if(!it||it.lvl>=5)return;const cost=Math.max(1000,Math.round(it.price*.2*(it.lvl+1)));if(state.balance<cost)return toast('Недостаточно средств');state.balance-=cost;it.lvl++;commit();toast('Номер улучшен')}
 function wallTick(){const now=Date.now();if(state.wall.lastTick>now)state.wall.lastTick=now;const mins=Math.floor((now-state.wall.lastTick)/60000);if(mins>0){const paid=Math.min(mins,1440),income=state.wall.items.reduce((s,x)=>s+wallIncome(x),0)*paid;state.wall.lastTick+=mins*60000;if(income>0){state.balance+=income;toast(`СИМ-стена: +${money(income)}`)}commit()}else if(currentView==='wall')renderView();const left=Math.max(0,Math.ceil((state.boostEnd-now)/1000));$('#boost').textContent=left?`⚡ Буст ×${state.boostMult} · ${left} с`:''}
 
+// ===== Телефоны =====
+function buyPhone(modelId){
+  const m = PHONE_MODELS[modelId]; if(!m) return;
+  if(state.phones.length >= 10) return toast('Максимум 10 телефонов');
+  if(state.balance < m.price) return toast('Недостаточно средств');
+  state.balance -= m.price;
+  const uid = 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  state.phones.push({uid, modelId});
+  if(state.activePhones.length < 5){
+    state.activePhones.push(uid);
+    toast(`${m.emoji} ${m.name} куплен и активирован!`);
+  }else{
+    toast(`${m.emoji} ${m.name} куплен! Активируйте вручную.`);
+  }
+  audio.play(900,.15);
+  commit();
+  if(currentView==='phones') renderView();
+}
+
+function activatePhone(uid){
+  if(state.activePhones.length >= 5) return toast('Максимум 5 активных');
+  if(!state.phones.find(p=>p.uid===uid)) return;
+  if(state.activePhones.includes(uid)) return;
+  state.activePhones.push(uid);
+  commit();
+  if(currentView==='phones') renderView();
+}
+
+function deactivatePhone(uid){
+  state.activePhones = state.activePhones.filter(x=>x!==uid);
+  commit();
+  if(currentView==='phones') renderView();
+}
+
+function sellPhone(uid){
+  const p = state.phones.find(x=>x.uid===uid); if(!p) return;
+  const m = PHONE_MODELS[p.modelId];
+  const sellPrice = Math.floor(m.price * 0.5);
+  if(!confirm(`Продать ${m.name} за ${money(sellPrice)}?`)) return;
+  state.phones = state.phones.filter(x=>x.uid!==uid);
+  state.activePhones = state.activePhones.filter(x=>x!==uid);
+  state.balance += sellPrice;
+  commit();
+  if(currentView==='phones') renderView();
+  toast(`Продано за ${money(sellPrice)}`);
+}
+
+function phoneTick(){
+  const now = Date.now();
+  if(!state.lastPhoneTick) state.lastPhoneTick = now;
+  const elapsedTicks = Math.floor((now - state.lastPhoneTick)/10000);
+  if(elapsedTicks > 0){
+    const ticks = Math.min(elapsedTicks, 2880);
+    const perTick = state.activePhones
+      .map(uid=>state.phones.find(p=>p.uid===uid))
+      .filter(Boolean)
+      .reduce((s,p)=>s+(PHONE_MODELS[p.modelId]?.income||0),0);
+    if(perTick > 0){
+      const income = perTick * ticks;
+      state.balance += income;
+      state.lastPhoneTick += ticks * 10000;
+      state.maxBalance = Math.max(state.maxBalance, state.balance);
+      $('#balance').textContent = money(state.balance);
+      if(elapsedTicks >= 6) toast(`📱 Телефоны: +${money(income)}`);
+      persist();
+      queueSync();
+      if(currentView==='phones') renderView();
+    }else{
+      state.lastPhoneTick = now;
+    }
+  }
+}
+
 async function resetProgress(){
     if(!confirm('Удалить прогресс Nomerki? Это действие нельзя отменить.'))return;
     resetting=true;
@@ -842,6 +1024,11 @@ $('#sheetBody').addEventListener('click',async e=>{
         return;
     }
 
+    if(d.buyphone!==undefined) return buyPhone(d.buyphone);
+    if(d.activate!==undefined) return activatePhone(d.activate);
+    if(d.deactivate!==undefined) return deactivatePhone(d.deactivate);
+    if(d.sellphone!==undefined) return sellPhone(d.sellphone);
+
     if(d.sell!==undefined)return inventorySell(Number(d.sell));
     if(d.gift!==undefined)return giftItem(Number(d.gift));
     if(d.list!==undefined)return listItem(Number(d.list));
@@ -876,7 +1063,7 @@ $('#sheetBody').addEventListener('click',async e=>{
     }
 });
 window.addEventListener('beforeunload',persist);document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()});
-settleCurrent();render();persist();initCloud();setInterval(wallTick,1000);
+settleCurrent();render();persist();initCloud();setInterval(()=>{wallTick();phoneTick();},1000);
 if (isNewStarter) setTimeout(() => toast('🎁 Стартовый набор: +100 000 ₽!'), 500);
 </script>
 </body>
